@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monopoly Math: Petualangan Bilangan Cacah Seribuan</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+        }
+        @media (min-width: 640px) {
+            .board-grid {
+                gap: 6px;
+            }
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(234, 179, 8, 0.7), 0 0 20px rgba(234, 179, 8, 0.5);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-950 via-purple-950 to-blue-950 min-h-screen text-white flex flex-col items-center justify-center p-2 sm:p-4 overflow-x-hidden">
+
+    <div id="login-screen" class="w-full max-w-lg bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 sm:p-8 card-shadow flex flex-col items-center text-center">
+        <div class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg mb-4 animate-bounce">
+            <i class="fa-solid fa-dice text-indigo-950"></i>
+        </div>
+        <h1 class="text-3xl font-black tracking-wider text-yellow-400 glow-text mb-1">MONOPOLY MATH</h1>
+        <p class="text-sm text-indigo-200 mb-6">Petualangan Bilangan Cacah Seribuan (Kelas 4 SD - 3 Pemain)</p>
+
+        <form id="login-form" class="w-full flex flex-col gap-4 text-left">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Player 1 -->
+                <div class="bg-white/5 border border-white/10 p-3 rounded-2xl">
+                    <label class="block text-xs font-bold text-red-400 mb-1"><i class="fa-solid fa-user"></i> Pemain 1</label>
+                    <input type="text" id="p1-name" required placeholder="Nama P1" 
+                        class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-indigo-300/40 text-xs focus:outline-none focus:ring-2 focus:ring-red-400 mb-2">
+                    <select id="p1-char" class="w-full px-2 py-1.5 bg-indigo-900 border border-white/20 rounded-xl text-xs text-white">
+                        <option value="car">🚗 Mobil Merah</option>
+                        <option value="hat">🎩 Topi Klasik</option>
+                        <option value="dog">🐶 Anjing Lucu</option>
+                    </select>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="bg-white/5 border border-white/10 p-3 rounded-2xl">
+                    <label class="block text-xs font-bold text-cyan-400 mb-1"><i class="fa-solid fa-user"></i> Pemain 2</label>
+                    <input type="text" id="p2-name" required placeholder="Nama P2" 
+                        class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-indigo-300/40 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-400 mb-2">
+                    <select id="p2-char" class="w-full px-2 py-1.5 bg-indigo-900 border border-white/20 rounded-xl text-xs text-white">
+                        <option value="hat" selected>🎩 Topi Klasik</option>
+                        <option value="car">🚗 Mobil Merah</option>
+                        <option value="dog">🐶 Anjing Lucu</option>
+                    </select>
+                </div>
+
+                <!-- Player 3 -->
+                <div class="bg-white/5 border border-white/10 p-3 rounded-2xl">
+                    <label class="block text-xs font-bold text-amber-400 mb-1"><i class="fa-solid fa-user"></i> Pemain 3</label>
+                    <input type="text" id="p3-name" required placeholder="Nama P3" 
+                        class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-indigo-300/40 text-xs focus:outline-none focus:ring-2 focus:ring-amber-400 mb-2">
+                    <select id="p3-char" class="w-full px-2 py-1.5 bg-indigo-900 border border-white/20 rounded-xl text-xs text-white">
+                        <option value="dog" selected>🐶 Anjing Lucu</option>
+                        <option value="car">🚗 Mobil Merah</option>
+                        <option value="hat">🎩 Topi Klasik</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-indigo-300 mb-1">Kelas / Rombel Siswa</label>
+                <input type="text" id="class-name" required placeholder="Contoh: Kelas 4A" 
+                    class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-indigo-300/40 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400">
+            </div>
+
+            <button type="submit" class="mt-2 w-full py-3.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-indigo-950 font-extrabold rounded-xl shadow-lg hover:from-yellow-300 hover:to-amber-400 transition transform active:scale-95 flex items-center justify-center gap-2 text-base">
+                <i class="fa-solid fa-play"></i> MULAI PERMAINAN MONOPOLY!
+            </button>
+        </form>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-5xl flex flex-col gap-3">
+        <!-- Top Status Bar -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 sm:p-4 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-red-500/20 px-3 py-1.5 rounded-xl border border-red-500/30">
+                    <span id="badge-p1" class="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span id="disp-p1-name" class="text-xs font-bold text-red-300">P1</span>: <span id="disp-p1-coins" class="text-xs font-black text-yellow-400">Rp 1.000</span>
+                </div>
+                <div class="flex items-center gap-2 bg-cyan-500/20 px-3 py-1.5 rounded-xl border border-cyan-500/30">
+                    <span id="badge-p2" class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                    <span id="disp-p2-name" class="text-xs font-bold text-cyan-300">P2</span>: <span id="disp-p2-coins" class="text-xs font-black text-yellow-400">Rp 1.000</span>
+                </div>
+                <div class="flex items-center gap-2 bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/30">
+                    <span id="badge-p3" class="w-3 h-3 rounded-full bg-amber-400"></span>
+                    <span id="disp-p3-name" class="text-xs font-bold text-amber-300">P3</span>: <span id="disp-p3-coins" class="text-xs font-black text-yellow-400">Rp 1.000</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div id="turn-indicator" class="px-3 py-1.5 bg-yellow-400/20 border border-yellow-400/40 rounded-xl text-xs font-bold text-yellow-300">
+                    Giliran: <span id="current-player-name">Pemain 1</span>
+                </div>
+                <button onclick="toggleAudio()" id="sound-btn" class="w-9 h-9 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl flex items-center justify-center text-yellow-400 transition">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Board Layout (5x5 Grid = 16 perimeter tiles) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+            <!-- Left/Center: Monopoly Board Container -->
+            <div class="lg:col-span-2 bg-indigo-900/60 border-4 border-yellow-500/40 rounded-3xl p-3 sm:p-4 card-shadow relative">
+                <div id="monopoly-board" class="board-grid w-full aspect-square max-w-[500px] mx-auto">
+                    <!-- Tiles injected dynamically -->
+                </div>
+            </div>
+
+            <!-- Right Control Panel: Dice Roll & Action Center -->
+            <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 card-shadow flex flex-col justify-between gap-4 h-full">
+                <div class="text-center">
+                    <span class="text-[10px] font-bold uppercase tracking-widest bg-yellow-400/20 text-yellow-300 px-3 py-1 rounded-full">Papan Interaktif</span>
+                    <h2 id="action-title" class="text-lg font-extrabold text-white mt-2">Lempar Dadu untuk Bergerak!</h2>
+                    <p id="action-desc" class="text-xs text-indigo-200 mt-1">Uji kemampuan bilangan cacah seribuannmu di setiap petak!</p>
+                </div>
+
+                <!-- Dice Animation Box -->
+                <div class="flex flex-col items-center justify-center my-2">
+                    <div id="dice-box" class="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center text-4xl text-indigo-950 font-black shadow-lg transition transform hover:rotate-6">
+                        <i class="fa-solid fa-dice-five"></i>
+                    </div>
+                    <span id="dice-result-text" class="text-xs font-semibold text-yellow-300 mt-2">Dadu: -</span>
+                </div>
+
+                <button id="roll-dice-btn" onclick="rollDice()" class="w-full py-4 bg-gradient-to-r from-yellow-400 to-amber-500 text-indigo-950 font-extrabold rounded-2xl shadow-lg hover:from-yellow-300 hover:to-amber-400 transition transform active:scale-95 flex items-center justify-center gap-2 text-base">
+                    <i class="fa-solid fa-dice"></i> LEMPAR DADU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quiz-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gradient-to-br from-indigo-950 to-purple-950 border border-white/20 rounded-3xl p-6 sm:p-8 max-w-lg w-full card-shadow flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <span id="quiz-tile-title" class="text-xs font-bold uppercase tracking-wider text-yellow-300 bg-yellow-400/20 px-3 py-1 rounded-full">Tantangan Petak</span>
+                <span id="quiz-reward" class="text-xs font-bold text-green-400"><i class="fa-solid fa-coins"></i> Hadiah: Rp 200</span>
+            </div>
+
+            <div class="text-center py-2">
+                <h3 id="quiz-question" class="text-base sm:text-xl font-bold text-white leading-relaxed">Memuat pertanyaan matematika...</h3>
+            </div>
+
+            <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Options injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gradient-to-br from-indigo-950 to-purple-950 border border-white/20 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center card-shadow flex flex-col items-center">
+            <div class="w-20 h-20 bg-yellow-400/20 rounded-full flex items-center justify-center text-4xl text-yellow-400 mb-4 animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-black text-yellow-400 mb-2">PERMAINAN SELESAI!</h2>
+            <p id="winner-announcement" class="text-sm text-indigo-200 mb-6">Pemenang dengan koin bilangan cacah terbanyak!</p>
+
+            <div id="final-leaderboard" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 mb-6 flex flex-col gap-2">
+                <!-- Final scores injected here -->
+            </div>
+
+            <div class="flex gap-3 w-full">
+                <button onclick="restartGame()" class="flex-1 py-3 bg-yellow-400 text-indigo-950 font-extrabold rounded-xl shadow-lg hover:bg-yellow-300 transition text-sm">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Main Lagi
+                </button>
+                <button onclick="location.reload()" class="flex-1 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-xl transition text-sm">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State for 3 Players
+        let players = [
+            { id: 0, name: 'Pemain 1', char: 'car', color: 'bg-red-500', textCol: 'text-red-400', coins: 1000, pos: 0 },
+            { id: 1, name: 'Pemain 2', char: 'hat', color: 'bg-cyan-400', textCol: 'text-cyan-300', coins: 1000, pos: 0 },
+            { id: 2, name: 'Pemain 3', char: 'dog', color: 'bg-amber-400', textCol: 'text-amber-300', coins: 1000, pos: 0 }
+        ];
+
+        let currentTurnIndex = 0;
+        let totalRounds = 0;
+        const maxRounds = 6; // Total rounds before game ends
+        let isAudioEnabled = true;
+        let audioCtx = null;
+        let currentActiveQuestion = null;
+
+        // 16 Perimeter Tiles definition for a 5x5 Grid (Indices 0 to 15 clockwise)
+        // Perimeter map: Row/Col coordinates
+        const boardTiles = [
+            { id: 0, name: "START", type: "start", desc: "Titik Awal Petualangan", r: 4, c: 4 },
+            { id: 1, name: "1.250", type: "property", value: 150, qType: "naming", r: 4, c: 3 },
+            { id: 2, name: "DANA UMUM", type: "chance", desc: "Bonus Koin Bilangan", r: 4, c: 2 },
+            { id: 3, name: "3.480", type: "property", value: 200, qType: "value", r: 4, c: 1 },
+            { id: 4, name: "SUDUT KANAN", type: "corner", desc: "Istirahat Sejenak", r: 4, c: 0 },
+            { id: 5, name: "5.120", type: "property", value: 250, qType: "comparison", r: 3, c: 0 },
+            { id: 6, name: "KESEMPATAN", type: "chance", desc: "Tantangan Misteri", r: 2, c: 0 },
+            { id: 7, name: "7.890", type: "property", value: 300, qType: "addition", r: 1, c: 0 },
+            { id: 8, name: "SUDUT ATAS", type: "corner", desc: "Bonus Ilmu Pengetahuan", r: 0, c: 0 },
+            { id: 9, name: "2.450", type: "property", value: 200, qType: "subtraction", r: 0, c: 1 },
+            { id: 10, name: "DANA UMUM", type: "chance", desc: "Rezeki Seribuan", r: 0, c: 2 },
+            { id: 11, name: "6.730", type: "property", value: 250, qType: "naming", r: 0, c: 3 },
+            { id: 12, name: "SUDUT KIRI", type: "corner", desc: "Pos Pemeriksaan Matematika", r: 0, c: 4 },
+            { id: 13, name: "4.190", type: "property", value: 200, qType: "value", r: 1, c: 4 },
+            { id: 14, name: "KESEMPATAN", type: "chance", desc: "Kuis Kilat", r: 2, c: 4 },
+            { id: 15, name: "8.650", type: "property", value: 350, qType: "addition", r: 3, c: 4 }
+        ];
+
+        // Web Audio API Synthesizer
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!isAudioEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'dice') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.exponentialRampToValueAtTime(950, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
+                osc.frequency.setValueAtTime(1046.50, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc.start(now);
+                osc.stop(now + 0.6);
+            }
+        }
+
+        function toggleAudio() {
+            isAudioEnabled = !isAudioEnabled;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = isAudioEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+        }
+
+        // Login Handler
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            players[0].name = document.getElementById('p1-name').value.trim();
+            players[0].char = document.getElementById('p1-char').value;
+
+            players[1].name = document.getElementById('p2-name').value.trim();
+            players[1].char = document.getElementById('p2-char').value;
+
+            players[2].name = document.getElementById('p3-name').value.trim();
+            players[2].char = document.getElementById('p3-char').value;
+
+            // Update UI Names
+            document.getElementById('disp-p1-name').innerText = players[0].name;
+            document.getElementById('disp-p2-name').innerText = players[1].name;
+            document.getElementById('disp-p3-name').innerText = players[2].name;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            renderBoard();
+            updateStatusDisplay();
+        });
+
+        // Render Monopoly 5x5 Board
+        function renderBoard() {
+            const boardContainer = document.getElementById('monopoly-board');
+            boardContainer.innerHTML = '';
+
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const tile = boardTiles.find(t => t.r === r && t.c === c);
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = "bg-white/5 border border-white/10 rounded-xl p-1 flex flex-col justify-between items-center relative text-center overflow-hidden";
+                    
+                    if (tile) {
+                        cellDiv.dataset.tileId = tile.id;
+                        let bgCol = "bg-white/10";
+                        if (tile.type === 'start') bgCol = "bg-yellow-500/20 border-yellow-400/40";
+                        else if (tile.type === 'property') bgCol = "bg-indigo-500/20 border-indigo-400/40";
+                        else if (tile.type === 'chance') bgCol = "bg-pink-500/20 border-pink-400/40";
+                        else if (tile.type === 'corner') bgCol = "bg-emerald-500/20 border-emerald-400/40";
+
+                        cellDiv.className += ` ${bgCol}`;
+
+                        let iconClass = "fa-solid fa-flag";
+                        if (tile.type === 'property') iconClass = "fa-solid fa-house";
+                        if (tile.type === 'chance') iconClass = "fa-solid fa-gift";
+                        if (tile.type === 'corner') iconClass = "fa-solid fa-star";
+
+                        cellDiv.innerHTML = `
+                            <span class="text-[9px] text-indigo-200 font-bold truncate">${tile.name}</span>
+                            <i class="${iconClass} text-xs text-yellow-300 opacity-80 my-0.5"></i>
+                            <div id="tokens-tile-${tile.id}" class="flex flex-wrap gap-0.5 justify-center"></div>
+                        `;
+                    } else {
+                        // Inner center space of 5x5 grid
+                        cellDiv.className += " bg-transparent border-none flex items-center justify-center";
+                        if (r === 2 && c === 2) {
+                            cellDiv.innerHTML = `<div class="text-center"><span class="text-xs font-black text-yellow-400 glow-text">MATEMATIKA<br>KELAS 4</span></div>`;
+                        }
+                    }
+                    boardContainer.appendChild(cellDiv);
+                }
+            }
+            updatePlayerTokens();
+        }
+
+        function updatePlayerTokens() {
+            // Clear all tokens
+            boardTiles.forEach(t => {
+                const container = document.getElementById(`tokens-tile-${t.id}`);
+                if (container) container.innerHTML = '';
+            });
+
+            // Place tokens on respective tiles
+            players.forEach(p => {
+                const container = document.getElementById(`tokens-tile-${p.pos}`);
+                if (container) {
+                    const tokenSpan = document.createElement('span');
+                    tokenSpan.className = `w-4 h-4 rounded-full ${p.color} border border-white flex items-center justify-center text-[9px] font-black text-indigo-950 shadow-md`;
+                    tokenSpan.innerText = p.name.charAt(0).toUpperCase();
+                    container.appendChild(tokenSpan);
+                }
+            });
+        }
+
+        function updateStatusDisplay() {
+            document.getElementById('disp-p1-coins').innerText = `Rp ${players[0].coins.toLocaleString('id-ID')}`;
+            document.getElementById('disp-p2-coins').innerText = `Rp ${players[1].coins.toLocaleString('id-ID')}`;
+            document.getElementById('disp-p3-coins').innerText = `Rp ${players[2].coins.toLocaleString('id-ID')}`;
+
+            const currP = players[currentTurnIndex];
+            const indicator = document.getElementById('turn-indicator');
+            indicator.className = `px-3 py-1.5 border rounded-xl text-xs font-bold ${currP.textChar || currP.textCol} bg-white/10 border-white/20`;
+            document.getElementById('current-player-name').innerText = currP.name;
+        }
+
+        // Dice Roll Mechanics
+        function rollDice() {
+            playSound('dice');
+            const rollBtn = document.getElementById('roll-dice-btn');
+            rollBtn.disabled = true;
+
+            const diceBox = document.getElementById('dice-box');
+            diceBox.classList.add('animate-spin');
+
+            setTimeout(() => {
+                diceBox.classList.remove('animate-spin');
+                const diceVal = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('dice-result-text').innerText = `Dadu: ${diceVal}`;
+                diceBox.innerHTML = `<i class="fa-solid fa-dice-${['one','two','three','four','five','six'][diceVal-1]}"></i>`;
+
+                movePlayer(diceVal);
+            }, 600);
+        }
+
+        function movePlayer(steps) {
+            const currP = players[currentTurnIndex];
+            currP.pos = (currP.pos + steps) % 16;
+
+            // Check if passed Start
+            if (currP.pos < steps && currP.pos !== 0) {
+                currP.coins += 500; // Bonus pass start
+            }
+
+            updatePlayerTokens();
+            handleTileAction(currP);
+        }
+
+        // Handle Tile Event & Math Question
+        function handleTileAction(player) {
+            const tile = boardTiles[player.pos];
+            const modal = document.getElementById('quiz-modal');
+            const titleElem = document.getElementById('quiz-tile-title');
+            const qElem = document.getElementById('quiz-question');
+            const rewardElem = document.getElementById('quiz-reward');
+            const optionsGrid = document.getElementById('quiz-options');
+
+            titleElem.innerText = `Petak ${tile.name} (${tile.type.toUpperCase()})`;
+            
+            if (tile.type === 'start') {
+                player.coins += 300;
+                updateStatusDisplay();
+                endTurn();
+                return;
+            } else if (tile.type === 'corner') {
+                player.coins += 200;
+                updateStatusDisplay();
+                endTurn();
+                return;
+            } else if (tile.type === 'chance') {
+                // Chance card bonus or mini math quiz
+                rewardElem.innerHTML = `<i class="fa-solid fa-coins"></i> Hadiah Bonus: Rp 300`;
+                currentActiveQuestion = generateMathQuestion('addition', player);
+            } else {
+                // Property quiz
+                rewardElem.innerHTML = `<i class="fa-solid fa-coins"></i> Hadiah: Rp ${tile.value}`;
+                currentActiveQuestion = generateMathQuestion(tile.qType, player, tile.value);
+            }
+
+            qElem.innerHTML = currentActiveQuestion.text;
+            optionsGrid.innerHTML = '';
+
+            currentActiveQuestion.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "py-3 px-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-bold text-sm transition transform active:scale-95 shadow-md flex items-center justify-center";
+                btn.innerHTML = opt;
+                btn.onclick = () => checkQuizAnswer(opt, btn, currentActiveQuestion);
+                optionsGrid.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        // Generate Math Questions for 4th Grade Whole Numbers up to thousands (Bilangan Cacah Seribuan)
+        function generateMathQuestion(type, player, reward = 200) {
+            let q = {};
+            if (type === 'naming' || type === undefined) {
+                const num = Math.floor(Math.random() * 9000) + 1000;
+                const formattedNum = num.toLocaleString('id-ID');
+                const words = numberToWords(num);
+                q.text = `Bagaimana cara membaca bilangan <span class="text-yellow-400">${formattedNum}</span>?`;
+                q.correct = words;
+                q.reward = reward;
+                q.options = shuffleArray([words, "dua ribu empat ratus", "lima ribu sembilan ratus", "tiga ribu delapan ratus"]);
+            } else if (type === 'value') {
+                const num = Math.floor(Math.random() * 9000) + 1000;
+                const digits = String(num).split('').map(Number);
+                const posIndex = Math.floor(Math.random() * 4);
+                const posNames = ['ribuan', 'ratusan', 'puluhan', 'satuan'];
+                const multipliers = [1000, 100, 10, 1];
+                const targetVal = digits[posIndex] * multipliers[posIndex];
+                q.text = `Pada bilangan <span class="text-yellow-400">${num.toLocaleString('id-ID')}</span>, angka <span class="text-yellow-400">${digits[posIndex]}</span> menempati tempat <b>${posNames[posIndex]}</b> bernilai...`;
+                q.correct = targetVal.toLocaleString('id-ID');
+                q.reward = reward;
+                q.options = shuffleArray([q.correct, (targetVal + 100).toLocaleString('id-ID'), (Math.abs(targetVal - 100) || 500).toLocaleString('id-ID'), (targetVal * 10).toLocaleString('id-ID')]);
+            } else if (type === 'comparison') {
+                const n1 = Math.floor(Math.random() * 9000) + 1000;
+                let n2 = Math.floor(Math.random() * 9000) + 1000;
+                if (n1 === n2) n2 += 123;
+                q.text = `Manakah tanda perbandingan yang tepat?<br><span class="text-xl text-yellow-300 font-bold">${n1.toLocaleString('id-ID')} ... ${n2.toLocaleString('id-ID')}</span>`;
+                q.correct = n1 > n2 ? '>' : '<';
+                q.reward = reward;
+                q.options = ['>', '<', '='];
+            } else if (type === 'addition') {
+                const a = Math.floor(Math.random() * 4000) + 1000;
+                const b = Math.floor(Math.random() * 4000) + 1000;
+                const ans = a + b;
+                q.text = `Hasil dari penjumlahan <span class="text-yellow-400">${a.toLocaleString('id-ID')} + ${b.toLocaleString('id-ID')}</span> adalah...`;
+                q.correct = ans.toLocaleString('id-ID');
+                q.reward = reward;
+                q.options = shuffleArray([q.correct, (ans + 100).toLocaleString('id-ID'), (ans - 150).toLocaleString('id-ID'), (ans + 1000).toLocaleString('id-ID')]);
+            } else {
+                const a = Math.floor(Math.random() * 4000) + 5000;
+                const b = Math.floor(Math.random() * 4000) + 1000;
+                const ans = a - b;
+                q.text = `Hasil dari pengurangan <span class="text-yellow-400">${a.toLocaleString('id-ID')} - ${b.toLocaleString('id-ID')}</span> adalah...`;
+                q.correct = ans.toLocaleString('id-ID');
+                q.reward = reward;
+                q.options = shuffleArray([q.correct, (ans + 110).toLocaleString('id-ID'), (ans - 90).toLocaleString('id-ID'), (ans + 500).toLocaleString('id-ID')]);
+            }
+            return q;
+        }
+
+        function numberToWords(n) {
+            const thousands = Math.floor(n / 1000);
+            let tWord = ["", "seribu", "dua ribu", "tiga ribu", "empat ribu", "lima ribu", "enam ribu", "tujuh ribu", "delapan ribu", "sembilan ribu"][thousands];
+            return (n % 1000 === 0) ? tWord : tWord + " sekian";
+        }
+
+        function shuffleArray(arr) {
+            return arr.sort(() => Math.random() - 0.5);
+        }
+
+        function checkQuizAnswer(selectedOpt, btnElem, questionObj) {
+            const buttons = document.querySelectorAll('#quiz-options button');
+            buttons.forEach(b => b.disabled = true);
+
+            const currP = players[currentTurnIndex];
+
+            if (selectedOpt === questionObj.correct) {
+                playSound('correct');
+                btnElem.classList.add('bg-green-500', 'border-green-400', 'text-white');
+                currP.coins += questionObj.reward;
+            } else {
+                playSound('wrong');
+                btnElem.classList.add('bg-rose-500', 'border-rose-400', 'text-white');
+                buttons.forEach(b => {
+                    if (b.innerText.trim() === String(questionObj.correct).trim()) {
+                        b.classList.add('bg-green-500/50');
+                    }
+                });
+                currP.coins = Math.max(0, currP.coins - 100); // Penalty
+            }
+
+            updateStatusDisplay();
+
+            setTimeout(() => {
+                document.getElementById('quiz-modal').classList.add('hidden');
+                endTurn();
+            }, 1200);
+        }
+
+        function endTurn() {
+            currentTurnIndex = (currentTurnIndex + 1) % 3;
+            if (currentTurnIndex === 0) {
+                totalRounds++;
+                if (totalRounds >= maxRounds) {
+                    endGame();
+                    return;
+                }
+            }
+            updateStatusDisplay();
+            document.getElementById('roll-dice-btn').disabled = false;
+        }
+
+        function endGame() {
+            playSound('win');
+            // Sort players by coin count
+            let sorted = [...players].sort((a, b) => b.coins - a.coins);
+            
+            const modal = document.getElementById('result-modal');
+            document.getElementById('winner-announcement').innerText = `Pemenang Utama: ${sorted[0].name} dengan total koin terbanyak!`;
+            
+            const lbContainer = document.getElementById('final-leaderboard');
+            lbContainer.innerHTML = '';
+
+            sorted.forEach((p, idx) => {
+                lbContainer.innerHTML += `
+                    <div class="flex justify-between items-center bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-xs">
+                        <span class="font-bold text-yellow-300">#${idx+1} ${p.name}</span>
+                        <span class="font-black text-green-400">Rp ${p.coins.toLocaleString('id-ID')}</span>
+                    </div>
+                `;
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('result-modal').classList.add('hidden');
+            players.forEach(p => { p.coins = 1000; p.pos = 0; });
+            currentTurnIndex = 0;
+            totalRounds = 0;
+            renderBoard();
+            updateStatusDisplay();
+            document.getElementById('roll-dice-btn').disabled = false;
+        }
+    </script>
+</body>
+</html>
