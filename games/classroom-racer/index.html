@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Classroom Racer - English Game</title>
+<style>
+:root{
+  --ink:#18233a;--muted:#64748b;--bg:#eef6ff;--card:#ffffff;
+  --blue:#2563eb;--cyan:#06b6d4;--green:#16a34a;--yellow:#f59e0b;
+  --red:#ef4444;--purple:#7c3aed;--shadow:0 18px 50px rgba(31,56,100,.16);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);
+ background:linear-gradient(145deg,#e8f5ff,#f7f1ff);min-height:100vh;overflow-x:hidden}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+.screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+.container{width:min(1100px,100%);margin:auto}
+.card{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.8);border-radius:30px;box-shadow:var(--shadow)}
+.login{padding:clamp(24px,5vw,55px);text-align:center;position:relative;overflow:hidden}
+.login:before,.login:after{content:"";position:absolute;border-radius:50%;filter:blur(2px);opacity:.55}
+.login:before{width:220px;height:220px;background:#c7d2fe;top:-100px;left:-80px}
+.login:after{width:250px;height:250px;background:#bae6fd;bottom:-130px;right:-80px}
+.logo{font-size:clamp(44px,8vw,78px);margin:0 0 4px;position:relative}
+h1{font-size:clamp(30px,5vw,50px);margin:0 0 8px;letter-spacing:-1px}
+.subtitle{color:var(--muted);font-size:clamp(15px,2.2vw,19px);margin:0 auto 28px;max-width:650px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:15px;text-align:left;max-width:680px;margin:auto;position:relative}
+.field label{font-weight:800;font-size:14px;display:block;margin:0 0 7px}
+.field input{width:100%;padding:16px 17px;border:2px solid #dbe4f0;border-radius:16px;outline:none;background:#fbfdff}
+.field input:focus{border-color:#60a5fa;box-shadow:0 0 0 4px #dbeafe}
+.primary{grid-column:1/-1;padding:17px 24px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-weight:900;font-size:18px;box-shadow:0 10px 24px rgba(37,99,235,.25)}
+.primary:active,.answer:active,.control:active{transform:scale(.98)}
+.note{font-size:12px;color:#8a98ab;margin-top:16px;position:relative}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-weight:800;font-size:13px;margin-bottom:16px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.player{font-weight:900}.scorebox{display:flex;gap:8px;align-items:center}
+.pill{padding:9px 13px;background:#fff;border-radius:999px;box-shadow:0 5px 18px rgba(30,64,175,.1);font-weight:800;font-size:14px}
+.game{padding:clamp(14px,2.5vw,26px)}
+.progress-wrap{height:10px;background:#dce8f5;border-radius:999px;overflow:hidden;margin:8px 0 18px}
+.progress{height:100%;width:0;background:linear-gradient(90deg,#06b6d4,#2563eb,#7c3aed);transition:width .35s}
+.track{position:relative;height:clamp(150px,22vw,220px);border-radius:25px;overflow:hidden;background:#5c6470;
+ border:5px solid #343b46;box-shadow:inset 0 10px 20px rgba(0,0,0,.16);margin-bottom:18px}
+.sky{position:absolute;inset:0 0 42% 0;background:linear-gradient(#8bd8ff,#dff7ff)}
+.cloud{position:absolute;background:#fff;border-radius:50px;width:80px;height:24px;top:25px;opacity:.8}
+.cloud:before,.cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud:before{width:35px;height:35px;left:15px;top:-18px}.cloud:after{width:42px;height:42px;right:12px;top:-23px}
+.c1{left:8%}.c2{left:55%;top:48px;transform:scale(.7)}
+.track-road{position:absolute;left:0;right:0;bottom:0;height:62%;background:repeating-linear-gradient(90deg,#505761 0 48px,#59616b 48px 96px)}
+.roadline{position:absolute;left:0;right:0;top:50%;border-top:5px dashed #fff;opacity:.75}
+.finish{position:absolute;right:3%;top:38%;font-size:38px;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25))}
+.car{position:absolute;left:4%;bottom:18%;font-size:clamp(48px,8vw,76px);transition:left .5s cubic-bezier(.2,.8,.2,1);z-index:5;filter:drop-shadow(0 5px 3px rgba(0,0,0,.25))}
+.rival{position:absolute;left:4%;bottom:58%;font-size:clamp(38px,6vw,58px);opacity:.8;transition:left .8s cubic-bezier(.2,.8,.2,1);z-index:4}
+.question-card{padding:clamp(18px,3vw,30px);text-align:center}
+.qmeta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.qtag{padding:6px 10px;border-radius:999px;background:#f1f5f9;color:#475569;font-weight:800;font-size:12px}
+.question{font-size:clamp(23px,4vw,36px);font-weight:950;margin:8px auto 20px;max-width:850px;line-height:1.18}
+.object{font-size:clamp(65px,11vw,105px);height:110px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:850px;margin:auto}
+.answer{background:#f8fafc;border:3px solid #e2e8f0;border-radius:17px;padding:15px 13px;font-size:clamp(16px,2.5vw,20px);font-weight:900;color:#1e293b;transition:.15s;min-height:60px}
+.answer:hover{border-color:#60a5fa;background:#eff6ff}
+.answer.correct{background:#dcfce7;border-color:#22c55e;color:#166534}
+.answer.wrong{background:#fee2e2;border-color:#ef4444;color:#991b1b}
+.answer:disabled{cursor:default}
+.feedback{min-height:29px;margin:14px 0 0;font-weight:900;font-size:17px}
+.next{margin-top:8px;padding:13px 24px;border-radius:14px;background:#172554;color:white;font-weight:900;display:none}
+.next.show{display:inline-block}
+.result{text-align:center;padding:clamp(24px,5vw,55px)}
+.trophy{font-size:82px}.result h2{font-size:clamp(30px,5vw,48px);margin:4px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:650px;margin:25px auto}
+.stat{background:#f8fafc;border-radius:18px;padding:16px}.stat b{font-size:28px;display:block}.stat span{font-size:12px;color:var(--muted);font-weight:800}
+.result-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.secondary{padding:14px 20px;border-radius:14px;background:#e8eef7;color:#24324b;font-weight:900}
+.hidden{display:none!important}
+.small{font-size:12px;color:#718096;margin-top:12px}
+@media(max-width:620px){
+ .screen{padding:10px}.card{border-radius:22px}.form{grid-template-columns:1fr}.primary{grid-column:auto}
+ .answers{grid-template-columns:1fr 1fr}.answer{min-height:56px;padding:12px 8px}
+ .stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}
+ .topbar{align-items:flex-start}.pill{padding:7px 9px;font-size:12px}
+}
+@media(max-width:400px){.answers{grid-template-columns:1fr}.object{height:85px}}
+</style>
+</head>
+<body>
+<section id="loginScreen" class="screen active">
+  <div class="container card login">
+    <div class="logo">🏎️💨</div>
+    <div class="badge">🎮 ENGLISH LEARNING GAME • PHASE C</div>
+    <h1>CLASSROOM RACER</h1>
+    <p class="subtitle">Race your car, answer English questions, and learn <b>Classroom Objects</b> along the way!</p>
+    <form id="loginForm" class="form">
+      <div class="field"><label for="studentName">Student Name / Nama</label><input id="studentName" required maxlength="30" placeholder="Type your name..." autocomplete="name"></div>
+      <div class="field"><label for="studentClass">Class / Kelas</label><input id="studentClass" required maxlength="20" placeholder="Example: 5A"></div>
+      <button class="primary" type="submit">START RACE 🚦</button>
+    </form>
+    <div class="note">Designed for HP • Tablet • Laptop • Digital Interactive Board</div>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+ <div class="container card game">
+  <div class="topbar">
+    <div class="player">👋 <span id="hello"></span></div>
+    <div class="scorebox"><div class="pill">⭐ <span id="score">0</span></div><div class="pill">🏁 <span id="qnum">1</span>/<span id="total"></span></div></div>
+  </div>
+  <div class="progress-wrap"><div id="progress" class="progress"></div></div>
+  <div class="track" aria-label="Racing track">
+    <div class="sky"></div><div class="cloud c1"></div><div class="cloud c2"></div>
+    <div class="track-road"></div><div class="roadline"></div><div class="finish">🏁</div>
+    <div id="rival" class="rival">🚙</div><div id="car" class="car">🏎️</div>
+  </div>
+  <div class="question-card">
+    <div class="qmeta"><span class="qtag">CLASSROOM OBJECTS</span><span id="difficulty" class="qtag">EASY</span></div>
+    <div id="object" class="object">📚</div>
+    <div id="question" class="question">What is this?</div>
+    <div id="answers" class="answers"></div>
+    <div id="feedback" class="feedback"></div>
+    <button id="nextBtn" class="next">NEXT QUESTION ➜</button>
+  </div>
+ </div>
+</section>
+
+<section id="resultScreen" class="screen">
+ <div class="container card result">
+  <div class="trophy" id="trophy">🏆</div>
+  <div class="badge">RACE COMPLETE!</div>
+  <h2 id="resultTitle">Great Job!</h2>
+  <p id="resultText"></p>
+  <div class="stats">
+   <div class="stat"><b id="finalScore">0</b><span>SCORE</span></div>
+   <div class="stat"><b id="correctCount">0</b><span>CORRECT</span></div>
+   <div class="stat"><b id="accuracy">0%</b><span>ACCURACY</span></div>
+  </div>
+  <div class="result-actions">
+   <button id="againBtn" class="primary" style="grid-column:auto">🔄 PLAY AGAIN</button>
+   <button id="homeBtn" class="secondary">🏠 HOME</button>
+  </div>
+  <div class="small">Keep practicing: book, pencil, ruler, eraser, desk, chair, board and more!</div>
+ </div>
+</section>
+
+<script>
+const bank=[
+ {icon:"📚",word:"books",q:"What are these?",a:["Books","Rulers","Chairs","Bags"],d:"EASY"},
+ {icon:"✏️",word:"pencil",q:"What is this?",a:["Pencil","Pen","Eraser","Crayon"],d:"EASY"},
+ {icon:"📏",word:"ruler",q:"What is this?",a:["Ruler","Board","Desk","Book"],d:"EASY"},
+ {icon:"🧽",word:"eraser",q:"What is this?",a:["Eraser","Pencil","Bag","Chair"],d:"EASY"},
+ {icon:"🪑",word:"chair",q:"What is this?",a:["Chair","Desk","Door","Window"],d:"EASY"},
+ {icon:"🪟",word:"window",q:"What is this?",a:["Window","Door","Board","Clock"],d:"EASY"},
+ {icon:"🚪",word:"door",q:"What is this?",a:["Door","Window","Desk","Chair"],d:"EASY"},
+ {icon:"🎒",word:"school bag",q:"What is this?",a:["School bag","Pencil case","Notebook","Book"],d:"EASY"},
+ {icon:"🖊️",word:"pen",q:"What is this?",a:["Pen","Pencil","Ruler","Eraser"],d:"EASY"},
+ {icon:"📓",word:"notebook",q:"What is this?",a:["Notebook","Book","Board","Desk"],d:"EASY"},
+ {icon:"🧑‍🏫",word:"teacher",q:"Who is this?",a:["Teacher","Student","Principal","Friend"],d:"MEDIUM"},
+ {icon:"👨‍🎓",word:"student",q:"Who is this?",a:["Student","Teacher","Driver","Doctor"],d:"MEDIUM"},
+ {icon:"🕐",word:"clock",q:"What classroom object shows the time?",a:["Clock","Calendar","Ruler","Map"],d:"MEDIUM"},
+ {icon:"🗺️",word:"map",q:"What can you use to see countries and places?",a:["Map","Clock","Board","Desk"],d:"MEDIUM"},
+ {icon:"📅",word:"calendar",q:"What shows the days, weeks, and months?",a:["Calendar","Notebook","Ruler","Window"],d:"MEDIUM"},
+ {icon:"🗑️",word:"trash bin",q:"Where do you put classroom rubbish?",a:["Trash bin","Desk","Bookshelf","Board"],d:"MEDIUM"},
+ {icon:"📖",word:"dictionary",q:"Which object helps you find word meanings?",a:["Dictionary","Chair","Clock","Pencil"],d:"CHALLENGE"},
+ {icon:"📋",word:"whiteboard",q:"The teacher writes on this. What is it?",a:["Whiteboard","Window","Door","Shelf"],d:"CHALLENGE"},
+ {icon:"🗄️",word:"bookshelf",q:"Where can you keep many books?",a:["Bookshelf","Clock","Chair","Pencil"],d:"CHALLENGE"},
+ {icon:"🖍️",word:"crayon",q:"Which object is often used for coloring?",a:["Crayon","Ruler","Clock","Desk"],d:"CHALLENGE"}
+];
+let questions=[],idx=0,score=0,correct=0,answered=false,student="";
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");window.scrollTo(0,0)}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function start(){
+ questions=shuffle(bank).slice(0,12);idx=0;score=0;correct=0;answered=false;
+ $("total").textContent=questions.length;$("hello").textContent=student;
+ $("score").textContent=0;show("gameScreen");render();
+}
+function render(){
+ const q=questions[idx];answered=false;
+ $("qnum").textContent=idx+1;$("progress").style.width=((idx)/questions.length*100)+"%";
+ $("object").textContent=q.icon;$("question").textContent=q.q;$("difficulty").textContent=q.difficulty||q.d;
+ $("feedback").textContent="";$("nextBtn").classList.remove("show");
+ const arr=shuffle(q.a),wrap=$("answers");wrap.innerHTML="";
+ arr.forEach(ans=>{
+  const b=document.createElement("button");b.className="answer";b.textContent=ans;b.onclick=()=>choose(b,ans,q.word);wrap.appendChild(b)
+ });
+ $("car").style.left=(4+idx/(questions.length-1)*78)+"%";
+ $("rival").style.left=(4+Math.max(0,(idx-2))/(questions.length-1)*70)+"%";
+}
+function choose(btn,ans,correctWord){
+ if(answered)return;answered=true;
+ document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+ if(ans.toLowerCase()===correctWord.toLowerCase()){
+  correct++;score+=100;btn.classList.add("correct");$("feedback").textContent="✅ Correct! +100 points";
+ }else{
+  btn.classList.add("wrong");score=Math.max(0,score-20);
+  document.querySelectorAll(".answer").forEach(b=>{if(b.textContent.toLowerCase()===correctWord.toLowerCase())b.classList.add("correct")});
+  $("feedback").textContent="💡 The answer is: "+correctWord;
+ }
+ $("score").textContent=score;$("nextBtn").classList.add("show");
+}
+$("nextBtn").onclick=()=>{if(idx<questions.length-1){idx++;render()}else finish()};
+function finish(){
+ $("progress").style.width="100%";$("finalScore").textContent=score;$("correctCount").textContent=correct;
+ const acc=Math.round(correct/questions.length*100);$("accuracy").textContent=acc+"%";
+ $("trophy").textContent=acc>=90?"🏆":acc>=70?"🥇":"🏎️";
+ $("resultTitle").textContent=acc>=90?"Amazing Racer!":acc>=70?"Great Job!":"Keep Practicing!";
+ $("resultText").textContent=`${student}, you got ${correct} out of ${questions.length} questions correct.`;
+ show("resultScreen");
+}
+$("loginForm").onsubmit=e=>{e.preventDefault();student=$("studentName").value.trim()||"Racer";localStorage.setItem("classroomRacerName",student);start()};
+$("againBtn").onclick=()=>start();
+$("homeBtn").onclick=()=>show("loginScreen");
+const saved=localStorage.getItem("classroomRacerName");if(saved)$("studentName").value=saved;
+</script>
+</body>
+</html>
