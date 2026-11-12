@@ -1,6 +1,10 @@
-# GEMAS — Portal Game Edukasi
+# GEMAS — Game Edukasi Murid Aktif Sukamenang
 
-Portal game pembelajaran karya guru-guru. Halaman utama berisi kartu-kartu game; klik kartu untuk langsung bermain.
+Portal game pembelajaran karya guru-guru SDN Sukamenang, Kecamatan Karang Jaya, Kabupaten Musi Rawas Utara. Halaman utama berisi kartu-kartu game; klik kartu untuk langsung bermain.
+
+**GEMAS telah terdaftar di HAKI (Hak Kekayaan Intelektual) dengan Nomor 001540186.**
+
+Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header) portal; logo SDN Sukamenang yang dipakai adalah versi latar transparan (latar hitam pada gambar asal sudah dihapus).
 
 **Portal (GitHub Pages):** https://sdn-sukamenang.github.io/gemas/
 
