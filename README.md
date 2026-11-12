@@ -23,7 +23,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Rally Rasio | Nova Sagita, S.Pd. | 6 | Matematika | `games/rally-rasio/` |
 | Math Racing: Rasio & Perbandingan | Armlis, S.Pd. | 4 | Matematika | `games/math-racing/` |
 | Petualangan Sahabat Kecil: Mengenal Diriku | Susanti, S.Pd. | 1 | Bahasa Indonesia | `games/petualangan-sahabat-kecil/` |
-| Monopoly Math: Petualangan Bilangan Cacah Seribuan | Yulia Nanda | 4 | Matematika | `games/monopoly-math/` |
+| Monopoly Math: Petualangan Bilangan Cacah Seribuan | Yulia Nanda | 3 | Matematika | `games/monopoly-math/` |
 
 ## Cara Menambah Game Baru
 
