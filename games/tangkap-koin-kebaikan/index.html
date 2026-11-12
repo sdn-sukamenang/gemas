@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Game Edukasi PAI: Tangkap Koin Kebaikan - Sejuta Asah Anak Yatim</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        emeraldCustom: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        amberCustom: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #065f46 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* Custom Pattern Overlay */
+        .islamic-bg {
+            background-color: #064e3b;
+            background-image: radial-gradient(#10b981 0.75px, transparent 0.75px), radial-gradient(#10b981 0.75px, #064e3b 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0,15px 15px;
+            opacity: 0.95;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 3px solid rgba(251, 191, 36, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-3d-gold {
+            background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+            box-shadow: 0 6px 0 #b45309, 0 10px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+        }
+        .btn-3d-gold:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b45309, 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-3d-green {
+            background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+            box-shadow: 0 6px 0 #047857, 0 10px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+        }
+        .btn-3d-green:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #047857, 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Canvas styling */
+        #gameCanvas {
+            touch-action: none;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 70%, #dcfce7 100%);
+            border-radius: 1.5rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.15), 0 10px 25px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body class="islamic-bg text-gray-800 min-h-screen flex items-center justify-center p-2 md:p-4">
+
+    <div id="app" class="w-full max-w-4xl mx-auto relative overflow-hidden">
+
+        <!-- ================= PAGE 1: LOGIN / IDENTITAS SISWA ================= -->
+        <div id="screen-login" class="glass-card rounded-3xl p-6 md:p-10 my-4 text-center relative z-10 transition-all duration-500">
+            <!-- Header Logo & Title -->
+            <div class="mb-6 animate-float">
+                <span class="inline-block bg-amber-100 text-amber-800 text-sm font-bold px-4 py-1.5 rounded-full border border-amber-300 mb-3 shadow-sm">
+                    <i class="fa-solid fa-kaaba mr-1.5 text-amber-600"></i> PAI & Budi Pekerti Kelas 5 SD
+                </span>
+                <h1 class="text-3xl md:text-5xl font-black font-game text-emerald-900 tracking-wide drop-shadow-sm">
+                    TANGKAP KOIN KEBAIKAN
+                </h1>
+                <p class="text-emerald-700 font-semibold text-base md:text-lg mt-1">
+                    Materi: <span class="text-amber-600 font-bold">Sejuta Asah untuk Anak Yatim</span>
+                </p>
+            </div>
+
+            <!-- Illustration & Mosque Graphic -->
+            <div class="flex justify-center my-4">
+                <div class="w-24 h-24 md:w-28 md:h-28 bg-emerald-100 border-4 border-emerald-500 rounded-full flex items-center justify-center shadow-inner relative">
+                    <i class="fa-solid fa-hand-holding-heart text-5xl md:text-6xl text-emerald-600"></i>
+                    <div class="absolute -top-2 -right-2 bg-amber-400 text-amber-950 font-bold rounded-full w-9 h-9 flex items-center justify-center text-xs border-2 border-white shadow">
+                        <i class="fa-solid fa-coins text-sm"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Inputs -->
+            <div class="max-w-md mx-auto space-y-4 text-left bg-emerald-50/80 p-5 md:p-6 rounded-2xl border border-emerald-200">
+                <div>
+                    <label class="block text-emerald-900 font-bold text-sm md:text-base mb-1.5" for="inputName">
+                        <i class="fa-solid fa-user-graduate text-emerald-600 mr-2"></i>Nama Lengkap Siswa:
+                    </label>
+                    <input type="text" id="inputName" placeholder="Masukkan nama kamu..." 
+                           class="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 focus:border-amber-500 focus:outline-none font-semibold text-gray-800 shadow-sm transition-all text-base md:text-lg">
+                </div>
+
+                <div>
+                    <label class="block text-emerald-900 font-bold text-sm md:text-base mb-1.5" for="inputClass">
+                        <i class="fa-solid fa-school text-emerald-600 mr-2"></i>Kelas / Rombel:
+                    </label>
+                    <select id="inputClass" class="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 focus:border-amber-500 focus:outline-none font-semibold text-gray-800 shadow-sm transition-all text-base md:text-lg bg-white">
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="5 A">Kelas 5 A</option>
+                        <option value="5 B">Kelas 5 B</option>
+                        <option value="5 C">Kelas 5 C</option>
+                        <option value="5 D">Kelas 5 D</option>
+                    </select>
+                </div>
+                
+                <p id="loginError" class="text-red-600 font-bold text-sm text-center hidden">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Mohon isi Nama dan Kelas terlebih dahulu!
+                </p>
+            </div>
+
+            <!-- Start Button -->
+            <div class="mt-8">
+                <button onclick="submitLogin()" class="btn-3d-gold w-full max-w-md text-amber-950 font-black font-game text-xl md:text-2xl py-3.5 px-8 rounded-2xl cursor-pointer transform hover:scale-105 active:scale-95 transition-all">
+                    <i class="fa-solid fa-play mr-2"></i> MASUK KE GAME
+                </button>
+            </div>
+            
+            <div class="mt-4 text-xs text-emerald-800 font-medium">
+                Didesain untuk HP, Tablet, Laptop & Papan Interaktif Digital (Smartboard)
+            </div>
+        </div>
+
+        <!-- ================= PAGE 2: DASHBOARD / MENU UTAMA ================= -->
+        <div id="screen-menu" class="glass-card rounded-3xl p-6 md:p-8 my-4 text-center hidden relative z-10 transition-all duration-500">
+            <!-- Profile Greeting Bar -->
+            <div class="bg-emerald-800 text-white p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-md mb-6">
+                <div class="flex items-center space-x-3 text-left">
+                    <div class="w-12 h-12 bg-amber-400 text-amber-950 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <div id="userGreeting" class="font-bold text-lg md:text-xl font-game text-amber-300">Selamat Datang!</div>
+                        <div id="userClassBadge" class="text-xs md:text-sm text-emerald-200">Kelas: -</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="bg-emerald-700 hover:bg-emerald-600 text-xs text-white px-3 py-2 rounded-xl border border-emerald-500 transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Ganti Siswa
+                </button>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-black font-game text-emerald-950 mb-2">PILIH MENU PERMAINAN</h2>
+            <p class="text-emerald-700 text-sm mb-6">Pelajari materi terlebih dahulu atau langsung uji ketangkasanmu!</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <!-- Menu Button 1: Main Game -->
+                <button onclick="startGame()" class="btn-3d-gold p-6 rounded-2xl text-amber-950 text-left flex items-center space-x-4 cursor-pointer group hover:scale-[1.02] transition">
+                    <div class="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0 border border-white/50">
+                        <i class="fa-solid fa-gamepad text-amber-900 group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <div>
+                        <div class="font-game font-black text-xl md:text-2xl text-amber-950">MULAI TANGKAP KOIN</div>
+                        <div class="text-xs md:text-sm text-amber-900 font-semibold opacity-90">Mainkan game, kumpulkan koin pahala & jawab kuis!</div>
+                    </div>
+                </button>
+
+                <!-- Menu Button 2: Rangkuman Materi -->
+                <button onclick="showMateri()" class="btn-3d-green p-6 rounded-2xl text-white text-left flex items-center space-x-4 cursor-pointer group hover:scale-[1.02] transition">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black shrink-0 border border-white/30">
+                        <i class="fa-solid fa-book-open text-white group-hover:scale-110 transition-transform"></i>
+                    </div>
+                    <div>
+                        <div class="font-game font-black text-xl md:text-2xl text-white">RANGKUMAN MATERI</div>
+                        <div class="text-xs md:text-sm text-emerald-100 font-semibold opacity-90">Baca rangkuman materi Sejuta Asah Anak Yatim</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Petunjuk Singkat Perangkat -->
+            <div class="mt-8 bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs md:text-sm text-amber-900 text-left">
+                <div class="font-bold mb-1 text-amber-950 flex items-center">
+                    <i class="fa-solid fa-circle-info mr-2 text-amber-600"></i> Cara Bermain di Berbagai Perangkat:
+                </div>
+                <ul class="list-disc list-inside space-y-1 text-amber-800">
+                    <li><strong>Laptop/PC:</strong> Gunakan tombol Panah Kiri/Kanan (<kbd class="bg-white px-1.5 py-0.5 rounded border">←</kbd> <kbd class="bg-white px-1.5 py-0.5 rounded border">→</kbd>) atau tombol <kbd class="bg-white px-1.5 py-0.5 rounded border">A</kbd>/<kbd class="bg-white px-1.5 py-0.5 rounded border">D</kbd>.</li>
+                    <li><strong>HP / Tablet:</strong> Sentuh dan geser (drag) keranjang atau gunakan tombol panah besar di layar bawah.</li>
+                    <li><strong>Papan Interaktif Digital (Smartboard):</strong> Ketuk tombol panah layar sentuh kiri/kanan yang telah disediakan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 3: RANGKUMAN MATERI ================= -->
+        <div id="screen-materi" class="glass-card rounded-3xl p-5 md:p-8 my-4 hidden relative z-10 max-h-[85vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b-2 border-emerald-100 pb-4 mb-4">
+                <h2 class="text-2xl md:text-3xl font-black font-game text-emerald-950 flex items-center">
+                    <i class="fa-solid fa-book-bookmark text-amber-500 mr-3"></i> Materi: Sejuta Asah Anak Yatim
+                </h2>
+                <button onclick="showMenu()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-4 py-2 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                </button>
+            </div>
+
+            <div class="space-y-4 text-emerald-950 text-sm md:text-base leading-relaxed">
+                <!-- Point 1 -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border-l-4 border-emerald-600">
+                    <h3 class="font-black font-game text-lg text-emerald-900 mb-1">1. Pengertian Anak Yatim</h3>
+                    <p>
+                        Menurut bahasa, <strong>Yatim</strong> artinya sendiri atau terpisah. Secara istilah ajaran Islam, anak yatim adalah 
+                        <span class="bg-amber-200 px-1 rounded font-bold">anak yang ditinggal meninggal dunia oleh ayahnya sebelum ia dewasa (baligh)</span>.
+                        Jika yang meninggal ibunya disebut <i>Piatu</i>, dan jika meninggal keduanya disebut <i>Yatim Piatu</i>.
+                    </p>
+                </div>
+
+                <!-- Point 2 -->
+                <div class="bg-amber-50 p-4 rounded-2xl border-l-4 border-amber-500">
+                    <h3 class="font-black font-game text-lg text-amber-900 mb-1">2. Makna "Sejuta Asah" (Mengasah & Menyayangi)</h3>
+                    <p>
+                        "Sejuta Asah" bermakna memberikan bimbingan, pendidikan, perhatian, serta kasih sayang yang tulus kepada anak yatim agar mereka tumbuh menjadi anak yang berakhlak mulia, cerdas, dan mandiri.
+                    </p>
+                </div>
+
+                <!-- Point 3 -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border-l-4 border-emerald-600">
+                    <h3 class="font-black font-game text-lg text-emerald-900 mb-1">3. Hadits Nabi tentang Anak Yatim</h3>
+                    <p class="italic text-emerald-800 bg-white p-3 rounded-xl border border-emerald-200 mb-2">
+                        "Aku dan orang yang menanggung (memelihara) anak yatim di surga adalah seperti ini..." (Rasulullah SAW mengisyaratkan dengan <strong>jari telunjuk dan jari tengah</strong> serta merenggangkan keduanya sedikit). 
+                        <span class="block text-xs text-right font-bold mt-1">— HR. Bukhari</span>
+                    </p>
+                    <p>Artinya: Orang yang menyantuni anak yatim akan sangat dekat kedudukannya dengan Nabi Muhammad SAW di surga kelak.</p>
+                </div>
+
+                <!-- Point 4 -->
+                <div class="bg-red-50 p-4 rounded-2xl border-l-4 border-red-500">
+                    <h3 class="font-black font-game text-lg text-red-900 mb-1">4. Peringatan dalam Al-Qur'an (Surah Al-Ma'un)</h3>
+                    <p>
+                        Dalam <strong>Surah Al-Ma'un ayat 1-2</strong>, Allah SWT menegaskan bahwa orang yang menghardik (membentak/menyakiti) anak yatim termasuk golongan <strong>pendusta agama</strong>. Kita juga dilarang keras memakan harta anak yatim secara zalim (Surah An-Nisa ayat 10).
+                    </p>
+                </div>
+
+                <!-- Point 5 -->
+                <div class="bg-emerald-100 p-4 rounded-2xl text-center">
+                    <h3 class="font-black font-game text-lg text-emerald-950 mb-2">Keutamaan Menyantuni Anak Yatim:</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs md:text-sm font-bold text-emerald-900">
+                        <div class="bg-white p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-heart text-red-500 mr-1"></i> Melembutkan Hati</div>
+                        <div class="bg-white p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-star text-amber-500 mr-1"></i> Dekat Rasulullah di Surga</div>
+                        <div class="bg-white p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-hand-holding-dollar text-emerald-600 mr-1"></i> Melapangkan Rezeki</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button onclick="startGame()" class="btn-3d-gold text-amber-950 font-black font-game text-lg py-3 px-8 rounded-2xl">
+                    <i class="fa-solid fa-gamepad mr-2"></i> Paham! Langsung Main Sekarang
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 4: GAMEPLAY CANVAS ================= -->
+        <div id="screen-game" class="hidden relative z-10">
+            <!-- HUD / Scoreboard Header -->
+            <div class="bg-emerald-900/90 text-white p-3 md:p-4 rounded-2xl mb-3 flex items-center justify-between shadow-lg border border-emerald-700">
+                <!-- Player info -->
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <div class="bg-amber-400 text-amber-950 font-black px-3 py-1 rounded-xl text-xs md:text-sm font-game" id="hudPlayerName">
+                        Siswa
+                    </div>
+                    <div class="text-xs text-emerald-200 hidden sm:block" id="hudPlayerClass">Kelas 5</div>
+                </div>
+
+                <!-- Stats: Score & Lives -->
+                <div class="flex items-center space-x-4 md:space-x-6">
+                    <!-- Skor -->
+                    <div class="text-center">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Skor Kebaikan</div>
+                        <div class="text-xl md:text-2xl font-black font-game text-amber-400" id="hudScore">0</div>
+                    </div>
+                    
+                    <!-- Batas Waktu Main -->
+                    <div class="text-center bg-emerald-800/80 px-3 py-1 rounded-xl border border-amber-400/50">
+                        <div class="text-[10px] text-amber-300 font-bold uppercase tracking-wider"><i class="fa-solid fa-clock mr-1"></i>Waktu</div>
+                        <div class="text-lg md:text-xl font-black font-game text-amber-300" id="hudTimer">90s</div>
+                    </div>
+
+                    <!-- Target/Level -->
+                    <div class="text-center">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Level</div>
+                        <div class="text-lg md:text-xl font-black font-game text-white" id="hudLevel">1</div>
+                    </div>
+
+                    <!-- Lives / Hearts -->
+                    <div class="text-center">
+                        <div class="text-[10px] text-emerald-300 font-bold uppercase tracking-wider">Kesempatan</div>
+                        <div class="text-lg md:text-xl text-red-400" id="hudLives">
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleAudio()" id="btnAudio" class="bg-emerald-700 hover:bg-emerald-600 text-white p-2 rounded-xl text-sm transition">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <button onclick="pauseGame()" class="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold p-2 px-3 rounded-xl text-sm transition font-game">
+                        <i class="fa-solid fa-pause"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div class="relative w-full flex justify-center items-center">
+                <canvas id="gameCanvas" width="800" height="500" class="w-full h-auto max-h-[60vh] object-contain"></canvas>
+
+                <!-- On-Screen Feedback Overlay (Floating Text) -->
+                <div id="gameNotice" class="absolute inset-0 pointer-events-none flex items-center justify-center hidden">
+                    <span id="gameNoticeText" class="font-game font-black text-3xl md:text-5xl text-amber-400 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] animate-bounce">
+                        +10 SKOR!
+                    </span>
+                </div>
+            </div>
+
+            <!-- Touch Controls for Smartboards & Mobile -->
+            <div class="mt-3 grid grid-cols-2 gap-3 max-w-lg mx-auto">
+                <button id="btnLeft" class="bg-emerald-800 active:bg-emerald-600 text-white font-game text-2xl py-4 rounded-2xl shadow-lg border-2 border-emerald-500 flex items-center justify-center active:scale-95 transition">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> KIRI
+                </button>
+                <button id="btnRight" class="bg-emerald-800 active:bg-emerald-600 text-white font-game text-2xl py-4 rounded-2xl shadow-lg border-2 border-emerald-500 flex items-center justify-center active:scale-95 transition">
+                    KANAN <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= MODAL: KUIS EDUKASI PAI ================= -->
+        <div id="modal-quiz" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+            <div class="glass-card rounded-3xl p-6 md:p-8 max-w-lg w-full text-center relative animate-float">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="inline-block bg-amber-400 text-amber-950 font-black px-4 py-1 rounded-full text-xs font-game shadow">
+                        <i class="fa-solid fa-star mr-1"></i> KOIN SOAL SPESIAL (+50 POIN)
+                    </div>
+                    <!-- Countdown Bar / Timer Soal -->
+                    <div class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-300">
+                        <i class="fa-solid fa-stopwatch mr-1 text-amber-600"></i><span id="quizTimerText">30s</span>
+                    </div>
+                </div>
+
+                <!-- Progress Timer Bar -->
+                <div class="w-full bg-gray-200 h-2 rounded-full mb-4 overflow-hidden">
+                    <div id="quizTimerBar" class="bg-amber-500 h-full w-full transition-all duration-1000"></div>
+                </div>
+                
+                <h3 id="quizQuestion" class="text-lg md:text-xl font-bold text-emerald-950 mb-6 leading-snug">
+                    Soal Kuis PAI akan muncul di sini...
+                </h3>
+
+                <!-- Quiz Options -->
+                <div id="quizOptions" class="space-y-3 text-left mb-4">
+                    <!-- Dynamic Buttons Generated Here -->
+                </div>
+
+                <div id="quizFeedback" class="hidden font-bold font-game text-lg p-3 rounded-xl mt-3"></div>
+            </div>
+        </div>
+
+        <!-- ================= MODAL: PAUSE ================= -->
+        <div id="modal-pause" class="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+            <div class="glass-card rounded-3xl p-8 max-w-sm w-full text-center">
+                <h3 class="text-3xl font-black font-game text-emerald-950 mb-4">PERMAINAN DIPAUS</h3>
+                <div class="space-y-3">
+                    <button onclick="resumeGame()" class="btn-3d-gold w-full text-amber-950 font-black font-game text-lg py-3 rounded-xl">
+                        <i class="fa-solid fa-play mr-2"></i> LANJUTKAN
+                    </button>
+                    <button onclick="showMenu()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-full py-3 rounded-xl transition text-sm">
+                        <i class="fa-solid fa-house mr-2"></i> KEMBALI KE MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 5: HASIL & SERTIFIKAT DIGITAL ================= -->
+        <div id="screen-result" class="glass-card rounded-3xl p-6 md:p-8 my-4 text-center hidden relative z-10">
+            <div class="border-4 border-amber-400 p-6 md:p-8 rounded-2xl bg-gradient-to-b from-amber-50/50 to-white relative overflow-hidden shadow-inner">
+                
+                <!-- Ribbon Badge -->
+                <div class="inline-block bg-emerald-700 text-amber-300 font-black font-game text-sm md:text-base px-6 py-2 rounded-full border-2 border-amber-400 mb-4 shadow">
+                    <i class="fa-solid fa-award mr-2"></i> LAPORAN HASIL BELAJAR DIGITAL
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-black font-game text-emerald-950 mb-1">
+                    SELAMAT!
+                </h2>
+                <p class="text-emerald-700 font-semibold text-sm mb-6">Kamu telah menyelesaikan Game Edukasi PAI</p>
+
+                <!-- Student Identity Card -->
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 max-w-md mx-auto mb-6 text-left flex justify-between items-center">
+                    <div>
+                        <div class="text-xs text-emerald-700 font-bold">NAMA SISWA:</div>
+                        <div id="resStudentName" class="font-black text-lg text-emerald-950 font-game">-</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-emerald-700 font-bold">KELAS:</div>
+                        <div id="resStudentClass" class="font-black text-lg text-amber-600 font-game">-</div>
+                    </div>
+                </div>
+
+                <!-- Final Score & Grade -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-md mx-auto mb-6">
+                    <div class="bg-amber-100/80 p-3 rounded-xl border border-amber-300">
+                        <div class="text-[11px] text-amber-900 font-bold">TOTAL SKOR</div>
+                        <div id="resFinalScore" class="text-2xl md:text-3xl font-black font-game text-amber-600">0</div>
+                    </div>
+                    <div class="bg-emerald-100/80 p-3 rounded-xl border border-emerald-300">
+                        <div class="text-[11px] text-emerald-900 font-bold">AKURASI KUIS</div>
+                        <div id="resQuizAccuracy" class="text-2xl md:text-3xl font-black font-game text-emerald-700">0%</div>
+                    </div>
+                    <div class="bg-blue-100/80 p-3 rounded-xl border border-blue-300 col-span-2 md:col-span-1">
+                        <div class="text-[11px] text-blue-900 font-bold">PREDIKAT</div>
+                        <div id="resGrade" class="text-xl md:text-2xl font-black font-game text-blue-700">SANGAT BAIK</div>
+                    </div>
+                </div>
+
+                <!-- Teacher Feedback Message -->
+                <div class="bg-white p-4 rounded-xl border border-gray-200 text-xs md:text-sm text-gray-700 italic max-w-md mx-auto mb-6">
+                    <i class="fa-solid fa-quote-left text-amber-400 text-lg mr-2"></i>
+                    <span id="resFeedbackText">
+                        Luar biasa! Kamu telah memahami materi Sejuta Asah untuk Anak Yatim dengan sangat baik. Pertahankan semangat berbuat kebaikan!
+                    </span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="startGame()" class="btn-3d-gold text-amber-950 font-black font-game text-base py-3 px-6 rounded-xl">
+                        <i class="fa-solid fa-rotate-right mr-1.5"></i> MAIN LAGI
+                    </button>
+                    <button onclick="showMenu()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-base py-3 px-6 rounded-xl transition">
+                        <i class="fa-solid fa-house mr-1.5"></i> MENU UTAMA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* ================= STATE MANAGEMENT ================= */
+        const state = {
+            playerName: '',
+            playerClass: '',
+            score: 0,
+            lives: 3,
+            level: 1,
+            timeLeft: 90, // Batas waktu total game (detik)
+            gameTimerInterval: null,
+            quizTimeLeft: 30, // Batas waktu jawab kuis (30 detik per soal)
+            quizTimerInterval: null,
+            quizCorrect: 0,
+            quizTotal: 0,
+            isPlaying: false,
+            isPaused: false,
+            isQuizActive: false,
+            audioEnabled: true
+        };
+
+        /* ================= AUDIO SYNTHESIZER (Web Audio API) ================= */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!state.audioEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'coin') {
+                    // Chime high pitched sound
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'star') {
+                    // Magic star sound
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'wrong') {
+                    // Low error buzz
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'correct') {
+                    // Fanfare flourish
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.2);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                }
+            } catch (e) {
+                console.log("Audio play error", e);
+            }
+        }
+
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const btn = document.getElementById('btnAudio');
+            btn.innerHTML = state.audioEnabled ? 
+                '<i class="fa-solid fa-volume-high"></i>' : 
+                '<i class="fa-solid fa-volume-xmark text-red-400"></i>';
+        }
+
+        /* ================= LOGIN & NAVIGATION LOGIC ================= */
+        function submitLogin() {
+            const nameInput = document.getElementById('inputName').value.trim();
+            const classInput = document.getElementById('inputClass').value;
+            const errorEl = document.getElementById('loginError');
+
+            if (!nameInput || !classInput) {
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            errorEl.classList.add('hidden');
+            state.playerName = nameInput;
+            state.playerClass = classInput;
+
+            // Update UI elements
+            document.getElementById('userGreeting').innerText = `Hai, ${state.playerName}!`;
+            document.getElementById('userClassBadge').innerText = `Kelas: ${state.playerClass}`;
+            document.getElementById('hudPlayerName').innerText = state.playerName;
+            document.getElementById('hudPlayerClass').innerText = `Kelas ${state.playerClass}`;
+
+            showScreen('screen-menu');
+            initAudio();
+        }
+
+        function logout() {
+            state.playerName = '';
+            state.playerClass = '';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputClass').value = '';
+            showScreen('screen-login');
+        }
+
+        function showScreen(screenId) {
+            const screens = ['screen-login', 'screen-menu', 'screen-materi', 'screen-game', 'screen-result'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === screenId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        function showMenu() {
+            state.isPlaying = false;
+            clearInterval(state.gameTimerInterval);
+            clearInterval(state.quizTimerInterval);
+            document.getElementById('modal-pause').classList.add('hidden');
+            document.getElementById('modal-quiz').classList.add('hidden');
+            showScreen('screen-menu');
+        }
+
+        function showMateri() {
+            showScreen('screen-materi');
+        }
+
+        /* ================= EDUCATIONAL QUIZ DATA (Surah Al-Ma'un & Sejuta Asah Anak Yatim) ================= */
+        const quizBank = [
+            {
+                q: "Surah Al-Ma'un terdiri dari 7 ayat. Apakah arti dari kata 'Al-Ma'un'?",
+                options: [
+                    "Barang-barang yang berguna",
+                    "Pertolongan Allah yang agung",
+                    "Nikmat yang melimpah",
+                    "Waktu Subuh"
+                ],
+                answer: 0
+            },
+            {
+                q: "Menurut Surah Al-Ma'un ayat 1-2, siapakah yang tergolong sebagai orang yang mendustakan agama?",
+                options: [
+                    "Orang yang rajin memberi sedekah",
+                    "Orang yang menghardik (menyakiti) anak yatim",
+                    "Orang yang selalu menuntut ilmu",
+                    "Orang yang menjaga tutur katanya"
+                ],
+                answer: 1
+            },
+            {
+                q: "Secara istilah ajaran Islam, anak Yatim adalah anak yang...",
+                options: [
+                    "Ditinggal meninggal ibunya saat sudah dewasa",
+                    "Ditinggal meninggal ayahnya sebelum baligh (dewasa)",
+                    "Ditinggal merantau oleh kedua orang tuanya",
+                    "Tidak memiliki tempat tinggal"
+                ],
+                answer: 1
+            },
+            {
+                q: "Rasulullah SAW mengisyaratkan kedudukan orang yang mengasuh anak yatim di surga sangat dekat dengan beliau seperti...",
+                options: [
+                    "Juli dan Agustus",
+                    "Jari telunjuk dan jari tengah",
+                    "Matahari dan bulan",
+                    "Ibu jari dan kelingking"
+                ],
+                answer: 1
+            },
+            {
+                q: "Makna utama dari 'Sejuta Asah' untuk anak yatim adalah...",
+                options: [
+                    "Memberikan bimbingan, pendidikan, dan kasih sayang tulus",
+                    "Membiarkan anak yatim berjuang sendirian",
+                    "Hanya memberi bantuan berupa barang bekas",
+                    "Menuntut anak yatim bekerja keras"
+                ],
+                answer: 0
+            },
+            {
+                q: "Ancaman 'Celakalah bagi orang-orang yang shalat' dalam Surah Al-Ma'un ayat 4-5 ditujukan kepada orang yang...",
+                options: [
+                    "Shalat berjamaah di masjid",
+                    "Lalai dan meremehkan shalatnya",
+                    "Khusyuk dalam shalatnya",
+                    "Tepat waktu mengerjakan shalat"
+                ],
+                answer: 1
+            },
+            {
+                q: "Sifat 'Riya' yang dilarang keras dalam Surah Al-Ma'un ayat 6 bermakna...",
+                options: [
+                    "Ikhlas beramal semata-mata karena Allah SWT",
+                    "Berbuat kebaikan hanya karena ingin dipuji manusia",
+                    "Suka menabung untuk keperluan masa depan",
+                    "Saling menasihati dalam kebaikan"
+                ],
+                answer: 1
+            },
+            {
+                q: "Apabila seorang anak ditinggal meninggal dunia oleh kedua orang tuanya (ayah dan ibu), dinamakan...",
+                options: [
+                    "Yatim",
+                    "Piatu",
+                    "Yatim Piatu",
+                    "Dhuafa"
+                ],
+                answer: 2
+            },
+            {
+                q: "Ciri orang pendusta agama menurut ayat ke-7 Surah Al-Ma'un adalah orang yang...",
+                options: [
+                    "Enggan memberikan bantuan barang yang berguna",
+                    "Suka membantu anak-anak yatim",
+                    "Senang membagikan makanan ke tetangga",
+                    "Rendah hati dan tidak sombong"
+                ],
+                answer: 0
+            },
+            {
+                q: "Berikut ini yang merupakan sikap teladan terhadap anak yatim sesuai ajaran Islam adalah...",
+                options: [
+                    "Membentak jika mereka berbuat salah",
+                    "Menyayangi, memuliakan, dan membantu kebutuhannya",
+                    "Mengambil harta milik mereka secara zalim",
+                    "Acuh dan tidak peduli terhadap nasib mereka"
+                ],
+                answer: 1
+            }
+        ];
+
+        /* ================= GAME ENGINE (CANVAS TANGKAP KOIN) ================= */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Responsive internal game size
+        const GAME_WIDTH = 800;
+        const GAME_HEIGHT = 500;
+
+        // Player / Basket configuration
+        const player = {
+            x: GAME_WIDTH / 2 - 50,
+            y: GAME_HEIGHT - 70,
+            width: 100,
+            height: 50,
+            speed: 9,
+            dx: 0
+        };
+
+        // Falling Items Array & Item Types
+        let items = [];
+        let particles = [];
+        let animationFrameId = null;
+        let lastItemSpawn = 0;
+
+        const GOOD_COINS = [
+            { text: "Menyantuni", color: "#10b981", points: 10 },
+            { text: "Kasih Sayang", color: "#059669", points: 10 },
+            { text: "Infaq", color: "#047857", points: 10 },
+            { text: "Mengusap Kepala", color: "#10b981", points: 10 },
+            { text: "Al-Ma'un", color: "#d97706", points: 15 },
+            { text: "Doa Tulus", color: "#f59e0b", points: 10 }
+        ];
+
+        const BAD_ITEMS = [
+            { text: "Menghardik", color: "#ef4444" },
+            { text: "Mengejek", color: "#dc2626" },
+            { text: "Zalim Harta", color: "#b91c1c" },
+            { text: "Apatis", color: "#991b1b" }
+        ];
+
+        function startGame() {
+            showScreen('screen-game');
+            
+            // Clear existing intervals
+            if (state.gameTimerInterval) clearInterval(state.gameTimerInterval);
+            if (state.quizTimerInterval) clearInterval(state.quizTimerInterval);
+
+            // Reset game statistics
+            state.score = 0;
+            state.lives = 3;
+            state.level = 1;
+            state.timeLeft = 90; // Reset waktu game ke 90 detik
+            state.quizCorrect = 0;
+            state.quizTotal = 0;
+            state.isPlaying = true;
+            state.isPaused = false;
+            state.isQuizActive = false;
+
+            items = [];
+            particles = [];
+            player.x = GAME_WIDTH / 2 - player.width / 2;
+
+            updateHUD();
+            setupControls();
+
+            // Jalankan Timer Countdown Game Utama
+            state.gameTimerInterval = setInterval(() => {
+                if (!state.isPaused && !state.isQuizActive && state.isPlaying) {
+                    state.timeLeft--;
+                    updateHUD();
+                    if (state.timeLeft <= 0) {
+                        clearInterval(state.gameTimerInterval);
+                        endGame();
+                    }
+                }
+            }, 1000);
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            lastItemSpawn = performance.now();
+            gameLoop(performance.now());
+        }
+
+        function updateHUD() {
+            document.getElementById('hudScore').innerText = state.score;
+            document.getElementById('hudLevel').innerText = state.level;
+            document.getElementById('hudTimer').innerText = `${state.timeLeft}s`;
+            
+            // Hearts rendering
+            let heartsHtml = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < state.lives) {
+                    heartsHtml += '<i class="fa-solid fa-heart mr-1 text-red-500"></i>';
+                } else {
+                    heartsHtml += '<i class="fa-regular fa-heart mr-1 text-gray-400"></i>';
+                }
+            }
+            document.getElementById('hudLives').innerHTML = heartsHtml;
+        }
+
+        // Spawn falling object
+        function spawnItem() {
+            const rand = Math.random();
+            const x = Math.random() * (GAME_WIDTH - 80) + 40;
+            const speed = 2.5 + (state.level * 0.5) + Math.random() * 1.5;
+
+            if (rand < 0.65) {
+                // Good Coin
+                const template = GOOD_COINS[Math.floor(Math.random() * GOOD_COINS.length)];
+                items.push({
+                    type: 'coin',
+                    x: x,
+                    y: -30,
+                    radius: 24,
+                    text: template.text,
+                    color: template.color,
+                    points: template.points,
+                    speed: speed
+                });
+            } else if (rand < 0.82) {
+                // Quiz Star Coin (Special)
+                items.push({
+                    type: 'star',
+                    x: x,
+                    y: -30,
+                    radius: 26,
+                    text: "KUIS PAI",
+                    color: "#f59e0b",
+                    speed: speed * 0.9
+                });
+            } else {
+                // Bad Obstacle Item
+                const template = BAD_ITEMS[Math.floor(Math.random() * BAD_ITEMS.length)];
+                items.push({
+                    type: 'bomb',
+                    x: x,
+                    y: -30,
+                    radius: 22,
+                    text: template.text,
+                    color: template.color,
+                    speed: speed * 1.1
+                });
+            }
+        }
+
+        // Create particle explosions upon catch
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 12; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 4 + 2,
+                    color: color,
+                    alpha: 1
+                });
+            }
+        }
+
+        // Main Animation Frame Loop
+        function gameLoop(timestamp) {
+            if (!state.isPlaying) return;
+
+            if (!state.isPaused && !state.isQuizActive) {
+                // Clear Canvas
+                ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+                // Spawn management
+                if (timestamp - lastItemSpawn > Math.max(700, 1600 - (state.level * 150))) {
+                    spawnItem();
+                    lastItemSpawn = timestamp;
+                }
+
+                // Move Player
+                player.x += player.dx;
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > GAME_WIDTH) player.x = GAME_WIDTH - player.width;
+
+                // Draw Player (Basket Keranjang Kebaikan)
+                drawPlayer();
+
+                // Update & Draw Items
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const item = items[i];
+                    item.y += item.speed;
+
+                    // Draw Item
+                    drawItem(item);
+
+                    // Collision Check with Player
+                    if (checkCollision(item, player)) {
+                        handleCatch(item);
+                        items.splice(i, 1);
+                        continue;
+                    }
+
+                    // Remove when offscreen
+                    if (item.y - item.radius > GAME_HEIGHT) {
+                        items.splice(i, 1);
+                    }
+                }
+
+                // Update & Draw Particles
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= 0.03;
+                    if (p.alpha <= 0) {
+                        particles.splice(i, 1);
+                    } else {
+                        ctx.save();
+                        ctx.globalAlpha = p.alpha;
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }
+
+                // Level up check
+                if (state.score >= state.level * 100) {
+                    state.level++;
+                    showFloatingNotice(`LEVEL ${state.level}!`);
+                    playSound('star');
+                    updateHUD();
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function drawPlayer() {
+            ctx.save();
+            // Basket Body Gradient
+            const grad = ctx.createLinearGradient(player.x, player.y, player.x, player.y + player.height);
+            grad.addColorStop(0, '#f59e0b');
+            grad.addColorStop(1, '#b45309');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(player.x, player.y, player.width, player.height, [10, 10, 20, 20]);
+            ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            // Label on Basket
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px "Plus Jakarta Sans"';
+            ctx.textAlign = 'center';
+            ctx.fillText('KERANJANG KEBAIKAN', player.x + player.width / 2, player.y + 30);
+            ctx.restore();
+        }
+
+        function drawItem(item) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+
+            if (item.type === 'coin') {
+                ctx.fillStyle = '#fbbf24';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#d97706';
+                ctx.stroke();
+
+                // Inner circle
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, item.radius - 6, 0, Math.PI * 2);
+                ctx.strokeStyle = '#fef3c7';
+                ctx.stroke();
+            } else if (item.type === 'star') {
+                ctx.fillStyle = '#f59e0b';
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+            } else {
+                // Bomb / Bad Item
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#7f1d1d';
+                ctx.stroke();
+            }
+
+            // Text Label under item
+            ctx.fillStyle = '#064e3b';
+            ctx.font = 'bold 11px "Plus Jakarta Sans"';
+            ctx.textAlign = 'center';
+            ctx.fillText(item.text, item.x, item.y + item.radius + 14);
+
+            ctx.restore();
+        }
+
+        function checkCollision(item, basket) {
+            const closestX = Math.max(basket.x, Math.min(item.x, basket.x + basket.width));
+            const closestY = Math.max(basket.y, Math.min(item.y, basket.y + basket.height));
+            const distanceX = item.x - closestX;
+            const distanceY = item.y - closestY;
+            return (distanceX * distanceX + distanceY * distanceY) < (item.radius * item.radius);
+        }
+
+        function handleCatch(item) {
+            if (item.type === 'coin') {
+                state.score += item.points;
+                playSound('coin');
+                createParticles(item.x, item.y, '#fbbf24');
+                showFloatingNotice(`+${item.points}`);
+            } else if (item.type === 'star') {
+                playSound('star');
+                createParticles(item.x, item.y, '#f59e0b');
+                triggerQuizModal();
+            } else if (item.type === 'bomb') {
+                state.lives--;
+                playSound('wrong');
+                createParticles(item.x, item.y, '#ef4444');
+                showFloatingNotice(`Sifat Tercela! -1 Nyawa`);
+
+                if (state.lives <= 0) {
+                    endGame();
+                }
+            }
+            updateHUD();
+        }
+
+        function showFloatingNotice(txt) {
+            const el = document.getElementById('gameNotice');
+            const txtEl = document.getElementById('gameNoticeText');
+            txtEl.innerText = txt;
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 800);
+        }
+
+        /* ================= KUIS LOGIC IN-GAME ================= */
+        function triggerQuizModal() {
+            state.isQuizActive = true;
+            state.quizTimeLeft = 30; // 30 detik batas waktu kuis
+
+            const modal = document.getElementById('modal-quiz');
+            const qEl = document.getElementById('quizQuestion');
+            const optsEl = document.getElementById('quizOptions');
+            const fbEl = document.getElementById('quizFeedback');
+
+            fbEl.classList.add('hidden');
+            updateQuizTimerUI();
+
+            // Pick random question from bank
+            const qObj = quizBank[Math.floor(Math.random() * quizBank.length)];
+            qEl.innerText = qObj.q;
+            optsEl.innerHTML = '';
+
+            qObj.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-950 font-semibold text-sm transition flex items-center";
+                btn.innerHTML = `<span class="w-7 h-7 bg-emerald-700 text-white rounded-full font-bold font-game flex items-center justify-center mr-3 text-xs shrink-0">${String.fromCharCode(65 + idx)}</span> ${optText}`;
+                btn.onclick = () => answerQuiz(idx, qObj.answer);
+                optsEl.appendChild(btn);
+            });
+
+            // Timer hitung mundur kuis
+            if (state.quizTimerInterval) clearInterval(state.quizTimerInterval);
+            state.quizTimerInterval = setInterval(() => {
+                state.quizTimeLeft--;
+                updateQuizTimerUI();
+                if (state.quizTimeLeft <= 0) {
+                    clearInterval(state.quizTimerInterval);
+                    // Jika waktu kuis habis, anggap salah
+                    answerQuiz(-1, qObj.answer);
+                }
+            }, 1000);
+
+            modal.classList.remove('hidden');
+        }
+
+        function updateQuizTimerUI() {
+            const timerTxt = document.getElementById('quizTimerText');
+            const timerBar = document.getElementById('quizTimerBar');
+            if (timerTxt) timerTxt.innerText = `${state.quizTimeLeft}s`;
+            if (timerBar) {
+                const pct = (state.quizTimeLeft / 30) * 100;
+                timerBar.style.width = `${pct}%`;
+                if (state.quizTimeLeft <= 10) {
+                    timerBar.className = "bg-red-500 h-full transition-all duration-1000";
+                } else {
+                    timerBar.className = "bg-amber-500 h-full transition-all duration-1000";
+                }
+            }
+        }
+
+        function answerQuiz(selectedIndex, correctIndex) {
+            if (state.quizTimerInterval) clearInterval(state.quizTimerInterval);
+            state.quizTotal++;
+            const fbEl = document.getElementById('quizFeedback');
+            fbEl.classList.remove('hidden');
+
+            if (selectedIndex === correctIndex) {
+                state.quizCorrect++;
+                state.score += 50;
+                playSound('correct');
+                fbEl.className = "font-bold font-game text-base p-3 rounded-xl mt-3 bg-emerald-100 text-emerald-800 border border-emerald-300";
+                fbEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> BENAR! +50 Poin Pahala Kebaikan!`;
+            } else {
+                playSound('wrong');
+                fbEl.className = "font-bold font-game text-base p-3 rounded-xl mt-3 bg-red-100 text-red-800 border border-red-300";
+                fbEl.innerHTML = selectedIndex === -1 ? 
+                    `<i class="fa-solid fa-hourglass-end text-red-600 mr-1"></i> WAKTU HABIS! Terus tingkatkan belajar ya.` :
+                    `<i class="fa-solid fa-circle-xmark text-red-600 mr-1"></i> Kurang Tepat! Terus tingkatkan belajar ya.`;
+            }
+
+            updateHUD();
+
+            setTimeout(() => {
+                document.getElementById('modal-quiz').classList.add('hidden');
+                state.isQuizActive = false;
+            }, 1400);
+        }
+
+        /* ================= CONTROLS HANDLER ================= */
+        function setupControls() {
+            // Keyboard Listener
+            window.onkeydown = (e) => {
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    player.dx = -player.speed;
+                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    player.dx = player.speed;
+                }
+            };
+
+            window.onkeyup = (e) => {
+                if (['ArrowLeft', 'ArrowRight', 'a', 'A', 'd', 'D'].includes(e.key)) {
+                    player.dx = 0;
+                }
+            };
+
+            // Touch / Mouse controls on Canvas
+            let isDragging = false;
+
+            const handlePointerDown = (clientX) => {
+                isDragging = true;
+                moveBasketToClientX(clientX);
+            };
+
+            const handlePointerMove = (clientX) => {
+                if (isDragging) {
+                    moveBasketToClientX(clientX);
+                }
+            };
+
+            const handlePointerUp = () => {
+                isDragging = false;
+            };
+
+            function moveBasketToClientX(clientX) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = GAME_WIDTH / rect.width;
+                const canvasX = (clientX - rect.left) * scaleX;
+                player.x = canvasX - player.width / 2;
+            }
+
+            // Mouse Events
+            canvas.onmousedown = (e) => handlePointerDown(e.clientX);
+            canvas.onmousemove = (e) => handlePointerMove(e.clientX);
+            canvas.onmouseup = handlePointerUp;
+
+            // Touch Events (Mobile/Tablet)
+            canvas.ontouchstart = (e) => {
+                if (e.touches.length > 0) handlePointerDown(e.touches[0].clientX);
+            };
+            canvas.ontouchmove = (e) => {
+                if (e.touches.length > 0) handlePointerMove(e.touches[0].clientX);
+            };
+            canvas.ontouchend = handlePointerUp;
+
+            // Onscreen Big Buttons for Smartboards / Tablets
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+
+            btnLeft.onmousedown = btnLeft.ontouchstart = (e) => {
+                e.preventDefault();
+                player.dx = -player.speed;
+            };
+            btnLeft.onmouseup = btnLeft.ontouchend = (e) => {
+                e.preventDefault();
+                player.dx = 0;
+            };
+
+            btnRight.onmousedown = btnRight.ontouchstart = (e) => {
+                e.preventDefault();
+                player.dx = player.speed;
+            };
+            btnRight.onmouseup = btnRight.ontouchend = (e) => {
+                e.preventDefault();
+                player.dx = 0;
+            };
+        }
+
+        /* ================= PAUSE & END GAME ================= */
+        function pauseGame() {
+            state.isPaused = true;
+            document.getElementById('modal-pause').classList.remove('hidden');
+        }
+
+        function resumeGame() {
+            state.isPaused = false;
+            document.getElementById('modal-pause').classList.add('hidden');
+        }
+
+        function endGame() {
+            state.isPlaying = false;
+            if (state.gameTimerInterval) clearInterval(state.gameTimerInterval);
+            if (state.quizTimerInterval) clearInterval(state.quizTimerInterval);
+            
+            // Calculate accuracy
+            const accuracy = state.quizTotal > 0 ? Math.round((state.quizCorrect / state.quizTotal) * 100) : 100;
+            
+            // Determine Grade
+            let grade = "CUKUP";
+            let feedback = "Terus tingkatkan pemahamanmu tentang Surah Al-Ma'un dan materi Sejuta Asah Anak Yatim ya!";
+
+            if (state.score >= 150 && accuracy >= 80) {
+                grade = "SANGAT BAIK (A)";
+                feedback = "Subhanallah! Kamu luar biasa! Kamu memahami Surah Al-Ma'un dan pentingnya menyantuni anak yatim dengan sangat sempurna!";
+            } else if (state.score >= 80) {
+                grade = "BAIK (B)";
+                feedback = "Bagus sekali! Kamu sudah dapat membedakan mana kebaikan dan larangan dalam Surah Al-Ma'un serta cara memperlakukan anak yatim.";
+            }
+
+            // Fill Report Card / Certificate
+            document.getElementById('resStudentName').innerText = state.playerName;
+            document.getElementById('resStudentClass').innerText = state.playerClass;
+            document.getElementById('resFinalScore').innerText = state.score;
+            document.getElementById('resQuizAccuracy').innerText = `${accuracy}%`;
+            document.getElementById('resGrade').innerText = grade;
+            document.getElementById('resFeedbackText').innerText = feedback;
+
+            showScreen('screen-result');
+        }
+    </script>
+</body>
+</html>
