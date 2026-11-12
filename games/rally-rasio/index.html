@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rally Rasio - Game Balap Matematika Kelas 6 SD</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts - Fredoka & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Fredoka', 'sans-serif'],
+            sans: ['Inter', 'sans-serif']
+          },
+          colors: {
+            racingRed: '#FF2A42',
+            racingYellow: '#FFD100',
+            racingBlue: '#00E5FF',
+            racingGreen: '#00E676',
+            racingDark: '#0B0F19'
+          },
+          animation: {
+            'pulse-fast': 'pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-short': 'bounce 0.5s ease-in-out 2'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      background-color: #0b0f19;
+      color: #ffffff;
+    }
+
+    .font-game {
+      font-family: 'Fredoka', cursive;
+    }
+
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .glow-yellow {
+      box-shadow: 0 0 25px rgba(255, 209, 0, 0.6);
+    }
+    .glow-red {
+      box-shadow: 0 0 25px rgba(255, 42, 66, 0.6);
+    }
+    .glow-blue {
+      box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+    }
+
+    /* Custom Scrollbar for Modal */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.2);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0,229,255,0.5);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col justify-between select-none">
+
+  <!-- ==================== TOP BAR / HEADER ==================== -->
+  <header id="mainHeader" class="hidden z-20 px-4 py-2 bg-slate-900/90 border-b border-slate-700/80 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="bg-gradient-to-r from-red-600 to-amber-500 text-white font-game px-3 py-1 rounded-lg text-lg flex items-center gap-2 shadow-lg">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <span>RALLY RASIO</span>
+      </div>
+      <div class="bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 text-sm flex items-center gap-2">
+        <i class="fa-solid fa-user text-cyan-400"></i>
+        <span id="displayPlayerName" class="font-semibold text-cyan-300">Pembalap</span>
+        <span id="displayPlayerClass" class="bg-cyan-900 text-cyan-200 text-xs px-2 py-0.5 rounded font-mono">6A</span>
+      </div>
+    </div>
+
+    <!-- HUD Indicators -->
+    <div class="flex items-center gap-4">
+      <!-- Score -->
+      <div class="bg-slate-800/90 border border-amber-500/50 px-3 py-1 rounded-lg flex items-center gap-2">
+        <i class="fa-solid fa-trophy text-amber-400"></i>
+        <div>
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Skor</div>
+          <div id="hudScore" class="font-game text-xl text-amber-300 leading-none">0</div>
+        </div>
+      </div>
+
+      <!-- Lap / Soal -->
+      <div class="bg-slate-800/90 border border-cyan-500/50 px-3 py-1 rounded-lg flex items-center gap-2">
+        <i class="fa-solid fa-stopwatch text-cyan-400"></i>
+        <div>
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Posisi Lap</div>
+          <div id="hudLap" class="font-game text-xl text-cyan-300 leading-none">1 / 10</div>
+        </div>
+      </div>
+
+      <!-- Sound Toggle -->
+      <button id="btnSoundToggle" onclick="toggleAudio()" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 flex items-center justify-center text-amber-400 text-lg transition">
+        <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== CONTAINER UTAMA ==================== -->
+  <main class="relative flex-1 w-full h-full overflow-hidden flex items-center justify-center">
+
+    <!-- ================= 1. HALAMAN LOGIN & PROFIL ================= -->
+    <section id="screenLogin" class="z-30 w-full max-w-md p-6 m-4 glass-panel rounded-3xl shadow-2xl border border-cyan-500/30 flex flex-col items-center text-center animate-fade-in">
+      
+      <!-- Logo Header -->
+      <div class="relative mb-4">
+        <div class="w-20 h-20 bg-gradient-to-tr from-red-600 via-amber-500 to-yellow-300 rounded-2xl rotate-6 flex items-center justify-center shadow-lg shadow-red-500/30 border-2 border-white/20">
+          <i class="fa-solid fa-car-side text-4xl text-slate-900 -rotate-6"></i>
+        </div>
+        <span class="absolute -top-2 -right-2 bg-cyan-400 text-slate-950 font-game font-bold text-xs px-2 py-0.5 rounded-full shadow">SD Kelas 6</span>
+      </div>
+
+      <h1 class="font-game text-3xl md:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-red-500 mb-1">
+        RALLY RASIO
+      </h1>
+      <p class="text-slate-300 text-sm mb-6">Game Balap Matematika Materi Rasio & Perbandingan</p>
+
+      <!-- Form Inputs -->
+      <form id="loginForm" onsubmit="startGame(event)" class="w-full space-y-4">
+        <div class="text-left">
+          <label class="block text-xs font-semibold text-cyan-300 uppercase mb-1">Nama Pembalap</label>
+          <div class="relative">
+            <i class="fa-solid fa-user-astronaut absolute left-3 top-3.5 text-slate-400"></i>
+            <input type="text" id="inputName" required placeholder="Masukkan nama kamu..." class="w-full bg-slate-800/90 border border-slate-600 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 font-semibold text-base transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-left">
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 uppercase mb-1">Kelas</label>
+            <select id="inputClass" class="w-full bg-slate-800/90 border border-slate-600 rounded-xl py-3 px-3 text-white focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 font-semibold text-base">
+              <option value="6A">6 - A</option>
+              <option value="6B">6 - B</option>
+              <option value="6C">6 - C</option>
+              <option value="6D">6 - D</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 uppercase mb-1">Pilih Mobil</label>
+            <div class="flex gap-2 justify-between">
+              <!-- Car selector buttons -->
+              <button type="button" onclick="selectCar('red')" id="carBtnRed" class="car-select-btn flex-1 py-2 bg-red-600/30 border-2 border-red-500 rounded-xl text-red-400 text-xl hover:bg-red-600/50 transition">
+                <i class="fa-solid fa-car"></i>
+              </button>
+              <button type="button" onclick="selectCar('cyan')" id="carBtnCyan" class="car-select-btn flex-1 py-2 bg-slate-800 border-2 border-slate-700 rounded-xl text-cyan-400 text-xl hover:bg-cyan-600/50 transition">
+                <i class="fa-solid fa-car"></i>
+              </button>
+              <button type="button" onclick="selectCar('yellow')" id="carBtnYellow" class="car-select-btn flex-1 py-2 bg-slate-800 border-2 border-slate-700 rounded-xl text-yellow-400 text-xl hover:bg-yellow-600/50 transition">
+                <i class="fa-solid fa-car"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <button type="submit" class="w-full py-4 mt-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-game text-xl font-bold rounded-2xl shadow-lg shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition flex items-center justify-center gap-3">
+          <i class="fa-solid fa-play"></i> MULAI BALAPAN!
+        </button>
+      </form>
+
+      <!-- Instructions modal toggle -->
+      <button onclick="toggleInstructions()" class="mt-4 text-xs text-slate-400 hover:text-cyan-300 flex items-center gap-1">
+        <i class="fa-solid fa-circle-info"></i> Petunjuk Cara Bermain
+      </button>
+    </section>
+
+    <!-- Modal Petunjuk -->
+    <div id="modalInstructions" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-cyan-500/40 text-left space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+          <h3 class="font-game text-xl text-yellow-400 flex items-center gap-2">
+            <i class="fa-solid fa-gamepad"></i> Cara Bermain
+          </h3>
+          <button onclick="toggleInstructions()" class="text-slate-400 hover:text-white text-xl">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="space-y-3 text-sm text-slate-200">
+          <p>🏎️ <strong>Kendalikan Mobil:</strong> Geser lajur ke <strong>KIRI / TENGAH / KANAN</strong> untuk menabrak jawaban rasio yang benar.</p>
+          <p>⌨️ <strong>Kontrol Laptop:</strong> Gunakan Panah Kiri / Kanan atau tombol <kbd class="px-1.5 py-0.5 bg-slate-800 border rounded text-xs">A</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 border rounded text-xs">D</kbd>. Tekan <kbd class="px-1.5 py-0.5 bg-slate-800 border rounded text-xs">SPACE</kbd> untuk Nitro!</p>
+          <p>📱 <strong>Kontrol Touch / Smartboard:</strong> Sentuh tombol Panah raksasa di bawah layar.</p>
+          <p>🤖 <strong>Montir AI:</strong> Jika bingung, tekan tombol <strong>"Tanya Montir AI"</strong> untuk mendapatkan petunjuk cara menghitung rasio!</p>
+        </div>
+        <button onclick="toggleInstructions()" class="w-full py-2.5 bg-cyan-500 text-slate-950 font-bold rounded-xl hover:bg-cyan-400">Paham, Siap Balapan!</button>
+      </div>
+    </div>
+
+
+    <!-- ================= 2. CANVAS GAME & OVERLAY HUD ================= -->
+    <div id="screenGame" class="hidden relative w-full h-full flex flex-col justify-between items-center">
+      
+      <!-- Canvas untuk Balapan Arcade -->
+      <canvas id="gameCanvas" class="absolute inset-0 w-full h-full"></canvas>
+
+      <!-- HUD Soal Rasio (Melayang di Atas Canvas) -->
+      <div class="relative z-10 w-full max-w-2xl px-4 pt-3 pointer-events-none">
+        <div class="glass-panel rounded-2xl p-4 border-2 border-cyan-400/80 shadow-2xl text-center backdrop-blur-md pointer-events-auto transition-all transform hover:scale-[1.01]">
+          
+          <div class="flex items-center justify-between mb-1">
+            <span class="bg-cyan-950 border border-cyan-500/50 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <i class="fa-solid fa-brain"></i> CHALENGE RASIO
+            </span>
+            <button onclick="askAIPitCrew()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg shadow-indigo-500/30 flex items-center gap-1.5 transition active:scale-95 animate-pulse-fast">
+              <i class="fa-solid fa-robot text-yellow-300"></i> Tanya Montir AI
+            </button>
+          </div>
+
+          <h2 id="questionText" class="font-game text-xl sm:text-2xl md:text-3xl text-amber-300 my-1 drop-shadow-md">
+            Mempersiapkan Balapan...
+          </h2>
+          <p id="questionSubtext" class="text-xs sm:text-sm text-slate-300">Pilihlah lajur mobil dengan jawaban perbandingan yang tepat!</p>
+
+        </div>
+      </div>
+
+      <!-- Center Dynamic Feedback Overlay (Benar/Salah Flash) -->
+      <div id="feedbackBanner" class="relative z-10 pointer-events-none opacity-0 transform transition-all duration-300 scale-75 text-center my-auto">
+        <div id="feedbackBox" class="inline-block px-8 py-4 rounded-3xl font-game text-3xl md:text-5xl shadow-2xl border-4">
+          SUPER NITRO!
+        </div>
+      </div>
+
+      <!-- Dashboard Bawah: Speedometer & Kontrol Layar Sentuh -->
+      <div class="relative z-10 w-full p-4 flex flex-col sm:flex-row items-end justify-between gap-3 pointer-events-none">
+        
+        <!-- Speedometer Display -->
+        <div class="glass-panel px-4 py-2 rounded-2xl border border-slate-700 flex items-center gap-3 pointer-events-auto">
+          <div class="relative w-12 h-12 flex items-center justify-center">
+            <i class="fa-solid fa-gauge-high text-3xl text-cyan-400"></i>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 uppercase font-bold">Kecepatan</div>
+            <div class="flex items-baseline gap-1">
+              <span id="speedValue" class="font-game text-2xl text-yellow-400">120</span>
+              <span class="text-xs text-slate-400 font-bold">KM/H</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nitro Boost Meter -->
+        <div class="w-full sm:w-48 glass-panel p-2 rounded-xl border border-slate-700 pointer-events-auto flex flex-col gap-1">
+          <div class="flex justify-between items-center text-[10px] text-slate-300 font-bold uppercase">
+            <span><i class="fa-solid fa-bolt text-yellow-400"></i> Tangki Nitro</span>
+            <span id="nitroPercent" class="text-yellow-400">100%</span>
+          </div>
+          <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-600">
+            <div id="nitroBar" class="bg-gradient-to-r from-amber-400 to-yellow-300 h-full w-full transition-all duration-300 shadow-lg shadow-yellow-500/50"></div>
+          </div>
+        </div>
+
+        <!-- Touch Controls / Smartboard Big Buttons -->
+        <div class="w-full sm:w-auto flex items-center justify-center gap-3 pointer-events-auto">
+          <button onclick="moveLane(-1)" class="flex-1 sm:flex-none w-20 sm:w-24 h-16 bg-gradient-to-b from-slate-700 to-slate-800 active:from-cyan-600 active:to-cyan-700 border-2 border-cyan-400/50 rounded-2xl flex items-center justify-center text-3xl text-cyan-300 shadow-xl active:scale-90 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <button onclick="triggerNitro()" class="flex-1 sm:flex-none px-6 h-16 bg-gradient-to-b from-amber-500 to-red-600 active:from-amber-400 active:to-red-500 border-2 border-yellow-300 rounded-2xl flex items-center justify-center font-game text-lg text-slate-950 font-bold shadow-xl shadow-red-500/30 active:scale-90 transition gap-2">
+            <i class="fa-solid fa-fire text-yellow-200"></i> NITRO
+          </button>
+
+          <button onclick="moveLane(1)" class="flex-1 sm:flex-none w-20 sm:w-24 h-16 bg-gradient-to-b from-slate-700 to-slate-800 active:from-cyan-600 active:to-cyan-700 border-2 border-cyan-400/50 rounded-2xl flex items-center justify-center text-3xl text-cyan-300 shadow-xl active:scale-90 transition">
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= 3. MODAL MONTIR AI (GEMINI TUTOR) ================= -->
+    <div id="modalAIPitCrew" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border-2 border-indigo-500 shadow-2xl space-y-4 text-left animate-fade-in max-h-[90vh] flex flex-col">
+        
+        <!-- Header Modal -->
+        <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl text-yellow-300 shadow-md">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <div>
+              <h3 class="font-game text-xl text-yellow-300">Montir AI Pit Crew</h3>
+              <p class="text-xs text-slate-400">Asisten Pintar Matematika Rasio SD</p>
+            </div>
+          </div>
+          <button onclick="closeAIModal()" class="text-slate-400 hover:text-white text-2xl">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Content Area -->
+        <div id="aiContentArea" class="flex-1 overflow-y-auto pr-1 text-sm text-slate-200 space-y-3">
+          <div id="aiLoading" class="flex flex-col items-center justify-center py-8 space-y-3">
+            <div class="w-10 h-10 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-indigo-300 text-xs font-semibold animate-pulse">Montir AI sedang menganalisis trik cepat rasio...</p>
+          </div>
+          <div id="aiResponseText" class="hidden leading-relaxed space-y-2">
+            <!-- Text response from Gemini will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button onclick="closeAIModal()" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-game text-base rounded-2xl shadow-lg transition">
+          Siap! Kembali ke Lintasan
+        </button>
+      </div>
+    </div>
+
+
+    <!-- ================= 4. HALAMAN HASIL & SERTIFIKAT JUARA ================= -->
+    <section id="screenResult" class="hidden z-30 w-full max-w-xl p-6 m-4 glass-panel rounded-3xl shadow-2xl border-2 border-amber-400/60 text-center animate-fade-in my-auto">
+      
+      <!-- Trophy Icon -->
+      <div class="relative inline-block mb-3">
+        <div class="w-24 h-24 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-200 rounded-full flex items-center justify-center shadow-xl shadow-amber-500/30 border-4 border-yellow-200">
+          <i class="fa-solid fa-trophy text-5xl text-slate-900"></i>
+        </div>
+        <i class="fa-solid fa-star text-amber-300 text-2xl absolute -top-1 -right-1 animate-bounce"></i>
+      </div>
+
+      <h2 class="font-game text-3xl md:text-4xl text-amber-300 mb-1">FINISH! SERTIFIKAT JUARA</h2>
+      <p class="text-xs text-slate-300 mb-6">Selamat! Kamu berhasil menyelesaikan Balap Rasio Matematika!</p>
+
+      <!-- Certificate Display Box -->
+      <div id="certificateCard" class="bg-slate-900/90 border-2 border-amber-500/40 rounded-2xl p-5 text-left space-y-4 mb-6 shadow-inner relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 opacity-10 text-amber-400 text-9xl">
+          <i class="fa-solid fa-award"></i>
+        </div>
+
+        <div class="flex justify-between items-start border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Nama Pembalap</span>
+            <h3 id="resPlayerName" class="font-game text-2xl text-white">Ahmad Fauzi</h3>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">Kelas</span>
+            <div id="resPlayerClass" class="font-game text-xl text-yellow-400">6 - A</div>
+          </div>
+        </div>
+
+        <!-- Stat Grid -->
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Total Skor</div>
+            <div id="resTotalScore" class="font-game text-2xl text-amber-400">850</div>
+          </div>
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Akurasi</div>
+            <div id="resAccuracy" class="font-game text-2xl text-emerald-400">90%</div>
+          </div>
+          <div class="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700">
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Waktu Balap</div>
+            <div id="resTime" class="font-game text-2xl text-cyan-400">01:45</div>
+          </div>
+        </div>
+
+        <!-- Grade / Predikat -->
+        <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl flex items-center justify-between">
+          <span class="text-xs font-semibold text-amber-200">Predikat Rasio:</span>
+          <span id="resGrade" class="font-game text-lg text-amber-300">MASTER PERBANDINGAN 🏆</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <button onclick="restartGame()" class="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-game text-lg font-bold rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-right"></i> MAIN LAGI
+        </button>
+        <button onclick="logout()" class="py-3.5 px-6 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold rounded-2xl transition">
+          <i class="fa-solid fa-right-from-bracket"></i> Keluar
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    /* ===================================================================
+       EFEK SUARA & AUDIO SYNTHESIZER (WEB AUDIO API)
+       =================================================================== */
+    let audioCtx = null;
+    let isSoundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleAudio() {
+      isSoundEnabled = !isSoundEnabled;
+      const icon = document.getElementById('soundIcon');
+      if (isSoundEnabled) {
+        icon.className = "fa-solid fa-volume-high";
+      } else {
+        icon.className = "fa-solid fa-volume-xmark text-slate-500";
+      }
+    }
+
+    // Play tone synthesizer
+    function playSound(type) {
+      if (!isSoundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        // High double chime
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'wrong') {
+        // Low error buzz
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.setValueAtTime(110, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'nitro') {
+        // Whoosh boost sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        // Gentle click
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+  </script>
+
+  <script>
+    /* ===================================================================
+       DATA SOAL MATEMATIKA RASIO & PERBANDINGAN KELAS 6 SD
+       =================================================================== */
+    const questionBank = [
+      {
+        question: "Bentuk sederhana dari rasio 6 : 8 adalah...",
+        options: ["3 : 4", "2 : 3", "3 : 5"],
+        correctIndex: 0,
+        explanation: "Sama-sama dibagi 2: 6 ÷ 2 = 3 dan 8 ÷ 2 = 4. Jadi hasilnya 3 : 4."
+      },
+      {
+        question: "Rasio Apel : Jeruk adalah 2 : 3. Jika Apel ada 6, berapa banyak Jeruk?",
+        options: ["8 buah", "9 buah", "12 buah"],
+        correctIndex: 1,
+        explanation: "Apel naik 3 kali lipat (2 x 3 = 6). Maka Jeruk juga dikali 3 (3 x 3 = 9 buah)."
+      },
+      {
+        question: "Sederhanakan rasio 15 : 20!",
+        options: ["3 : 5", "3 : 4", "4 : 5"],
+        correctIndex: 1,
+        explanation: "Sama-sama dibagi FPB-nya yaitu 5: 15 ÷ 5 = 3 dan 20 ÷ 5 = 4."
+      },
+      {
+        question: "Rasio kelereng Budi : Ani = 4 : 5. Jika kelereng Ani = 20, berapa kelereng Budi?",
+        options: ["16", "15", "18"],
+        correctIndex: 0,
+        explanation: "Ani = 5 bagian = 20 (berarti 1 bagian = 4). Budi = 4 bagian x 4 = 16 kelereng."
+      },
+      {
+        question: "Di kelas 6, rasio siswa Laki-laki : Perempuan = 3 : 2. Jika Laki-laki 15, total siswa?",
+        options: ["20 siswa", "25 siswa", "30 siswa"],
+        correctIndex: 1,
+        explanation: "1 bagian = 15 ÷ 3 = 5. Total bagian = 3 + 2 = 5 bagian. Total siswa = 5 x 5 = 25 siswa."
+      },
+      {
+        question: "Perbandingan uang A dan B adalah 2 : 5. Jumlah uang mereka Rp 35.000. Uang A = ?",
+        options: ["Rp 10.000", "Rp 15.000", "Rp 25.000"],
+        correctIndex: 0,
+        explanation: "Total bagian = 2 + 5 = 7 bagian. Nilai 1 bagian = 35.000 ÷ 7 = 5.000. Uang A = 2 x 5.000 = Rp 10.000."
+      },
+      {
+        question: "Sebuah peta memiliki skala 1 : 100.000. Jarak peta 3 cm, berapa jarak sebenarnya?",
+        options: ["3 km", "30 km", "300 m"],
+        correctIndex: 0,
+        explanation: "Jarak sebenarnya = 3 cm x 100.000 = 300.000 cm = 3 km."
+      },
+      {
+        question: "Rasio tepung : gula untuk membuat kue adalah 5 : 2. Jika gula 100 gram, tepung = ?",
+        options: ["200 gram", "250 gram", "300 gram"],
+        correctIndex: 1,
+        explanation: "Gula = 2 bagian = 100g (1 bagian = 50g). Tepung = 5 x 50g = 250 gram."
+      },
+      {
+        question: "Mana di bawah ini yang MERUPAKAN rasio senilai dari 4 : 5?",
+        options: ["8 : 10", "12 : 16", "10 : 15"],
+        correctIndex: 0,
+        explanation: "4 : 5 jika dikali 2 pada kedua sisi menjadi 8 : 10."
+      },
+      {
+        question: "Selisih umur Caca dan Dedi rasio 3 : 1 adalah 6 tahun. Berapa umur Caca?",
+        options: ["9 tahun", "12 tahun", "15 tahun"],
+        correctIndex: 0,
+        explanation: "Selisih bagian = 3 - 1 = 2 bagian = 6 tahun (1 bagian = 3 tahun). Umur Caca = 3 x 3 = 9 tahun."
+      }
+    ];
+  </script>
+
+  <script>
+    /* ===================================================================
+       STATE GLOBAL GAME BALAPAN
+       =================================================================== */
+    let player = {
+      name: "Pembalap",
+      class: "6A",
+      carColor: "red"
+    };
+
+    let gameState = {
+      score: 0,
+      currentQuestionIndex: 0,
+      correctCount: 0,
+      totalQuestions: 10,
+      startTime: 0,
+      endTime: 0,
+      nitro: 100,
+      lane: 1, // 0: Left, 1: Center, 2: Right
+      targetLane: 1,
+      carX: 0,
+      speed: 120,
+      isNitroActive: false,
+      questions: [],
+      gateY: -300,
+      isGameOver: false,
+      isPaused: false
+    };
+
+    // Canvas Variables
+    let canvas, ctx;
+    let animFrameId = null;
+
+    // Car Color Hex map
+    const carColors = {
+      red: '#FF2A42',
+      cyan: '#00E5FF',
+      yellow: '#FFD100'
+    };
+
+    function selectCar(color) {
+      player.carColor = color;
+      playSound('click');
+      document.querySelectorAll('.car-select-btn').forEach(btn => {
+        btn.classList.remove('border-red-500', 'border-cyan-400', 'border-yellow-400', 'bg-red-600/30', 'bg-cyan-600/30', 'bg-yellow-600/30');
+        btn.classList.add('border-slate-700', 'bg-slate-800');
+      });
+      const selectedBtn = document.getElementById(`carBtn${color.charAt(0).toUpperCase() + color.slice(1)}`);
+      if (selectedBtn) {
+        selectedBtn.classList.remove('border-slate-700', 'bg-slate-800');
+        if (color === 'red') selectedBtn.classList.add('border-red-500', 'bg-red-600/30');
+        if (color === 'cyan') selectedBtn.classList.add('border-cyan-400', 'bg-cyan-600/30');
+        if (color === 'yellow') selectedBtn.classList.add('border-yellow-400', 'bg-yellow-600/30');
+      }
+    }
+
+    function toggleInstructions() {
+      playSound('click');
+      const modal = document.getElementById('modalInstructions');
+      modal.classList.toggle('hidden');
+    }
+
+    /* ===================================================================
+       MULAI GAME & SETUP
+       =================================================================== */
+    function startGame(e) {
+      if (e) e.preventDefault();
+      initAudio();
+      playSound('nitro');
+
+      const nameInput = document.getElementById('inputName').value.trim();
+      const classInput = document.getElementById('inputClass').value;
+
+      player.name = nameInput || "Pembalap";
+      player.class = classInput || "6A";
+
+      // Update Header HUD
+      document.getElementById('displayPlayerName').innerText = player.name;
+      document.getElementById('displayPlayerClass').innerText = player.class;
+
+      // Reset State
+      gameState.score = 0;
+      gameState.currentQuestionIndex = 0;
+      gameState.correctCount = 0;
+      gameState.nitro = 100;
+      gameState.lane = 1;
+      gameState.targetLane = 1;
+      gameState.speed = 120;
+      gameState.isNitroActive = false;
+      gameState.isGameOver = false;
+      gameState.startTime = Date.now();
+
+      // Shuffle Questions
+      gameState.questions = [...questionBank].sort(() => Math.random() - 0.5).slice(0, 10);
+      gameState.totalQuestions = gameState.questions.length;
+
+      // Switch Screens
+      document.getElementById('screenLogin').classList.add('hidden');
+      document.getElementById('mainHeader').classList.remove('hidden');
+      document.getElementById('screenGame').classList.remove('hidden');
+
+      // Setup Canvas
+      initCanvas();
+      loadQuestion();
+
+      // Start Game Loop
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      lastTime = performance.now();
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+  </script>
+
+  <script>
+    /* ===================================================================
+       CANVAS & GAME GRAPHICS ENGINE (PSEUDO 2.5D ARCADE TRACK)
+       =================================================================== */
+    let trackOffset = 0;
+    let lastTime = 0;
+
+    function initCanvas() {
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+
+    function moveLane(dir) {
+      let newLane = gameState.lane + dir;
+      if (newLane >= 0 && newLane <= 2) {
+        gameState.lane = newLane;
+        playSound('click');
+      }
+    }
+
+    function triggerNitro() {
+      if (gameState.nitro >= 30 && !gameState.isNitroActive) {
+        gameState.isNitroActive = true;
+        gameState.nitro -= 30;
+        playSound('nitro');
+        showFeedback("BOOST NITRO! 🔥", "text-yellow-300 border-yellow-400 bg-amber-950/80");
+        setTimeout(() => {
+          gameState.isNitroActive = false;
+        }, 2000);
+      }
+    }
+
+    // Keyboard Listeners
+    window.addEventListener('keydown', (e) => {
+      if (gameState.isGameOver) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLane(-1);
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveLane(1);
+      if (e.key === ' ' || e.key === 'ArrowUp') triggerNitro();
+    });
+
+    function loadQuestion() {
+      const q = gameState.questions[gameState.currentQuestionIndex];
+      document.getElementById('questionText').innerText = q.question;
+      document.getElementById('hudLap').innerText = `${gameState.currentQuestionIndex + 1} / ${gameState.totalQuestions}`;
+      document.getElementById('hudScore').innerText = gameState.score;
+      
+      // Reset Gate position
+      gameState.gateY = -150;
+    }
+
+    function showFeedback(text, styleClasses) {
+      const banner = document.getElementById('feedbackBanner');
+      const box = document.getElementById('feedbackBox');
+      box.className = `inline-block px-8 py-3 rounded-3xl font-game text-2xl md:text-4xl shadow-2xl border-4 ${styleClasses}`;
+      box.innerText = text;
+
+      banner.classList.remove('opacity-0', 'scale-75');
+      banner.classList.add('opacity-100', 'scale-100');
+
+      setTimeout(() => {
+        banner.classList.remove('opacity-100', 'scale-100');
+        banner.classList.add('opacity-0', 'scale-75');
+      }, 1200);
+    }
+
+    /* main Game Render Loop */
+    function gameLoop(time) {
+      if (gameState.isGameOver) return;
+
+      const delta = (time - lastTime) / 1000;
+      lastTime = time;
+
+      // Update speed & Nitro
+      let currentSpeed = gameState.isNitroActive ? gameState.speed * 1.8 : gameState.speed;
+      document.getElementById('speedValue').innerText = Math.round(currentSpeed);
+      
+      // Auto replenish nitro slowly
+      if (gameState.nitro < 100) {
+        gameState.nitro = Math.min(100, gameState.nitro + delta * 5);
+        document.getElementById('nitroBar').style.width = `${gameState.nitro}%`;
+        document.getElementById('nitroPercent').innerText = `${Math.round(gameState.nitro)}%`;
+      }
+
+      // Animate track scrolling
+      trackOffset += currentSpeed * delta * 4;
+
+      // Move Math Checkpoint Gate towards car
+      gameState.gateY += currentSpeed * delta * 2.8;
+
+      // Render Graphics
+      renderRaceTrack();
+      renderGates();
+      renderPlayerCar();
+
+      // Check Collision with Gate
+      if (gameState.gateY >= canvas.height - 180 && gameState.gateY <= canvas.height - 120) {
+        checkAnswerCollision();
+      }
+
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    /* Drawing Pseudo-3D Perspective Road */
+    function renderRaceTrack() {
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Sky & Horizon Gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.4);
+      skyGrad.addColorStop(0, '#020617');
+      skyGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Distant mountains / city lights
+      ctx.fillStyle = '#1e293b';
+      for (let i = 0; i < w; i += 60) {
+        ctx.fillRect(i, h * 0.35 - (i % 40), 45, h * 0.1);
+      }
+
+      // Track Perspective trapezoid
+      const horizonY = h * 0.35;
+      const topWidth = w * 0.25;
+      const bottomWidth = w * 0.85;
+
+      const topLeft = (w - topWidth) / 2;
+      const topRight = (w + topWidth) / 2;
+      const bottomLeft = (w - bottomWidth) / 2;
+      const bottomRight = (w + bottomWidth) / 2;
+
+      // Grass side shoulders
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(0, horizonY, w, h - horizonY);
+
+      // Asphalt Road
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.moveTo(topLeft, horizonY);
+      ctx.lineTo(topRight, horizonY);
+      ctx.lineTo(bottomRight, h);
+      ctx.lineTo(bottomLeft, h);
+      ctx.closePath();
+      ctx.fill();
+
+      // Red/White Curb Side Markings
+      const curbStrips = 12;
+      for (let i = 0; i < curbStrips; i++) {
+        let p1 = (i / curbStrips + (trackOffset % 50) / 50) % 1;
+        let p2 = ((i + 0.5) / curbStrips + (trackOffset % 50) / 50) % 1;
+
+        let y1 = horizonY + p1 * (h - horizonY);
+        let y2 = horizonY + p2 * (h - horizonY);
+
+        ctx.fillStyle = (i % 2 === 0) ? '#ef4444' : '#ffffff';
+
+        // Left curb
+        ctx.beginPath();
+        ctx.moveTo(topLeft + p1 * (bottomLeft - topLeft), y1);
+        ctx.lineTo(topLeft + p2 * (bottomLeft - topLeft), y2);
+        ctx.lineTo(topLeft + p2 * (bottomLeft - topLeft) - 15, y2);
+        ctx.lineTo(topLeft + p1 * (bottomLeft - topLeft) - 15, y1);
+        ctx.fill();
+
+        // Right curb
+        ctx.beginPath();
+        ctx.moveTo(topRight + p1 * (bottomRight - topRight), y1);
+        ctx.lineTo(topRight + p2 * (bottomRight - topRight), y2);
+        ctx.lineTo(topRight + p2 * (bottomRight - topRight) + 15, y2);
+        ctx.lineTo(topRight + p1 * (bottomRight - topRight) + 15, y1);
+        ctx.fill();
+      }
+
+      // Lane Lines (3 Lanes -> 2 Dividers)
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([20, 20]);
+      ctx.lineDashOffset = -trackOffset % 40;
+
+      for (let l = 1; l <= 2; l++) {
+        let laneRatio = l / 3;
+        ctx.beginPath();
+        ctx.moveTo(topLeft + laneRatio * topWidth, horizonY);
+        ctx.lineTo(bottomLeft + laneRatio * bottomWidth, h);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    /* Render Answer Gates across 3 lanes */
+    function renderGates() {
+      const q = gameState.questions[gameState.currentQuestionIndex];
+      if (!q) return;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const horizonY = h * 0.35;
+      const progress = (gameState.gateY - horizonY) / (h - horizonY);
+
+      if (progress < 0 || progress > 1.2) return;
+
+      // Scale based on distance
+      const scale = Math.max(0.2, progress);
+      const gateHeight = 70 * scale;
+
+      const bottomWidth = w * 0.85;
+      const bottomLeft = (w - bottomWidth) / 2;
+      const laneWidth = bottomWidth / 3;
+
+      const laneCenters = [
+        bottomLeft + laneWidth * 0.5,
+        bottomLeft + laneWidth * 1.5,
+        bottomLeft + laneWidth * 2.5
+      ];
+
+      q.options.forEach((optText, index) => {
+        const x = laneCenters[index];
+        const y = gameState.gateY;
+
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Gate Box background
+        const boxWidth = 140 * scale;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.strokeStyle = '#00E5FF';
+        ctx.lineWidth = 3 * scale;
+
+        ctx.beginPath();
+        ctx.roundRect(-boxWidth / 2, -gateHeight / 2, boxWidth, gateHeight, 10 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        // Option Text
+        ctx.fillStyle = '#FFD100';
+        ctx.font = `bold ${Math.max(12, 22 * scale)}px Fredoka, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(optText, 0, 0);
+
+        ctx.restore();
+      });
+    }
+
+    /* Render Player's Race Car */
+    function renderPlayerCar() {
+      const w = canvas.width;
+      const h = canvas.height;
+
+      const bottomWidth = w * 0.85;
+      const bottomLeft = (w - bottomWidth) / 2;
+      const laneWidth = bottomWidth / 3;
+
+      // Target X based on Lane
+      const targetX = bottomLeft + laneWidth * (gameState.lane + 0.5);
+
+      // Smooth interpolation for lane switching
+      if (!gameState.carX) gameState.carX = targetX;
+      gameState.carX += (targetX - gameState.carX) * 0.2;
+
+      const carY = h - 140;
+      const carW = 75;
+      const carH = 110;
+
+      ctx.save();
+      ctx.translate(gameState.carX, carY);
+
+      // Nitro Tail Smoke/Flame
+      if (gameState.isNitroActive) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.moveTo(-15, carH / 2);
+        ctx.lineTo(0, carH / 2 + 35 + Math.random() * 15);
+        ctx.lineTo(15, carH / 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-8, carH / 2);
+        ctx.lineTo(0, carH / 2 + 20 + Math.random() * 10);
+        ctx.lineTo(8, carH / 2);
+        ctx.fill();
+      }
+
+      // Car Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(0, carH / 2 - 5, carW / 1.8, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Main Car Body
+      ctx.fillStyle = carColors[player.carColor] || carColors.red;
+      ctx.beginPath();
+      ctx.roundRect(-carW / 2, -carH / 2, carW, carH, 16);
+      ctx.fill();
+
+      // Car Roof/Windshield
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.roundRect(-carW / 2.5, -carH / 4, carW / 1.25, carH / 2.2, 8);
+      ctx.fill();
+
+      // Windshield Glare
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.roundRect(-carW / 3, -carH / 5, carW / 1.5, carH / 5, 4);
+      ctx.fill();
+
+      // Rear Spoiler / Wing
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(-carW / 1.8, carH / 2 - 12, carW * 1.1, 10);
+
+      // Wheels
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-carW / 2 - 6, -carH / 3, 8, 22); // Top Left
+      ctx.fillRect(carW / 2 - 2, -carH / 3, 8, 22);  // Top Right
+      ctx.fillRect(-carW / 2 - 6, carH / 4, 8, 22);  // Bottom Left
+      ctx.fillRect(carW / 2 - 2, carH / 4, 8, 22);   // Bottom Right
+
+      ctx.restore();
+    }
+
+    /* Check answer when car hits gate */
+    function checkAnswerCollision() {
+      const q = gameState.questions[gameState.currentQuestionIndex];
+      if (!q || gameState.gateY < 0) return;
+
+      // Prevent duplicate triggers
+      gameState.gateY = -999;
+
+      if (gameState.lane === q.correctIndex) {
+        // CORRECTION ANSWER
+        gameState.score += 100 + (gameState.isNitroActive ? 50 : 0);
+        gameState.correctCount++;
+        playSound('correct');
+        showFeedback("JAWABAN BENAR! +100 🏆", "text-emerald-300 border-emerald-400 bg-emerald-950/90");
+        
+        // Add Nitro Bonus
+        gameState.nitro = Math.min(100, gameState.nitro + 25);
+      } else {
+        // WRONG ANSWER
+        playSound('wrong');
+        showFeedback("OOPS! KURANG TEPAT ❌", "text-red-300 border-red-500 bg-red-950/90");
+      }
+
+      // Advance Question after short delay
+      setTimeout(() => {
+        gameState.currentQuestionIndex++;
+        if (gameState.currentQuestionIndex >= gameState.totalQuestions) {
+          finishRace();
+        } else {
+          loadQuestion();
+        }
+      }, 800);
+    }
+  </script>
+
+  <script>
+    /* ===================================================================
+       INTEGRASI GEMINI AI TUTOR (GEMINI-3-FLASH-PREVIEW)
+       =================================================================== */
+    async function askAIPitCrew() {
+      playSound('click');
+      const q = gameState.questions[gameState.currentQuestionIndex];
+      if (!q) return;
+
+      // Show Modal & Spinner
+      const modal = document.getElementById('modalAIPitCrew');
+      const loading = document.getElementById('aiLoading');
+      const responseBox = document.getElementById('aiResponseText');
+
+      modal.classList.remove('hidden');
+      loading.classList.remove('hidden');
+      responseBox.classList.add('hidden');
+
+      const apiKey = ""; // Disertakan otomatis di runtime canvas Gemini
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const systemPrompt = `Kamu adalah "Montir AI Pit Crew", asisten pembalap matematika cerdas, ramah, dan seru untuk anak kelas 6 SD (usia 12 tahun). 
+Gunakan bahasa Indonesia yang singkat, mudah dipahami, penuh semangat balapan, dan sertakan emoticon seru.
+Tugasmu: Berikan trik cepat dan penjelasan matematika langkah demi langkah untuk menyelesaikan soal perbandingan/rasio yang diberikan tanpa langsung menyebut jawaban secara terang-terangan jika memungkinkan, tetapi berikan logika caranya.`;
+
+      const userPrompt = `Halo Montir AI! Bantu saya menyelesaikan soal balapan rasio ini:
+Soal: "${q.question}"
+Pilihan Jawaban: ${q.options.join(', ')}
+
+Beri petunjuk ringkas 2-3 kalimat saja ya!`;
+
+      try {
+        const payload = {
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || q.explanation;
+
+        // Render AI Response
+        loading.classList.add('hidden');
+        responseBox.classList.remove('hidden');
+        responseBox.innerHTML = `
+          <div class="bg-indigo-950/60 border border-indigo-500/40 p-4 rounded-2xl text-indigo-100 space-y-2">
+            <p class="font-bold text-yellow-300 flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb"></i> Trik Montir AI:
+            </p>
+            <p class="text-sm leading-relaxed">${aiText.replace(/\n/g, '<br>')}</p>
+          </div>
+          <div class="text-xs text-slate-400 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+            <strong>Penjelasan Kunci:</strong> ${q.explanation}
+          </div>
+        `;
+
+      } catch (err) {
+        console.error("AI Error:", err);
+        // Fallback to offline explanation
+        loading.classList.add('hidden');
+        responseBox.classList.remove('hidden');
+        responseBox.innerHTML = `
+          <div class="bg-indigo-950/60 border border-indigo-500/40 p-4 rounded-2xl text-indigo-100 space-y-2">
+            <p class="font-bold text-yellow-300"><i class="fa-solid fa-wrench"></i> Trik Cepat Rasio:</p>
+            <p class="text-sm">${q.explanation}</p>
+          </div>
+        `;
+      }
+    }
+
+    function closeAIModal() {
+      playSound('click');
+      document.getElementById('modalAIPitCrew').classList.add('hidden');
+    }
+  </script>
+
+  <script>
+    /* ===================================================================
+       FINISH RACE & REPORT CARD / SERTIFIKAT JUARA
+       =================================================================== */
+    function finishRace() {
+      gameState.isGameOver = true;
+      gameState.endTime = Date.now();
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+
+      // Calculate stats
+      const totalTimeSec = Math.floor((gameState.endTime - gameState.startTime) / 1000);
+      const minutes = Math.floor(totalTimeSec / 60).toString().padStart(2, '0');
+      const seconds = (totalTimeSec % 60).toString().padStart(2, '0');
+      const timeFormatted = `${minutes}:${seconds}`;
+
+      const accuracy = Math.round((gameState.correctCount / gameState.totalQuestions) * 100);
+
+      // Determine Grade
+      let grade = "PEMBALAP PEMULA 🏎️";
+      if (accuracy >= 90) grade = "JUARA UTAMA RASIO 🏆";
+      else if (accuracy >= 70) grade = "MASTER PERBANDINGAN 🥇";
+      else if (accuracy >= 50) grade = "PEMBALAP HANDAL 🥈";
+
+      // Render Result Screen
+      document.getElementById('resPlayerName').innerText = player.name;
+      document.getElementById('resPlayerClass').innerText = `Kelas ${player.class}`;
+      document.getElementById('resTotalScore').innerText = gameState.score;
+      document.getElementById('resAccuracy').innerText = `${accuracy}%`;
+      document.getElementById('resTime').innerText = timeFormatted;
+      document.getElementById('resGrade').innerText = grade;
+
+      // Hide Game, Show Result
+      document.getElementById('screenGame').classList.add('hidden');
+      document.getElementById('screenResult').classList.remove('hidden');
+
+      // Trigger Confetti Celebration
+      if (window.confetti) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function restartGame() {
+      playSound('click');
+      document.getElementById('screenResult').classList.add('hidden');
+      startGame();
+    }
+
+    function logout() {
+      playSound('click');
+      document.getElementById('screenResult').classList.add('hidden');
+      document.getElementById('screenGame').classList.add('hidden');
+      document.getElementById('mainHeader').classList.add('hidden');
+      document.getElementById('screenLogin').classList.remove('hidden');
+    }
+  </script>
+
+</body>
+</html>

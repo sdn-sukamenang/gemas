@@ -20,6 +20,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Balap PPKn: Pahlawan Lingkungan Sekitar | Desi Sarwinda, M.Pd. | 4 | PPKN | `games/balap-ppkn/` |
 | Tangkap Koin Kebaikan | Tri Daryati, S.Pd. | 5 | Pendidikan Agama Islam | `games/tangkap-koin-kebaikan/` |
 | Ular Tangga Matematika | Herniza Amro, S.Pd. | 1 | Matematika | `games/ular-tangga-matematika/` |
+| Rally Rasio | Nova Sagita, S.Pd. | 6 | Matematika | `games/rally-rasio/` |
 
 ## Cara Menambah Game Baru
 
