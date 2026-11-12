@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Turbo Math: Balap Bilangan Bulat (Kelas 5 SD)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        game: ['Fredoka', 'cursive']
+                    },
+                    colors: {
+                        racingRed: '#FF2A54',
+                        racingYellow: '#FFC700',
+                        racingBlue: '#00D2FF',
+                        racingGreen: '#00E676',
+                        darkAsphalt: '#121826'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: #0b0f19;
+            color: #ffffff;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(22, 30, 49, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Pulsing Nitro effect */
+        .nitro-glow {
+            box-shadow: 0 0 25px #00D2FF, 0 0 50px #00D2FF;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121826;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF2A54;
+            border-radius: 4px;
+        }
+
+        /* Interactive Whiteboard Big Touch Buttons */
+        .touch-btn {
+            transition: transform 0.1s active, background-color 0.2s;
+        }
+        .touch-btn:active {
+            transform: scale(0.95);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between select-none">
+
+    <script>
+        /* Web Audio Synthesizer for reliable Sound Effects without external asset dependency */
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playCorrect() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2); // C6
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            },
+            playWrong() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.3);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            },
+            playNitro() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+        };
+    </script>
+
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cover bg-center" style="background-image: linear-gradient(rgba(11, 15, 25, 0.85), rgba(11, 15, 25, 0.95)), url('https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=1200&q=80');">
+        <div class="glass-card max-w-lg w-full p-6 sm:p-8 rounded-3xl border border-white/20 shadow-2xl relative overflow-hidden text-center animate-fade-in">
+            
+            <div class="inline-block px-4 py-1.5 bg-gradient-to-r from-racingRed to-racingYellow text-black font-extrabold text-xs uppercase tracking-widest rounded-full mb-3 shadow-lg">
+                <i class="fa-solid fa-flag-checkered mr-1"></i> Matematika Fase C - Kelas 5
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl font-black font-game text-transparent bg-clip-text bg-gradient-to-r from-racingYellow via-white to-racingBlue tracking-wider mb-2 drop-shadow-md">
+                TURBO MATH
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base font-medium mb-6">Petualangan Balap Bilangan Bulat</p>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                        <i class="fa-solid fa-user-astronaut text-racingYellow mr-1"></i> Nama Pembalap
+                    </label>
+                    <input type="text" id="playerName" required placeholder="Masukkan Nama Kamu..." 
+                        class="w-full px-4 py-3 bg-slate-900/90 border-2 border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-racingYellow text-base font-semibold transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                            <i class="fa-solid fa-graduation-cap text-racingBlue mr-1"></i> Kelas
+                        </label>
+                        <select id="playerClass" class="w-full px-4 py-3 bg-slate-900/90 border-2 border-slate-700 rounded-xl text-white focus:outline-none focus:border-racingBlue text-base font-semibold transition">
+                            <option value="5-A">Kelas 5 - A</option>
+                            <option value="5-B">Kelas 5 - B</option>
+                            <option value="5-C">Kelas 5 - C</option>
+                            <option value="5-D">Kelas 5 - D</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                            <i class="fa-solid fa-gauge-high text-racingGreen mr-1"></i> Tingkat Soal
+                        </label>
+                        <select id="difficulty" class="w-full px-4 py-3 bg-slate-900/90 border-2 border-slate-700 rounded-xl text-white focus:outline-none focus:border-racingGreen text-base font-semibold transition">
+                            <option value="easy">Pemula (Dasar)</option>
+                            <option value="medium" selected>Juara (Campuran)</option>
+                            <option value="hard">Master (Tantangan)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Car Color Selection -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-car-side text-racingRed mr-1"></i> Pilih Mobil Balap Kamu
+                    </label>
+                    <div class="grid grid-cols-4 gap-2" id="carSelection">
+                        <button type="button" onclick="selectCar('#FF2A54')" class="car-opt p-3 bg-slate-800/80 border-2 border-racingRed rounded-xl flex flex-col items-center justify-center hover:scale-105 transition active">
+                            <i class="fa-solid fa-car text-2xl text-racingRed"></i>
+                            <span class="text-[10px] font-bold text-slate-300 mt-1">Merah</span>
+                        </button>
+                        <button type="button" onclick="selectCar('#00D2FF')" class="car-opt p-3 bg-slate-800/80 border-2 border-slate-700 rounded-xl flex flex-col items-center justify-center hover:scale-105 transition">
+                            <i class="fa-solid fa-car text-2xl text-racingBlue"></i>
+                            <span class="text-[10px] font-bold text-slate-300 mt-1">Biru</span>
+                        </button>
+                        <button type="button" onclick="selectCar('#FFC700')" class="car-opt p-3 bg-slate-800/80 border-2 border-slate-700 rounded-xl flex flex-col items-center justify-center hover:scale-105 transition">
+                            <i class="fa-solid fa-car text-2xl text-racingYellow"></i>
+                            <span class="text-[10px] font-bold text-slate-300 mt-1">Kuning</span>
+                        </button>
+                        <button type="button" onclick="selectCar('#00E676')" class="car-opt p-3 bg-slate-800/80 border-2 border-slate-700 rounded-xl flex flex-col items-center justify-center hover:scale-105 transition">
+                            <i class="fa-solid fa-car text-2xl text-racingGreen"></i>
+                            <span class="text-[10px] font-bold text-slate-300 mt-1">Hijau</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="touch-btn w-full py-4 mt-2 bg-gradient-to-r from-racingRed via-pink-600 to-racingYellow text-black font-black font-game text-xl rounded-2xl shadow-xl hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play text-2xl"></i> MULAI BALAPAN!
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="gameContainer" class="relative w-full h-screen overflow-hidden hidden bg-slate-950 flex flex-col justify-between">
+
+        <!-- Top HUD Header -->
+        <div class="relative z-20 p-3 sm:p-4 bg-slate-900/90 border-b border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-2">
+            
+            <!-- Driver Info -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-racingYellow flex items-center justify-center text-racingYellow font-black">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div>
+                    <div id="hudDriverName" class="font-black text-sm sm:text-base text-white tracking-wide">Pembalap</div>
+                    <div id="hudDriverClass" class="text-xs text-racingYellow font-bold">Kelas 5-A</div>
+                </div>
+            </div>
+
+            <!-- Math Question Banner in HUD -->
+            <div class="flex-1 max-w-xl mx-2 bg-slate-950 border-2 border-racingBlue/60 rounded-2xl px-4 py-2 flex flex-col items-center justify-center shadow-inner">
+                <div class="text-[10px] uppercase font-bold tracking-widest text-racingBlue">SOAL BALAPAN MATEMATIKA</div>
+                <div id="questionText" class="font-game text-xl sm:text-2xl font-bold text-yellow-300 tracking-wider text-center">
+                    Berapakah -5 + 8 = ?
+                </div>
+            </div>
+
+            <!-- Stats HUD (Score, Nitro, Health) -->
+            <div class="flex items-center gap-3 sm:gap-5">
+                <!-- Score -->
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase">SKOR</div>
+                    <div id="hudScore" class="font-game text-2xl text-racingGreen font-extrabold">0</div>
+                </div>
+
+                <!-- Nitro Meter -->
+                <div class="w-20 sm:w-28 bg-slate-800 p-1 rounded-xl border border-slate-700">
+                    <div class="flex justify-between text-[9px] font-bold text-slate-300 mb-0.5">
+                        <span>NITRO</span>
+                        <span id="nitroPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-2.5 rounded-lg overflow-hidden">
+                        <div id="nitroBar" class="bg-gradient-to-r from-racingBlue to-cyan-300 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Fullscreen Button for Whiteboard / Interactive Screens -->
+                <button onclick="toggleFullscreen()" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-slate-200">
+                    <i class="fa-solid fa-expand text-base"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Game World -->
+        <div class="relative flex-1 w-full h-full">
+            <canvas id="raceCanvas"></canvas>
+
+            <!-- Floating AI Coach Hint / Explanation Box -->
+            <div id="aiCoachBox" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-30 max-w-lg w-11/12 glass-card border-2 border-racingYellow p-4 rounded-2xl shadow-2xl flex items-start gap-3 animate-bounce">
+                <div class="w-10 h-10 rounded-full bg-racingYellow text-black flex-shrink-0 flex items-center justify-center font-bold text-xl">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-xs font-bold text-racingYellow uppercase tracking-wider">Guru AI Balap Memberi Petunjuk:</div>
+                    <div id="aiCoachText" class="text-xs sm:text-sm text-slate-100 font-semibold leading-relaxed mt-1">
+                        Ingat! Jika menjumlahkan bilangan negatif (-5) dengan positif (8), bayangkan suhu naik dari -5°C sejauh 8 derajat!
+                    </div>
+                </div>
+                <button onclick="closeAiCoach()" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Touch Controls for Mobile, Tablet, & Interactive Whiteboard -->
+        <div class="relative z-20 p-3 bg-slate-900/95 border-t border-slate-800 grid grid-cols-3 gap-2 sm:gap-4 max-w-4xl mx-auto w-full">
+            <button onclick="steerLane(0)" class="touch-btn py-3.5 sm:py-4 bg-slate-800 hover:bg-racingRed/20 border-2 border-slate-700 active:border-racingRed rounded-2xl flex flex-col items-center justify-center text-white">
+                <span class="text-xs font-extrabold text-racingRed">JALUR A (1)</span>
+                <span id="btnAnswerA" class="font-game text-xl sm:text-2xl text-white font-bold mt-0.5">-3</span>
+            </button>
+            <button onclick="steerLane(1)" class="touch-btn py-3.5 sm:py-4 bg-slate-800 hover:bg-racingYellow/20 border-2 border-slate-700 active:border-racingYellow rounded-2xl flex flex-col items-center justify-center text-white">
+                <span class="text-xs font-extrabold text-racingYellow">JALUR B (2)</span>
+                <span id="btnAnswerB" class="font-game text-xl sm:text-2xl text-white font-bold mt-0.5">+3</span>
+            </button>
+            <button onclick="steerLane(2)" class="touch-btn py-3.5 sm:py-4 bg-slate-800 hover:bg-racingBlue/20 border-2 border-slate-700 active:border-racingBlue rounded-2xl flex flex-col items-center justify-center text-white">
+                <span class="text-xs font-extrabold text-racingBlue">JALUR C (3)</span>
+                <span id="btnAnswerC" class="font-game text-xl sm:text-2xl text-white font-bold mt-0.5">-13</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="resultModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="glass-card max-w-xl w-full p-6 sm:p-8 rounded-3xl border border-yellow-500/40 text-center relative overflow-hidden">
+            
+            <!-- Confetti Icon Header -->
+            <div class="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-tr from-racingYellow to-amber-500 text-black flex items-center justify-center text-4xl shadow-xl animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h2 class="font-game text-3xl sm:text-4xl font-extrabold text-yellow-400 tracking-wider">SELAMAT JUARA!</h2>
+            <p class="text-slate-300 text-sm mt-1">Balapan Selesai dengan Performa Luar Biasa!</p>
+
+            <!-- Student Summary Badge -->
+            <div class="my-5 p-4 bg-slate-900/90 rounded-2xl border border-slate-800 text-left grid grid-cols-2 gap-4">
+                <div>
+                    <div class="text-xs text-slate-400 font-bold">NAMA PEMBALAP</div>
+                    <div id="resName" class="text-lg font-bold text-white">Budi Santoso</div>
+                    <div id="resClass" class="text-xs text-racingYellow font-semibold">Kelas 5-A</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400 font-bold">TOTAL SKOR</div>
+                    <div id="resScore" class="font-game text-2xl text-racingGreen font-black">850 Pts</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400 font-bold">AKURASI JAWABAN</div>
+                    <div id="resAccuracy" class="text-base font-bold text-racingBlue">90% (9/10)</div>
+                </div>
+                <div>
+                    <div class="text-xs text-slate-400 font-bold">KECEPATAN RATA-RATA</div>
+                    <div id="resSpeed" class="text-base font-bold text-racingRed">180 KM/H</div>
+                </div>
+            </div>
+
+            <!-- AI Performance Review & Teacher Notes -->
+            <div class="p-4 bg-slate-950 rounded-2xl border border-racingBlue/40 text-left mb-6">
+                <div class="flex items-center gap-2 text-racingBlue font-bold text-xs uppercase mb-1">
+                    <i class="fa-solid fa-brain"></i> Evaluasi AI Guru Matematika:
+                </div>
+                <p id="resAiAnalysis" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    Sedang menganalisis hasil belajar kamu...
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="restartRace()" class="touch-btn flex-1 py-3.5 bg-gradient-to-r from-racingRed to-pink-600 text-white font-bold font-game rounded-xl shadow-lg hover:brightness-110">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> BALAP LAGI
+                </button>
+                <button onclick="generateAiCertificate()" class="touch-btn flex-1 py-3.5 bg-gradient-to-r from-racingYellow to-amber-500 text-black font-bold font-game rounded-xl shadow-lg hover:brightness-110">
+                    <i class="fa-solid fa-award mr-1"></i> CETAK LAPORAN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Game State Variables */
+        let player = {
+            name: '',
+            class: '',
+            color: '#FF2A54',
+            difficulty: 'medium',
+            score: 0,
+            lane: 1, // 0: Left, 1: Center, 2: Right
+            targetLaneX: 0,
+            x: 0,
+            y: 0,
+            speed: 5,
+            baseSpeed: 5,
+            nitro: 0,
+            correctCount: 0,
+            totalAnswered: 0
+        };
+
+        let currentQuestion = null;
+        let gates = [];
+        let roadOffset = 0;
+        let isPlaying = false;
+        let canvas, ctx;
+        let animationFrameId;
+
+        // Sound FX initializers
+        document.addEventListener('click', () => AudioFX.init(), { once: true });
+
+        /* Selecting Car Color in Menu */
+        function selectCar(color) {
+            player.color = color;
+            document.querySelectorAll('.car-opt').forEach(btn => {
+                btn.classList.remove('border-racingRed', 'border-racingBlue', 'border-racingYellow', 'border-racingGreen');
+                btn.classList.add('border-slate-700');
+            });
+            event.currentTarget.classList.remove('border-slate-700');
+            event.currentTarget.classList.add('border-white');
+        }
+
+        /* Handle Form Login */
+        function handleLogin(e) {
+            e.preventDefault();
+            player.name = document.getElementById('playerName').value || 'Pembalap Muda';
+            player.class = document.getElementById('playerClass').value;
+            player.difficulty = document.getElementById('difficulty').value;
+
+            // Update HUD
+            document.getElementById('hudDriverName').innerText = player.name;
+            document.getElementById('hudDriverClass').innerText = player.class;
+
+            // Hide Login Screen & Show Game Container
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('gameContainer').classList.remove('hidden');
+
+            initGame();
+        }
+
+        /* Math Questions Generator for Grade 5 Fase C - Bilangan Bulat */
+        function generateMathQuestion() {
+            const diff = player.difficulty;
+            let q = {};
+
+            // Question types: 1. Addition/Subtraction, 2. Comparing, 3. Contextual word problems
+            const type = Math.floor(Math.random() * 3);
+
+            if (type === 0) {
+                // Addition & Subtraction of Integers
+                const a = Math.floor(Math.random() * 25) - 12; // -12 to +12
+                const b = Math.floor(Math.random() * 25) - 12;
+                const isAdd = Math.random() > 0.5;
+
+                if (isAdd) {
+                    q.text = `Berapakah hasil dari ${a} + (${b}) = ?`;
+                    q.answer = a + b;
+                } else {
+                    q.text = `Berapakah hasil dari ${a} - (${b}) = ?`;
+                    q.answer = a - b;
+                }
+
+                q.explanation = `Langkah: ${a} ${isAdd ? '+' : '-'} (${b}) = ${q.answer}. Pada garis bilangan, perhatikan arah positif (kanan) dan negatif (kiri).`;
+            } else if (type === 1) {
+                // Comparing Integers
+                const num1 = Math.floor(Math.random() * 20) - 10;
+                let num2 = Math.floor(Math.random() * 20) - 10;
+                while (num2 === num1) num2 = Math.floor(Math.random() * 20) - 10;
+
+                const askGreater = Math.random() > 0.5;
+                q.text = askGreater ? `Mana bilangan yang LEBIH BESAR antara ${num1} dan ${num2}?` : `Mana bilangan yang LEBIH KECIL antara ${num1} dan ${num2}?`;
+                q.answer = askGreater ? Math.max(num1, num2) : Math.min(num1, num2);
+                q.explanation = `Pada bilangan bulat, semakin ke kanan posisi angka pada garis bilangan, nilainya semakin besar!`;
+            } else {
+                // Contextual Real World Problems (Temperature, Depth)
+                const contexts = [
+                    { title: "Suhu puncak gunung adalah -4°C. Kemudian suhu naik 9°C. Berapa suhu sekarang?", ans: 5 },
+                    { title: "Kapal selam berada 12 meter di bawah laut (-12m), lalu naik 7 meter. Di posisi berapa sekarang?", ans: -5 },
+                    { title: "Suhu es krim -8°C, setelah dikeluarkan dari kulkas suhunya naik 12°C. Suhu sekarang?", ans: 4 },
+                    { title: "Roni berada di lantai 3. Ia turun 5 lantai. Di lantai berapa Roni berada?", ans: -2 }
+                ];
+                const selected = contexts[Math.floor(Math.random() * contexts.length)];
+                q.text = selected.title;
+                q.answer = selected.ans;
+                q.explanation = `Soal cerita bilangan bulat: Hitung perubahan nilai positif atau negatif secara cermat!`;
+            }
+
+            // Generate 3 unique choices
+            const choices = [q.answer];
+            while (choices.length < 3) {
+                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() > 0.5 ? 1 : -1);
+                let fakeAns = q.answer + offset;
+                if (!choices.includes(fakeAns)) {
+                    choices.push(fakeAns);
+                }
+            }
+
+            // Shuffle choices
+            choices.sort(() => Math.random() - 0.5);
+            q.choices = choices;
+            q.correctLane = choices.indexOf(q.answer);
+
+            return q;
+        }
+
+        function initGame() {
+            canvas = document.getElementById('raceCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Reset Player Stats
+            player.score = 0;
+            player.correctCount = 0;
+            player.totalAnswered = 0;
+            player.lane = 1;
+            player.speed = player.baseSpeed;
+            player.nitro = 0;
+
+            loadNewQuestion();
+            isPlaying = true;
+
+            // Keyboard Listeners
+            window.addEventListener('keydown', handleKeyDown);
+
+            // Start Animation Loop
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+
+        function handleKeyDown(e) {
+            if (!isPlaying) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === '1') {
+                steerLane(0);
+            } else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === '2') {
+                steerLane(1);
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === '3') {
+                steerLane(2);
+            }
+        }
+
+        function steerLane(laneIndex) {
+            player.lane = laneIndex;
+            AudioFX.init();
+        }
+
+        function loadNewQuestion() {
+            currentQuestion = generateMathQuestion();
+            document.getElementById('questionText').innerText = currentQuestion.text;
+            
+            // Update HUD Control Button Labels
+            document.getElementById('btnAnswerA').innerText = (currentQuestion.choices[0] > 0 ? '+' : '') + currentQuestion.choices[0];
+            document.getElementById('btnAnswerB').innerText = (currentQuestion.choices[1] > 0 ? '+' : '') + currentQuestion.choices[1];
+            document.getElementById('btnAnswerC').innerText = (currentQuestion.choices[2] > 0 ? '+' : '') + currentQuestion.choices[2];
+
+            // Create Gates on canvas
+            gates = [
+                { lane: 0, text: currentQuestion.choices[0], isCorrect: currentQuestion.choices[0] === currentQuestion.answer, y: -200 },
+                { lane: 1, text: currentQuestion.choices[1], isCorrect: currentQuestion.choices[1] === currentQuestion.answer, y: -200 },
+                { lane: 2, text: currentQuestion.choices[2], isCorrect: currentQuestion.choices[2] === currentQuestion.answer, y: -200 }
+            ];
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            update();
+            render();
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // Road scroll speed
+            roadOffset += player.speed;
+            if (roadOffset > 80) roadOffset = 0;
+
+            // Move gates towards car
+            gates.forEach(g => {
+                g.y += player.speed;
+            });
+
+            // Check Collision with Gates
+            if (gates.length > 0 && gates[0].y >= canvas.height - 180) {
+                checkAnswer(player.lane);
+            }
+
+            // Nitro decrease gradually
+            if (player.nitro > 0) {
+                player.nitro -= 0.2;
+                player.speed = player.baseSpeed + 4;
+            } else {
+                player.speed = player.baseSpeed;
+            }
+            document.getElementById('nitroBar').style.width = `${Math.max(0, player.nitro)}%`;
+            document.getElementById('nitroPercent').innerText = `${Math.round(Math.max(0, player.nitro))}%`;
+        }
+
+        function checkAnswer(chosenLane) {
+            player.totalAnswered++;
+            const chosenGate = gates.find(g => g.lane === chosenLane);
+
+            if (chosenGate && chosenGate.isCorrect) {
+                // CORRECT ANSWER
+                player.score += 100 + Math.round(player.nitro);
+                player.correctCount++;
+                player.nitro = Math.min(100, player.nitro + 35);
+                AudioFX.playCorrect();
+                AudioFX.playNitro();
+
+                // Trigger confetti boost effect
+                confetti({
+                    particleCount: 25,
+                    spread: 60,
+                    origin: { y: 0.8 }
+                });
+            } else {
+                // WRONG ANSWER
+                player.score = Math.max(0, player.score - 30);
+                player.nitro = 0;
+                AudioFX.playWrong();
+
+                // Show AI Coach Explanation
+                showAiCoach(currentQuestion.explanation);
+            }
+
+            document.getElementById('hudScore').innerText = player.score;
+
+            // Check Game End Condition (e.g., 10 questions)
+            if (player.totalAnswered >= 10) {
+                endGame();
+            } else {
+                loadNewQuestion();
+            }
+        }
+
+        function showAiCoach(text) {
+            document.getElementById('aiCoachText').innerText = text;
+            document.getElementById('aiCoachBox').classList.remove('hidden');
+        }
+
+        function closeAiCoach() {
+            document.getElementById('aiCoachBox').classList.add('hidden');
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // 1. Draw Grass / Environment Sides
+            ctx.fillStyle = '#0d2b1a';
+            ctx.fillRect(0, 0, w, h);
+
+            // Perspective Road Dimensions
+            const roadWidth = Math.min(w * 0.85, 600);
+            const roadLeft = (w - roadWidth) / 2;
+            const laneWidth = roadWidth / 3;
+
+            // 2. Asphalt Road
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(roadLeft, 0, roadWidth, h);
+
+            // Road Borders
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(roadLeft - 8, 0, 8, h);
+            ctx.fillRect(roadLeft + roadWidth, 0, 8, h);
+
+            // 3. Animated Lane Dividers
+            ctx.strokeStyle = '#ffffff';
+            ctx.setLineDash([30, 30]);
+            ctx.lineDashOffset = -roadOffset;
+            ctx.lineWidth = 4;
+
+            ctx.beginPath();
+            ctx.moveTo(roadLeft + laneWidth, 0);
+            ctx.lineTo(roadLeft + laneWidth, h);
+            ctx.moveTo(roadLeft + laneWidth * 2, 0);
+            ctx.lineTo(roadLeft + laneWidth * 2, h);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset line dash
+
+            // 4. Draw Choice Gates
+            gates.forEach(g => {
+                const gateX = roadLeft + g.lane * laneWidth;
+                const gateY = g.y;
+
+                // Gate Banner Frame
+                ctx.fillStyle = g.lane === 0 ? 'rgba(255, 42, 84, 0.85)' : g.lane === 1 ? 'rgba(255, 199, 0, 0.85)' : 'rgba(0, 210, 255, 0.85)';
+                ctx.beginPath();
+                ctx.roundRect(gateX + 10, gateY, laneWidth - 20, 50, 12);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // Gate Text Value
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 24px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const textVal = (g.text > 0 ? '+' : '') + g.text;
+                ctx.fillText(textVal, gateX + laneWidth / 2, gateY + 25);
+            });
+
+            // 5. Draw Player Car
+            const playerX = roadLeft + player.lane * laneWidth + laneWidth / 2;
+            const playerY = h - 140;
+
+            // Car Body Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.ellipse(playerX, playerY + 35, 25, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Car Main Body
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.roundRect(playerX - 22, playerY - 40, 44, 80, 12);
+            ctx.fill();
+
+            // Windshield
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(playerX - 16, playerY - 20, 32, 25, 6);
+            ctx.fill();
+
+            // Roof Highlight
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillRect(playerX - 14, playerY - 15, 28, 8);
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(playerX - 18, playerY - 38, 8, 5);
+            ctx.fillRect(playerX + 10, playerY - 38, 8, 5);
+
+            // Nitro Flames Effect if Nitro Active
+            if (player.nitro > 0) {
+                ctx.fillStyle = '#00D2FF';
+                ctx.beginPath();
+                ctx.moveTo(playerX - 10, playerY + 40);
+                ctx.lineTo(playerX, playerY + 60 + Math.random() * 15);
+                ctx.lineTo(playerX + 10, playerY + 40);
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+
+            // Calculate accuracy
+            const accuracy = Math.round((player.correctCount / player.totalAnswered) * 100);
+
+            // Fill Modal Stats
+            document.getElementById('resName').innerText = player.name;
+            document.getElementById('resClass').innerText = player.class;
+            document.getElementById('resScore').innerText = `${player.score} Pts`;
+            document.getElementById('resAccuracy').innerText = `${accuracy}% (${player.correctCount}/${player.totalAnswered})`;
+            document.getElementById('resSpeed').innerText = `${120 + player.correctCount * 10} KM/H`;
+
+            // Open Modal
+            document.getElementById('resultModal').classList.remove('hidden');
+
+            // Trigger Victory Confetti
+            confetti({
+                particleCount: 100,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+
+            // Fetch Gemini AI Feedback
+            fetchAiTeacherFeedback(player.name, player.score, accuracy);
+        }
+
+        async function fetchAiTeacherFeedback(name, score, accuracy) {
+            const aiAnalysisEl = document.getElementById('resAiAnalysis');
+            aiAnalysisEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyusun umpan balik AI...`;
+
+            const prompt = `Berikan kalimat motivasi singkat (2 kalimat) untuk siswa kelas 5 SD bernama ${name} yang baru selesai bermain game balap matematika tentang 'Bilangan Bulat'. Skor: ${score}, Akurasi: ${accuracy}%. Berikan saran ramah dan menyemangati dalam bahasa Indonesia.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const feedbackText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (feedbackText) {
+                    aiAnalysisEl.innerText = feedbackText;
+                } else {
+                    fallbackFeedback(accuracy);
+                }
+            } catch (err) {
+                fallbackFeedback(accuracy);
+            }
+        }
+
+        function fallbackFeedback(accuracy) {
+            const aiAnalysisEl = document.getElementById('resAiAnalysis');
+            if (accuracy >= 80) {
+                aiAnalysisEl.innerText = `Luar biasa! Pemahaman kamu tentang garis bilangan dan operasi penjumlahan/pengurangan bilangan bulat sudah sangat matang. Pertahankan gelar juaramu!`;
+            } else {
+                aiAnalysisEl.innerText = `Usaha yang bagus! Jangan ragu untuk membayangkan garis bilangan saat menjumlahkan atau mengurangkan angka negatif. Ayo coba lagi dan tingkatkan skormu!`;
+            }
+        }
+
+        function restartRace() {
+            document.getElementById('resultModal').classList.add('hidden');
+            closeAiCoach();
+            initGame();
+        }
+
+        function generateAiCertificate() {
+            window.print();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

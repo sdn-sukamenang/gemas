@@ -15,6 +15,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Panjat Pinang | Oka Melya, S.Pd. | 2 | Matematika | `games/panjat-pinang/` |
 | Tarik Tambang Matematika | Mat Supri, S.Pd. | 5 | Matematika | `kelas5matematika.html` |
 | Math Racer: Operasi Hitung Pecahan | Isawadi Gari Baldi, S.Pd. | 6 | Matematika | `games/math-racer/` |
+| Turbo Math: Balap Bilangan Bulat | Tri Susilawati, S.Pd. | 5 | Matematika | `games/turbo-math/` |
 
 ## Cara Menambah Game Baru
 
