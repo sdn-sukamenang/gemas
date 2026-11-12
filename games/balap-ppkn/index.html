@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balap PPKn: Pahlawan Lingkungan Sekitar - Kelas 4 SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Outfit for vibrant educational UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brandGreen: '#10B981',
+                        brandBlue: '#0284C7',
+                        brandYellow: '#F59E0B',
+                        brandRed: '#EF4444',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+        }
+        .btn-bounce {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .btn-bounce:active {
+            transform: scale(0.94);
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.9); }
+        }
+        .nitro-glow {
+            animation: pulseGlow 1s infinite;
+        }
+        canvas {
+            display: block;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-center p-2 md:p-4 select-none">
+
+    <!-- SCREEN 1: LOGIN & PROFIL -->
+    <div id="screenLogin" class="w-full max-w-xl glass-panel rounded-3xl p-6 md:p-8 flex flex-col items-center text-center shadow-2xl relative z-20">
+        <div class="inline-flex items-center gap-2 bg-emerald-500/30 text-emerald-300 px-4 py-1.5 rounded-full text-sm font-semibold mb-3 border border-emerald-400/40">
+            <i class="fa-solid fa-graduation-cap"></i> PPKn Kelas 4 SD - Lingkungan Sekitar
+        </div>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-emerald-300 to-cyan-300 mb-2 leading-tight">
+            BALAP MOBIL<br><span class="text-white text-2xl md:text-4xl">PAHLAWAN LINGKUNGAN</span>
+        </h1>
+        <p class="text-slate-200 text-sm md:text-base mb-6 font-outfit">Isi nama & kelasmu untuk memulai petualangan balap edukasi!</p>
+
+        <form id="formLogin" class="w-full flex flex-col gap-4 text-left">
+            <div>
+                <label class="block text-amber-300 text-sm font-bold mb-1"><i class="fa-solid fa-user me-1"></i> Nama Lengkap Siswa</label>
+                <input type="text" id="inputNama" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 rounded-2xl bg-slate-900/80 border-2 border-emerald-400/50 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-300 text-lg font-outfit">
+            </div>
+
+            <div>
+                <label class="block text-amber-300 text-sm font-bold mb-1"><i class="fa-solid fa-school me-1"></i> Pilih Kelas</label>
+                <select id="selectKelas" required class="w-full px-4 py-3 rounded-2xl bg-slate-900/80 border-2 border-emerald-400/50 text-white focus:outline-none focus:border-emerald-300 text-lg font-outfit">
+                    <option value="4A">Kelas 4A</option>
+                    <option value="4B">Kelas 4B</option>
+                    <option value="4C">Kelas 4C</option>
+                    <option value="4D">Kelas 4D</option>
+                </select>
+            </div>
+
+            <!-- Pilih Mobil -->
+            <div>
+                <label class="block text-amber-300 text-sm font-bold mb-2"><i class="fa-solid fa-car me-1"></i> Pilih Mobil Balapmu</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <button type="button" onclick="selectCar('red')" id="carBtn-red" class="car-option p-2 rounded-2xl border-2 border-amber-400 bg-amber-500/20 flex flex-col items-center gap-1 btn-bounce">
+                        <i class="fa-solid fa-car-side text-2xl text-red-500"></i>
+                        <span class="text-xs font-bold">Merah</span>
+                    </button>
+                    <button type="button" onclick="selectCar('green')" id="carBtn-green" class="car-option p-2 rounded-2xl border-2 border-slate-600 bg-slate-800/40 flex flex-col items-center gap-1 btn-bounce">
+                        <i class="fa-solid fa-car-side text-2xl text-emerald-400"></i>
+                        <span class="text-xs font-bold">Hijau</span>
+                    </button>
+                    <button type="button" onclick="selectCar('blue')" id="carBtn-blue" class="car-option p-2 rounded-2xl border-2 border-slate-600 bg-slate-800/40 flex flex-col items-center gap-1 btn-bounce">
+                        <i class="fa-solid fa-car-side text-2xl text-cyan-400"></i>
+                        <span class="text-xs font-bold">Biru</span>
+                    </button>
+                    <button type="button" onclick="selectCar('yellow')" id="carBtn-yellow" class="car-option p-2 rounded-2xl border-2 border-slate-600 bg-slate-800/40 flex flex-col items-center gap-1 btn-bounce">
+                        <i class="fa-solid fa-car-side text-2xl text-yellow-400"></i>
+                        <span class="text-xs font-bold">Kuning</span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="mt-4 w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xl rounded-2xl shadow-lg shadow-emerald-500/30 btn-bounce flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i> MULAI BALAPAN
+            </button>
+        </form>
+    </div>
+
+    <!-- SCREEN 2: PETUNJUK CARA BERMAIN -->
+    <div id="screenInstructions" class="hidden w-full max-w-xl glass-panel rounded-3xl p-6 md:p-8 flex-col items-center text-center shadow-2xl z-20">
+        <h2 class="text-3xl font-extrabold text-yellow-300 mb-4"><i class="fa-solid fa-book-open me-2"></i>Petunjuk Arena Balap</h2>
+        <div class="text-left bg-slate-900/70 p-4 rounded-2xl border border-slate-700 text-slate-200 text-sm md:text-base space-y-3 font-outfit mb-6">
+            <div class="flex items-start gap-3">
+                <div class="bg-amber-500/30 text-amber-300 p-2 rounded-xl"><i class="fa-solid fa-gamepad text-xl"></i></div>
+                <div><strong>Kontrol Mobil:</strong> Gunakan tombol <span class="text-amber-300">Kiri / Kanan</span> di layar (HP/Tablet/Smartboard) atau <span class="text-amber-300">Tombol Panah / A D</span> pada keyboard laptop.</div>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="bg-emerald-500/30 text-emerald-300 p-2 rounded-xl"><i class="fa-solid fa-star text-xl"></i></div>
+                <div><strong>Ambil Bintang & Nitro:</strong> Kumpulkan Bintang Pancasila (+100 Skor) dan Serum Eco untuk akselerasi tambahan.</div>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="bg-red-500/30 text-red-300 p-2 rounded-xl"><i class="fa-solid fa-triangle-exclamation text-xl"></i></div>
+                <div><strong>Hindari Rintangan:</strong> Jauhi tumpukan sampah dan oli bekas di jalan agar mobil tidak kehilangan nyawa!</div>
+            </div>
+            <div class="flex items-start gap-3">
+                <div class="bg-cyan-500/30 text-cyan-300 p-2 rounded-xl"><i class="fa-solid fa-circle-question text-xl"></i></div>
+                <div><strong>Pos Checkpoint PPKn:</strong> Jawab soal kuis PPKn lingkungan sekitar di setiap checkpoint untuk mengaktifkan <strong>TURBO NITRO SPEED</strong>!</div>
+            </div>
+        </div>
+        <button onclick="startRacingGame()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-extrabold text-xl rounded-2xl shadow-lg shadow-amber-500/30 btn-bounce flex items-center justify-center gap-2">
+            SIAP! MASUK ARENA BALAP <i class="fa-solid fa-flag-checkered"></i>
+        </button>
+    </div>
+
+    <!-- SCREEN 3: GAMEPLAY CANVAS & HUD -->
+    <div id="screenGame" class="hidden w-full h-full max-w-4xl flex-col items-center justify-between p-2 relative z-10">
+        <!-- Top HUD -->
+        <div class="w-full glass-panel rounded-2xl p-3 px-4 flex items-center justify-between gap-2 shadow-lg mb-2">
+            <!-- Info Siswa & Nyawa -->
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                    <span id="hudPlayerName" class="font-extrabold text-amber-300 text-sm md:text-base">Siswa</span>
+                    <span id="hudPlayerClass" class="text-xs text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded ml-1">4A</span>
+                </div>
+                <div class="flex items-center gap-1 text-red-500 text-lg md:text-xl" id="hudHearts">
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                    <i class="fa-solid fa-heart"></i>
+                </div>
+            </div>
+
+            <!-- Pos Soal Checkpoint -->
+            <div class="bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 rounded-xl text-center">
+                <span class="text-xs text-emerald-400 font-bold block">POS SOAL</span>
+                <span id="hudQuestionCount" class="text-lg font-black text-emerald-300">0 / 8</span>
+            </div>
+
+            <!-- Skor & Nitro Status -->
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <span class="text-xs text-slate-300 block">SKOR</span>
+                    <span id="hudScore" class="text-xl md:text-2xl font-black text-yellow-300">0</span>
+                </div>
+                <button onclick="toggleAudio()" id="btnAudio" class="p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-600 text-amber-400">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full flex-1 flex items-center justify-center overflow-hidden min-h-0">
+            <canvas id="gameCanvas" class="w-full h-full max-w-md max-h-[600px] object-contain border-4 border-slate-700/80"></canvas>
+            
+            <!-- Toast Notification -->
+            <div id="toastNotify" class="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border-2 border-amber-400 text-amber-300 px-6 py-2 rounded-full font-bold text-center text-sm md:text-base shadow-2xl transition-all opacity-0 pointer-events-none z-30">
+                Pesan Toast
+            </div>
+        </div>
+
+        <!-- Touch Controls (HP, TAB, Smartboard/IFP) -->
+        <div class="w-full max-w-md grid grid-cols-3 gap-3 mt-2">
+            <button id="btnLeft" class="py-4 bg-slate-800/90 active:bg-emerald-600 border-2 border-slate-600 rounded-2xl text-white font-extrabold text-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform touch-none">
+                <i class="fa-solid fa-arrow-left"></i> KIRI
+            </button>
+            <button id="btnNitro" class="py-4 bg-amber-500/90 active:bg-amber-600 border-2 border-amber-300 rounded-2xl text-slate-950 font-black text-xl flex flex-col items-center justify-center shadow-lg active:scale-95 transition-transform touch-none nitro-glow">
+                <span><i class="fa-solid fa-bolt"></i> NITRO</span>
+                <span class="text-[10px] uppercase font-bold text-slate-900">Tekan/Tahan</span>
+            </button>
+            <button id="btnRight" class="py-4 bg-slate-800/90 active:bg-emerald-600 border-2 border-slate-600 rounded-2xl text-white font-extrabold text-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform touch-none">
+                KANAN <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL KUIS CHECKPOINT PPKN -->
+    <div id="quizModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div class="w-full max-w-2xl glass-panel rounded-3xl p-6 md:p-8 flex flex-col items-center text-center shadow-2xl border-2 border-amber-400/60 animate-bounce-in">
+            <!-- Badge Checkpoint -->
+            <div class="flex items-center justify-between w-full mb-4 border-b border-slate-700/80 pb-3">
+                <span class="bg-amber-500 text-slate-950 px-3 py-1 rounded-full text-xs font-black tracking-wide uppercase">
+                    <i class="fa-solid fa-flag"></i> Checkpoint PPKn
+                </span>
+                <span id="quizTimer" class="text-amber-300 font-extrabold text-sm"><i class="fa-regular fa-clock me-1"></i> Waktu: 20 detik</span>
+            </div>
+
+            <h3 id="quizQuestionText" class="text-xl md:text-2xl font-bold text-white mb-6 font-outfit text-left w-full leading-relaxed">
+                Pertanyaan Soal PPKn akan tampil di sini...
+            </h3>
+
+            <!-- Pilihan Jawaban (Desain Sangat Cocok untuk Touchscreen & Smartboard IFP) -->
+            <div id="quizOptionsContainer" class="w-full grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                <!-- Option buttons injected via JS -->
+            </div>
+
+            <!-- Box Pembahasan / Feedback -->
+            <div id="quizFeedbackBox" class="hidden w-full p-4 rounded-2xl text-left text-sm md:text-base font-outfit mb-4">
+                <p id="quizFeedbackTitle" class="font-extrabold text-base mb-1"></p>
+                <p id="quizFeedbackDesc" class="text-slate-200"></p>
+            </div>
+
+            <button id="btnContinueRace" onclick="closeQuizModal()" class="hidden w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 text-white font-extrabold text-lg rounded-2xl shadow-lg btn-bounce">
+                LANJUTKAN BALAPAN <i class="fa-solid fa-forward me-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: HASIL RAPORT BALAP & SERTIFIKAT -->
+    <div id="screenResult" class="hidden w-full max-w-xl glass-panel rounded-3xl p-6 md:p-8 flex-col items-center text-center shadow-2xl z-20">
+        <div class="text-amber-400 text-5xl mb-2">
+            <i class="fa-solid fa-trophy animate-bounce"></i>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-500">
+            RAPORT BALAP PPKN
+        </h2>
+        <p class="text-slate-300 text-sm font-outfit mb-4">Materi Lingkungan Sekitar Kelas 4 SD</p>
+
+        <!-- Card Hasil -->
+        <div class="w-full bg-slate-900/90 rounded-2xl p-4 border border-amber-400/40 text-left font-outfit space-y-2 mb-6">
+            <div class="flex justify-between border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Nama Pengemudi:</span>
+                <span id="resName" class="font-bold text-amber-300">Budi</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Kelas:</span>
+                <span id="resClass" class="font-bold text-emerald-400">4A</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Skor Akhir:</span>
+                <span id="resScore" class="font-extrabold text-2xl text-yellow-400">1200</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-800 pb-2">
+                <span class="text-slate-400">Akurasi Soal PPKn:</span>
+                <span id="resAccuracy" class="font-bold text-cyan-300">8 / 8 Soal Benar</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-400">Gelar Kelulusan:</span>
+                <span id="resBadge" class="font-extrabold text-emerald-300">Pahlawan Lingkungan Utama 🌟</span>
+            </div>
+        </div>
+
+        <div class="flex gap-3 w-full">
+            <button onclick="restartGame()" class="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold rounded-2xl btn-bounce">
+                <i class="fa-solid fa-rotate-right me-1"></i> Main Lagi
+            </button>
+            <button onclick="window.print()" class="flex-1 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-2xl shadow-lg btn-bounce">
+                <i class="fa-solid fa-print me-1"></i> Cetak Hasil
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME ENGINE -->
+    <script>
+        // SINTESIS AUDIO (Menggunakan Web Audio API tanpa perlu eksternal MP3)
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.setValueAtTime(130, now + 0.15);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'nitro') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('btnAudio');
+            btn.innerHTML = isMuted ? '<i class="fa-solid fa-volume-xmark text-red-400"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        }
+
+        // BANK SOAL PPKN KELAS 4 - MATERI LINGKUNGAN SEKITAR
+        const ppknQuestions = [
+            {
+                q: "Bagaimana cara terbaik dalam menjaga keharmonisan dan kerukunan dengan tetangga di sekitar rumah kita?",
+                options: [
+                    "A. Saling menyapa ramah dan menolong saat ada yang kesulitan",
+                    "B. Selalu mengunci pintu dan tidak pernah tersenyum",
+                    "C. Membunyikan musik sangat keras di tengah malam",
+                    "D. Membuang sampah di depan pagar rumah tetangga"
+                ],
+                answer: 0,
+                explain: "Menyapa dengan ramah dan tulus serta membantu tetangga adalah wujud nyata menciptakan lingkungan tetangga yang rukun dan damai."
+            },
+            {
+                q: "Kegiatan gotong royong membersihkan selokan air di lingkungan RT bertujuan untuk...",
+                options: [
+                    "A. Membuat jalanan makin sempit",
+                    "B. Mencegah banjir dan sarang nyamuk DBD",
+                    "C. Menghabiskan anggaran kas RT",
+                    "D. Pamer kekuatan fisik kepada warga"
+                ],
+                answer: 1,
+                explain: "Gotong royong membersihkan selokan membuat lingkungan bersih, sehat, dan terhindar dari bahaya banjir serta penyakit."
+            },
+            {
+                q: "Jika kamu melihat sampah plastik berserakan di lapangan bermain dekat rumah, sikap terpuji yang kamu lakukan adalah...",
+                options: [
+                    "A. Menyalahkan petugas kebersihan",
+                    "B. Mengabaikannya dan tetap bermain",
+                    "C. Memungutnya dan memasukkannya ke tempat sampah",
+                    "D. Menendang sampah tersebut ke halaman rumah orang lain"
+                ],
+                answer: 2,
+                explain: "Memungut sampah dan membuangnya ke tempat sampah menunjukkan kepedulian tinggi terhadap kelestarian lingkungan sekitar."
+            },
+            {
+                q: "Bentuk sikap saling menghargai ketika ada tetangga yang sedang melaksanakan ibadah di rumahnya adalah...",
+                options: [
+                    "A. Bermain petasan persis di depan rumah tetangga",
+                    "B. Menjaga ketenangan dan tidak berteriak-teriak",
+                    "C. Mematikan saklar listrik rumahnya secara sepihak",
+                    "D. Menghidupkan klakson kendaraan berkali-kali"
+                ],
+                answer: 1,
+                explain: "Menjaga suasana tetap tenang merupakan wujud pelaksanaan sila ke-1 Pancasila dan toleransi antarumat beragama."
+            },
+            {
+                q: "Tingkatan organisasi masyarakat paling kecil dan terdekat di lingkungan pemukiman tempat tinggal kita adalah...",
+                options: [
+                    "A. Rukun Tetangga (RT)",
+                    "B. Kantor Kecamatan",
+                    "C. Pemerintah Kabupaten",
+                    "D. Kantor Gubernur"
+                ],
+                answer: 0,
+                explain: "RT (Rukun Tetangga) merupakan organisasi masyarakat tingkat terkecil yang membina kebersamaan warga di sekitar lingkungan tempat tinggal."
+            },
+            {
+                q: "Tindakan yang tepat dalam merawat dan menjaga fasilitas umum seperti pos ronda dan taman bermain adalah...",
+                options: [
+                    "A. Mengotori tembok pos ronda dengan coretan cat",
+                    "B. Memetik seluruh bunga di taman sampai habis",
+                    "C. Menggunakan dan merawat fasilitas umum dengan baik",
+                    "D. Merusak lampu penerangan jalan umum"
+                ],
+                answer: 2,
+                explain: "Fasilitas umum adalah milik bersama, sehingga wajib kita jaga bersama agar dapat terus dimanfaatkan secara berkelanjutan."
+            },
+            {
+                q: "Mengapa kita harus mengenal nama dan alamat para tetangga di sekitar tempat tinggal kita?",
+                options: [
+                    "A. Untuk bahan pembicaraan negatif",
+                    "B. Agar tercipta hubungan kekeluargaan dan kemudahan saat saling memerlukan bantuan",
+                    "C. Agar bisa meminta makanan setiap hari",
+                    "D. Untuk menyombongkan barang baru"
+                ],
+                answer: 1,
+                explain: "Mengenal tetangga akan mempererat tali silaturahmi dan memudahkan komunikasi ketika membutuhkan pertolongan darurat."
+            },
+            {
+                q: "Semboyan 'Bhinneka Tunggal Ika' di lingkungan kehidupan bermasyarakat mengajarkan kita untuk...",
+                options: [
+                    "A. Hanya mau berteman dengan teman satu suku",
+                    "B. Bersatu dan rukun meskipun memiliki latar belakang budaya yang berbeda",
+                    "C. Membeda-bedakan tetangga kaya dan miskin",
+                    "D. Menjauhi tetangga yang berbeda logat bicara"
+                ],
+                answer: 1,
+                explain: "Bhinneka Tunggal Ika mengajarkan bahwa perbedaan adalah kekayaan bangsa yang harus disatukan dalam semangat persaudaraan."
+            }
+        ];
+
+        // VARIABEL STATE GAME
+        let playerData = {
+            nama: '',
+            kelas: '4A',
+            carColor: 'red',
+            score: 0,
+            hearts: 3,
+            questionsCorrect: 0,
+            currentQuestionIdx: 0
+        };
+
+        let canvas, ctx;
+        let gameLoopReq;
+        let isGameRunning = false;
+        let roadOffset = 0;
+        let roadSpeed = 6;
+        let isNitroActive = false;
+
+        // Entitas Game
+        let playerCar = {
+            x: 0,
+            y: 0,
+            width: 45,
+            height: 75,
+            lane: 1, // 0: Kiri, 1: Tengah, 2: Kanan
+            targetX: 0
+        };
+
+        let gameItems = []; // Stars & Nitro
+        let gameObstacles = []; // Trash & Oil
+        let checkPointGate = null;
+
+        let spawnTimer = 0;
+        let checkpointDistance = 0;
+        const CHECKPOINT_INTERVAL = 450; // Jarak antar checkpoint kuis
+
+        // Pilihan Warna Mobil
+        function selectCar(color) {
+            playerData.carColor = color;
+            document.querySelectorAll('.car-option').forEach(btn => {
+                btn.classList.remove('border-amber-400', 'bg-amber-500/20');
+                btn.classList.add('border-slate-600', 'bg-slate-800/40');
+            });
+            const selectedBtn = document.getElementById(`carBtn-${color}`);
+            selectedBtn.classList.add('border-amber-400', 'bg-amber-500/20');
+            selectedBtn.classList.remove('border-slate-600', 'bg-slate-800/40');
+        }
+
+        // Form Submission
+        document.getElementById('formLogin').addEventListener('submit', function(e) {
+            e.preventDefault();
+            playerData.nama = document.getElementById('inputNama').value.trim() || 'Pengemudi Cilik';
+            playerData.kelas = document.getElementById('selectKelas').value;
+
+            document.getElementById('screenLogin').classList.add('hidden');
+            document.getElementById('screenInstructions').classList.remove('hidden');
+            document.getElementById('screenInstructions').classList.add('flex');
+        });
+
+        function startRacingGame() {
+            document.getElementById('screenInstructions').classList.add('hidden');
+            document.getElementById('screenInstructions').classList.remove('flex');
+            document.getElementById('screenGame').classList.remove('hidden');
+            document.getElementById('screenGame').classList.add('flex');
+
+            document.getElementById('hudPlayerName').innerText = playerData.nama;
+            document.getElementById('hudPlayerClass').innerText = playerData.kelas;
+
+            initCanvas();
+            resetGameState();
+            isGameRunning = true;
+            gameLoop();
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Adjust canvas resolution dynamically
+            canvas.width = 360;
+            canvas.height = 580;
+
+            // Setup Lane X positions
+            updatePlayerX();
+            playerCar.y = canvas.height - 100;
+        }
+
+        function getLaneX(laneIndex) {
+            const laneWidth = canvas.width / 3;
+            return laneWidth * laneIndex + (laneWidth / 2);
+        }
+
+        function updatePlayerX() {
+            playerCar.targetX = getLaneX(playerCar.lane) - (playerCar.width / 2);
+        }
+
+        function resetGameState() {
+            playerData.score = 0;
+            playerData.hearts = 3;
+            playerData.questionsCorrect = 0;
+            playerData.currentQuestionIdx = 0;
+            
+            playerCar.lane = 1;
+            updatePlayerX();
+            playerCar.x = playerCar.targetX;
+
+            gameItems = [];
+            gameObstacles = [];
+            checkPointGate = null;
+            checkpointDistance = 0;
+            roadSpeed = 6;
+
+            updateHUD();
+        }
+
+        function updateHUD() {
+            document.getElementById('hudScore').innerText = playerData.score;
+            document.getElementById('hudQuestionCount').innerText = `${playerData.questionsCorrect} / ${ppknQuestions.length}`;
+            
+            // Render Hearts
+            let heartsHtml = '';
+            for (let i = 0; i < 3; i++) {
+                if (i < playerData.hearts) {
+                    heartsHtml += '<i class="fa-solid fa-heart text-red-500"></i>';
+                } else {
+                    heartsHtml += '<i class="fa-regular fa-heart text-slate-600"></i>';
+                }
+            }
+            document.getElementById('hudHearts').innerHTML = heartsHtml;
+        }
+
+        // KONTROL MOTORIK & INPUT
+        function moveLeft() {
+            if (playerCar.lane > 0) {
+                playerCar.lane--;
+                updatePlayerX();
+                playSound('coin');
+            }
+        }
+
+        function moveRight() {
+            if (playerCar.lane < 2) {
+                playerCar.lane++;
+                updatePlayerX();
+                playSound('coin');
+            }
+        }
+
+        // Attach Button Listeners
+        document.getElementById('btnLeft').addEventListener('pointerdown', (e) => { e.preventDefault(); moveLeft(); });
+        document.getElementById('btnRight').addEventListener('pointerdown', (e) => { e.preventDefault(); moveRight(); });
+
+        // Nitro Toggle
+        const btnNitro = document.getElementById('btnNitro');
+        btnNitro.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            isNitroActive = true;
+            playSound('nitro');
+        });
+        btnNitro.addEventListener('pointerup', () => { isNitroActive = false; });
+        btnNitro.addEventListener('pointerleave', () => { isNitroActive = false; });
+
+        // Keyboard Controls
+        window.addEventListener('keydown', (e) => {
+            if (!isGameRunning) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLeft();
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRight();
+            if (e.key === ' ' || e.key === 'ArrowUp') isNitroActive = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key === ' ' || e.key === 'ArrowUp') isNitroActive = false;
+        });
+
+        // GAME LOOP UTAMA
+        function gameLoop() {
+            if (!isGameRunning) return;
+
+            updatePhysics();
+            renderCanvas();
+
+            gameLoopReq = requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            const speedMultiplier = isNitroActive ? 1.8 : 1.0;
+            const currentSpeed = roadSpeed * speedMultiplier;
+
+            // Scroll Road Background
+            roadOffset = (roadOffset + currentSpeed) % 40;
+
+            // Smooth Interpolation X Car
+            playerCar.x += (playerCar.targetX - playerCar.x) * 0.25;
+
+            // Checkpoint Progress Distance
+            checkpointDistance += currentSpeed;
+            if (checkpointDistance >= CHECKPOINT_INTERVAL && !checkPointGate && playerData.currentQuestionIdx < ppknQuestions.length) {
+                checkPointGate = {
+                    y: -100,
+                    lane: 1
+                };
+            }
+
+            // Move Checkpoint Gate
+            if (checkPointGate) {
+                checkPointGate.y += currentSpeed;
+                if (checkPointGate.y >= playerCar.y - 20) {
+                    triggerQuizModal();
+                    checkPointGate = null;
+                    checkpointDistance = 0;
+                }
+            }
+
+            // Spawning Items & Obstacles
+            spawnTimer++;
+            if (spawnTimer > 45 && !checkPointGate) {
+                spawnTimer = 0;
+                const lane = Math.floor(Math.random() * 3);
+                const rand = Math.random();
+
+                if (rand < 0.55) {
+                    // Star item (+Score)
+                    gameItems.push({ x: getLaneX(lane), y: -40, type: 'star' });
+                } else if (rand < 0.7) {
+                    // Nitro Eco item
+                    gameItems.push({ x: getLaneX(lane), y: -40, type: 'eco' });
+                } else {
+                    // Trash obstacle
+                    gameObstacles.push({ x: getLaneX(lane), y: -40, type: Math.random() > 0.5 ? 'trash' : 'oil' });
+                }
+            }
+
+            // Update Items
+            for (let i = gameItems.length - 1; i >= 0; i--) {
+                let item = gameItems[i];
+                item.y += currentSpeed;
+
+                // Hit Test Player
+                if (Math.abs(item.x - (playerCar.x + playerCar.width / 2)) < 30 &&
+                    Math.abs(item.y - (playerCar.y + playerCar.height / 2)) < 35) {
+                    
+                    if (item.type === 'star') {
+                        playerData.score += 100;
+                        showToast('+100 Bintang Pancasila! 🌟');
+                    } else if (item.type === 'eco') {
+                        playerData.score += 150;
+                        showToast('Eco Boost! ⚡');
+                    }
+                    playSound('coin');
+                    gameItems.splice(i, 1);
+                    updateHUD();
+                    continue;
+                }
+
+                if (item.y > canvas.height + 50) gameItems.splice(i, 1);
+            }
+
+            // Update Obstacles
+            for (let i = gameObstacles.length - 1; i >= 0; i--) {
+                let obs = gameObstacles[i];
+                obs.y += currentSpeed;
+
+                // Hit Test
+                if (Math.abs(obs.x - (playerCar.x + playerCar.width / 2)) < 28 &&
+                    Math.abs(obs.y - (playerCar.y + playerCar.height / 2)) < 30) {
+                    
+                    playerData.hearts--;
+                    playSound('wrong');
+                    showToast('Awas Sampah/Oli! Nyawa Berkurang 💔');
+                    gameObstacles.splice(i, 1);
+                    updateHUD();
+
+                    if (playerData.hearts <= 0) {
+                        endGame(false);
+                    }
+                    continue;
+                }
+
+                if (obs.y > canvas.height + 50) gameObstacles.splice(i, 1);
+            }
+        }
+
+        // DRAWING ON CANVAS
+        function renderCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Environment Grass & Road
+            ctx.fillStyle = '#15803d'; // Green Grass
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Road Track
+            const roadMargin = 30;
+            const roadWidth = canvas.width - (roadMargin * 2);
+            ctx.fillStyle = '#334155'; // Asphalt Road
+            ctx.fillRect(roadMargin, 0, roadWidth, canvas.height);
+
+            // Curb Borders (Red & White)
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(roadMargin - 6, 0, 6, canvas.height);
+            ctx.fillRect(roadMargin + roadWidth, 0, 6, canvas.height);
+
+            // Lane Divider Lines (Dashed)
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([20, 20]);
+            ctx.lineDashOffset = -roadOffset;
+
+            const laneW = roadWidth / 3;
+            ctx.beginPath();
+            ctx.moveTo(roadMargin + laneW, 0);
+            ctx.lineTo(roadMargin + laneW, canvas.height);
+            ctx.moveTo(roadMargin + (laneW * 2), 0);
+            ctx.lineTo(roadMargin + (laneW * 2), canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset dash
+
+            // 2. Draw Checkpoint Gate
+            if (checkPointGate) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillRect(roadMargin, checkPointGate.y, roadWidth, 24);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 12px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('POS SOAL PPKN CHECKPOINT', canvas.width / 2, checkPointGate.y + 16);
+            }
+
+            // 3. Draw Items (Stars & Eco)
+            gameItems.forEach(item => {
+                if (item.type === 'star') {
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath();
+                    ctx.arc(item.x, item.y, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#854d0e';
+                    ctx.font = '900 14px "Font Awesome 6 Free"';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('\uf005', item.x, item.y);
+                } else {
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.beginPath();
+                    ctx.arc(item.x, item.y, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '900 12px "Font Awesome 6 Free"';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('\uf0e7', item.x, item.y);
+                }
+            });
+
+            // 4. Draw Obstacles (Trash & Oil)
+            gameObstacles.forEach(obs => {
+                if (obs.type === 'trash') {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillRect(obs.x - 12, obs.y - 12, 24, 24);
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '900 12px "Font Awesome 6 Free"';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('\uf1f8', obs.x, obs.y);
+                } else {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.beginPath();
+                    ctx.ellipse(obs.x, obs.y, 16, 12, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // 5. Draw Player Car
+            drawCar(playerCar.x, playerCar.y, playerCar.width, playerCar.height, playerData.carColor);
+        }
+
+        function drawCar(x, y, width, height, color) {
+            ctx.save();
+
+            let carColorHex = '#ef4444';
+            if (color === 'green') carColorHex = '#10b981';
+            if (color === 'blue') carColorHex = '#06b6d4';
+            if (color === 'yellow') carColorHex = '#f59e0b';
+
+            // Nitro Flame Effect
+            if (isNitroActive) {
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.moveTo(x + 10, y + height);
+                ctx.lineTo(x + width / 2, y + height + 20);
+                ctx.lineTo(x + width - 10, y + height);
+                ctx.fill();
+            }
+
+            // Car Body Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(x + 4, y + 4, width, height);
+
+            // Car Main Body
+            ctx.fillStyle = carColorHex;
+            ctx.beginPath();
+            ctx.roundRect(x, y, width, height, 10);
+            ctx.fill();
+
+            // Car Windshield (Glass)
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(x + 6, y + 18, width - 12, 16);
+
+            // Roof Lines
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(x + 4, y + 36, width - 8, 18);
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(x + 4, y + 2, 8, 6);
+            ctx.fillRect(x + width - 12, y + 2, 8, 6);
+
+            ctx.restore();
+        }
+
+        // KUIS CHECKPOINT MECHANICS
+        let quizTimerInterval = null;
+        let quizTimeLeft = 20;
+
+        function triggerQuizModal() {
+            isGameRunning = false;
+            cancelAnimationFrame(gameLoopReq);
+
+            const qData = ppknQuestions[playerData.currentQuestionIdx];
+            document.getElementById('quizQuestionText').innerText = qData.q;
+
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            optionsContainer.innerHTML = '';
+
+            document.getElementById('quizFeedbackBox').classList.add('hidden');
+            document.getElementById('btnContinueRace').classList.add('hidden');
+
+            qData.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 border-2 border-slate-600 text-slate-100 font-bold text-left text-sm md:text-base btn-bounce transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${optText}</span> <i class="fa-solid fa-circle-check opacity-0 text-emerald-400 text-xl"></i>`;
+                btn.onclick = () => handleAnswer(i);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('quizModal').classList.remove('hidden');
+
+            // Timer Quiz
+            quizTimeLeft = 20;
+            document.getElementById('quizTimer').innerHTML = `<i class="fa-regular fa-clock me-1"></i> Waktu: ${quizTimeLeft}s`;
+            clearInterval(quizTimerInterval);
+            quizTimerInterval = setInterval(() => {
+                quizTimeLeft--;
+                document.getElementById('quizTimer').innerHTML = `<i class="fa-regular fa-clock me-1"></i> Waktu: ${quizTimeLeft}s`;
+                if (quizTimeLeft <= 0) {
+                    clearInterval(quizTimerInterval);
+                    handleAnswer(-1); // Kehabisan waktu
+                }
+            }, 1000);
+        }
+
+        function handleAnswer(selectedIndex) {
+            clearInterval(quizTimerInterval);
+            const qData = ppknQuestions[playerData.currentQuestionIdx];
+            const buttons = document.querySelectorAll('#quizOptionsContainer button');
+
+            buttons.forEach(btn => btn.disabled = true);
+
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            const feedbackTitle = document.getElementById('quizFeedbackTitle');
+            const feedbackDesc = document.getElementById('quizFeedbackDesc');
+
+            feedbackBox.classList.remove('hidden', 'bg-emerald-500/20', 'border-emerald-500/50', 'bg-red-500/20', 'border-red-500/50');
+
+            if (selectedIndex === qData.answer) {
+                // Benar
+                playSound('correct');
+                playerData.score += 300;
+                playerData.questionsCorrect++;
+                
+                buttons[selectedIndex].classList.add('bg-emerald-600/50', 'border-emerald-400');
+                
+                feedbackBox.classList.add('bg-emerald-500/20', 'border', 'border-emerald-500/50');
+                feedbackTitle.innerText = "HEBAT! JAWABAN BENAR 🌟 (+300 Poin + Turbo Nitro Speed)";
+                feedbackTitle.className = "font-extrabold text-emerald-300 mb-1";
+            } else {
+                // Salah / Waktu Habis
+                playSound('wrong');
+                if (selectedIndex >= 0) {
+                    buttons[selectedIndex].classList.add('bg-red-600/50', 'border-red-400');
+                }
+                buttons[qData.answer].classList.add('bg-emerald-600/50', 'border-emerald-400');
+
+                feedbackBox.classList.add('bg-red-500/20', 'border', 'border-red-500/50');
+                feedbackTitle.innerText = "KURANG TEPAT!";
+                feedbackTitle.className = "font-extrabold text-red-300 mb-1";
+            }
+
+            feedbackDesc.innerText = qData.explain;
+            document.getElementById('btnContinueRace').classList.remove('hidden');
+            updateHUD();
+        }
+
+        function closeQuizModal() {
+            document.getElementById('quizModal').classList.add('hidden');
+            playerData.currentQuestionIdx++;
+
+            if (playerData.currentQuestionIdx >= ppknQuestions.length) {
+                endGame(true);
+            } else {
+                // Lanjut balapan
+                isGameRunning = true;
+                gameLoop();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotify');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 1800);
+        }
+
+        function endGame(isVictory) {
+            isGameRunning = false;
+            cancelAnimationFrame(gameLoopReq);
+
+            document.getElementById('screenGame').classList.add('hidden');
+            document.getElementById('screenResult').classList.remove('hidden');
+            document.getElementById('screenResult').classList.add('flex');
+
+            document.getElementById('resName').innerText = playerData.nama;
+            document.getElementById('resClass').innerText = playerData.kelas;
+            document.getElementById('resScore').innerText = playerData.score;
+            document.getElementById('resAccuracy').innerText = `${playerData.questionsCorrect} / ${ppknQuestions.length} Soal Benar`;
+
+            // Gelar Raport
+            let badgeText = "Pahlawan Lingkungan Utama 🌟";
+            if (playerData.questionsCorrect < 5) badgeText = "Pejuang Lingkungan Cilik 🌱";
+            else if (playerData.questionsCorrect < 7) badgeText = "Duta Lingkungan Teladan 🏆";
+            document.getElementById('resBadge').innerText = badgeText;
+        }
+
+        function restartGame() {
+            document.getElementById('screenResult').classList.add('hidden');
+            document.getElementById('screenLogin').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
