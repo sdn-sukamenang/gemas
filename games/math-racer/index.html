@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Math Racer: Operasi Hitung Pecahan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #1a202c;
+            color: white;
+            overflow: hidden; /* Mencegah scrolling saat main di mobile */
+            touch-action: none; /* Mencegah zoom/scroll default browser di mobile */
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2d3748;
+            overflow: hidden;
+            display: none; /* Sembunyikan game awalnya */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Overlay UI dalam Game */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Biarkan klik tembus ke canvas/tombol */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .hud-panel {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid #4a5568;
+            pointer-events: auto;
+        }
+
+        /* Modal Pertanyaan */
+        #question-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 4px solid #fff;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: none;
+            pointer-events: auto;
+            width: 90%;
+            max-width: 400px;
+            z-index: 50;
+        }
+
+        .answer-btn {
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            border: 2px solid #2b6cb0;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: calc(50% - 1rem);
+            display: inline-block;
+        }
+
+        .answer-btn:hover, .answer-btn:active {
+            background-color: #bee3f8;
+            transform: scale(1.05);
+        }
+
+        /* Layar Login & Game Over */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c5282, #1a365d);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Kontrol Sentuh Mobile */
+        #mobile-controls {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Animasi pecahan */
+        .fraction {
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            margin: 0 0.2em;
+        }
+        .fraction > span {
+            display: block;
+            padding: 0.1em;
+        }
+        .fraction span.fdn {
+            border-top: 2px solid white;
+        }
+        
+        .answer-btn .fraction span.fdn {
+            border-top: 2px solid #2b6cb0;
+        }
+
+        @media (min-width: 768px) {
+            #mobile-controls {
+                display: none; /* Sembunyikan kontrol sentuh di layar besar */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="screen">
+        <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
+            <div class="mb-6">
+                <svg class="w-20 h-20 mx-auto text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-blue-700 pixel-font mb-2 leading-tight">MATH RACER</h1>
+                <p class="text-lg font-semibold text-gray-600">Misi: Operasi Pecahan</p>
+                <p class="text-sm text-gray-500 mt-1">Kelas 6 SD - Fase C</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="playerName" class="block text-left text-sm font-medium text-gray-700 mb-1">Nama Pembalap</label>
+                    <input type="text" id="playerName" placeholder="Masukkan nama kamu..." class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-lg font-medium">
+                </div>
+                <div>
+                    <label for="playerClass" class="block text-left text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select id="playerClass" class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-lg font-medium appearance-none">
+                        <option value="">Pilih Kelas...</option>
+                        <option value="6A">Kelas 6A</option>
+                        <option value="6B">Kelas 6B</option>
+                        <option value="6C">Kelas 6C</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <button id="start-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-6 shadow-lg transform transition hover:-translate-y-1 hover:shadow-xl pixel-font text-sm">
+                    MULAI BALAPAN!
+                </button>
+            </div>
+            
+            <div class="mt-6 text-sm text-gray-500">
+                <p>Cara Main:</p>
+                <p>Ganti jalur: Sentuh Kiri/Kanan atau Panah ⬅️/➡️</p>
+                <p>Hindari mobil lain dan jawab soal pecahan!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <!-- Canvas untuk rendering grafis game -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- UI Layer (Skor, Nyawa, Info Pemain) -->
+        <div id="ui-layer">
+            <div class="flex justify-between items-start">
+                <div class="hud-panel">
+                    <div class="text-sm text-gray-300" id="display-name">Pemain</div>
+                    <div class="text-xl font-bold text-yellow-400 pixel-font mt-1">Skor: <span id="score">0</span></div>
+                </div>
+                <div class="hud-panel flex gap-1" id="lives-container">
+                    <!-- Nyawa akan di-render di sini via JS -->
+                    <span class="text-2xl">❤️</span>
+                    <span class="text-2xl">❤️</span>
+                    <span class="text-2xl">❤️</span>
+                </div>
+            </div>
+            
+            <div class="text-center mb-10">
+                <div id="status-message" class="text-2xl font-bold text-white pixel-font text-shadow drop-shadow-md hidden">
+                    BERSIAP!
+                </div>
+            </div>
+        </div>
+
+        <div id="question-modal">
+            <div class="text-yellow-300 font-bold mb-2 text-lg">WAKTUNYA KUIS!</div>
+            <p class="text-white text-sm mb-4">Jawab dengan benar untuk mempercepat mobilmu dan menambah nyawa!</p>
+            
+            <div id="question-text" class="text-3xl font-bold text-white mb-6 bg-blue-800 p-4 rounded-lg shadow-inner flex justify-center items-center gap-2">
+                <!-- Contoh format: 1/2 + 1/4 = ? -->
+                <div class="fraction"><span>1</span><span class="fdn">2</span></div>
+                <span>+</span>
+                <div class="fraction"><span>1</span><span class="fdn">4</span></div>
+                <span>= ?</span>
+            </div>
+
+            <div id="answers-container" class="flex flex-wrap justify-center">
+                <!-- Tombol jawaban akan di-generate via JS -->
+                <button class="answer-btn"><div class="fraction"><span>3</span><span class="fdn">4</span></div></button>
+                <button class="answer-btn"><div class="fraction"><span>2</span><span class="fdn">6</span></div></button>
+            </div>
+        </div>
+
+        <div id="mobile-controls">
+            <button class="control-btn" id="btn-left">◀</button>
+            <button class="control-btn" id="btn-right">▶</button>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="screen hidden">
+        <div class="bg-gray-900 border-4 border-red-500 p-8 rounded-2xl shadow-2xl max-w-md w-full text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-red-500 animate-pulse"></div>
+            
+            <h1 class="text-4xl font-bold text-red-500 pixel-font mb-4 mt-4">TABRAKAN!</h1>
+            
+            <div class="bg-gray-800 rounded-lg p-6 mb-6 mt-6 shadow-inner border border-gray-700">
+                <p class="text-gray-400 mb-1 text-lg">Pembalap: <span id="final-name" class="text-white font-bold"></span></p>
+                <p class="text-gray-400 mb-4 text-sm">Kelas: <span id="final-class" class="text-white"></span></p>
+                
+                <div class="border-t border-gray-700 pt-4">
+                    <p class="text-gray-400 text-sm uppercase tracking-widest mb-1">Skor Akhir</p>
+                    <p id="final-score" class="text-5xl font-bold text-yellow-400 pixel-font">0</p>
+                </div>
+            </div>
+
+            <button id="restart-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-lg shadow-[0_4px_0_#2f855a] active:shadow-[0_0px_0_#2f855a] active:translate-y-1 transition-all pixel-font text-sm">
+                MAIN LAGI
+            </button>
+            
+            <button id="change-player-btn" class="mt-4 text-gray-400 hover:text-white underline text-sm transition-colors">
+                Ganti Pemain
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- State Game ---
+        const gameState = {
+            playerName: '',
+            playerClass: '',
+            score: 0,
+            lives: 3,
+            maxLives: 3,
+            isPlaying: false,
+            isPausedForQuestion: false,
+            speedMultiplier: 1,
+            distance: 0,
+            roadOffset: 0
+        };
+
+        // --- Konstanta Game ---
+        const ROAD_WIDTH = 0.8; // Persentase lebar jalan dari canvas
+        const LANES = 3; // Jumlah jalur
+        const CAR_WIDTH = 50;
+        const CAR_HEIGHT = 90;
+        const ENEMY_SPEED_BASE = 3;
+        const ROAD_SPEED_BASE = 5;
+        const QUESTION_INTERVAL = 1000; // Jarak/skor antar pertanyaan
+
+        // --- Variabel Objek Game ---
+        let canvas, ctx;
+        let playerCar = { lane: 1, y: 0, width: CAR_WIDTH, height: CAR_HEIGHT }; // lane: 0 (kiri), 1 (tengah), 2 (kanan)
+        let enemies = [];
+        let animationId;
+        let lastTime = 0;
+        let currentQuestion = null;
+        let questionCounter = 0;
+
+        // --- Elemen DOM ---
+        const screens = {
+            login: document.getElementById('login-screen'),
+            game: document.getElementById('game-container'),
+            gameOver: document.getElementById('game-over-screen')
+        };
+        const inputs = {
+            name: document.getElementById('playerName'),
+            cls: document.getElementById('playerClass')
+        };
+        const ui = {
+            score: document.getElementById('score'),
+            lives: document.getElementById('lives-container'),
+            displayName: document.getElementById('display-name'),
+            status: document.getElementById('status-message')
+        };
+        const modal = {
+            container: document.getElementById('question-modal'),
+            text: document.getElementById('question-text'),
+            answers: document.getElementById('answers-container')
+        };
+
+        window.onload = () => {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Tombol Login
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            
+            // Tombol Game Over
+            document.getElementById('restart-btn').addEventListener('click', resetAndPlay);
+            document.getElementById('change-player-btn').addEventListener('click', showLogin);
+
+            // Kontrol Keyboard
+            window.addEventListener('keydown', handleKeyDown);
+
+            // Kontrol Sentuh Mobile
+            document.getElementById('btn-left').addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer(-1); });
+            document.getElementById('btn-right').addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer(1); });
+            // Mouse click support for testing mobile controls on desktop
+            document.getElementById('btn-left').addEventListener('mousedown', () => movePlayer(-1));
+            document.getElementById('btn-right').addEventListener('mousedown', () => movePlayer(1));
+        };
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const container = document.getElementById('game-container');
+            // Jika container sedang disembunyikan (display: none), ukurannya 0.
+            // Kita akali dengan mengambil ukuran window atau parent pembungkusnya
+            canvas.width = container.clientWidth || window.innerWidth || document.documentElement.clientWidth;
+            canvas.height = container.clientHeight || window.innerHeight || document.documentElement.clientHeight;
+            
+            // Limit lebar untuk laptop/desktop agar proporsi enak dilihat
+            if (canvas.width > 800) {
+                canvas.width = 800;
+            }
+            
+            // Sesuaikan posisi awal pemain
+            playerCar.y = canvas.height - CAR_HEIGHT - 30;
+            
+            // Gambar ulang jika sedang pause
+            if (gameState.isPausedForQuestion) {
+                draw();
+            }
+        }
+
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => {
+                s.style.display = 'none';
+                s.classList.add('hidden');
+            });
+            
+            if (screenName === 'game') {
+                screens.game.style.display = 'block';
+                // Trigger resize setelah elemen ditampilkan agar ukuran canvas akurat
+                setTimeout(resizeCanvas, 10); 
+            } else {
+                screens[screenName].style.display = 'flex';
+                screens[screenName].classList.remove('hidden');
+            }
+        }
+
+        function showLogin() {
+            showScreen('login');
+        }
+
+        function startGame() {
+            const name = inputs.name.value.trim();
+            const cls = inputs.cls.value;
+
+            if (!name) {
+                alert("Harap masukkan nama pembalap!");
+                inputs.name.focus();
+                return;
+            }
+            if (!cls) {
+                alert("Harap pilih kelas!");
+                inputs.cls.focus();
+                return;
+            }
+
+            gameState.playerName = name;
+            gameState.playerClass = cls;
+            ui.displayName.textContent = `${name} (${cls})`;
+
+            resetAndPlay();
+        }
+
+        function resetAndPlay() {
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.speedMultiplier = 1;
+            gameState.distance = 0;
+            gameState.isPausedForQuestion = false;
+            questionCounter = 0;
+            
+            playerCar.lane = 1; // Mulai di tengah
+            enemies = [];
+            
+            updateHUD();
+            showScreen('game');
+            modal.container.style.display = 'none';
+            
+            gameState.isPlaying = true;
+            lastTime = performance.now();
+            
+            showMessage("MULAI!", 1000);
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            gameLoop(performance.now());
+        }
+
+        function gameOver() {
+            gameState.isPlaying = false;
+            cancelAnimationFrame(animationId);
+            
+            document.getElementById('final-name').textContent = gameState.playerName;
+            document.getElementById('final-class').textContent = gameState.playerClass;
+            document.getElementById('final-score').textContent = Math.floor(gameState.score);
+            
+            setTimeout(() => {
+                showScreen('gameOver');
+            }, 500); // Jeda sedikit sebelum layar game over muncul
+        }
+
+        function handleKeyDown(e) {
+            if (!gameState.isPlaying || gameState.isPausedForQuestion) return;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                movePlayer(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                movePlayer(1);
+            }
+        }
+
+        function movePlayer(direction) {
+            if (!gameState.isPlaying || gameState.isPausedForQuestion) return;
+            
+            // direction: -1 (kiri), 1 (kanan)
+            playerCar.lane += direction;
+            
+            // Batasi jalur (0, 1, 2)
+            if (playerCar.lane < 0) playerCar.lane = 0;
+            if (playerCar.lane > LANES - 1) playerCar.lane = LANES - 1;
+        }
+
+        // Materi: Penjumlahan & Pengurangan beda penyebut, Perkalian, Pembagian sederhana
+        
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function simplifyFraction(n, d) {
+            const common = gcd(n, d);
+            return [n / common, d / common];
+        }
+
+        function formatFractionHTML(n, d) {
+            if (d === 1) return `<span>${n}</span>`;
+            if (n === 0) return `<span>0</span>`;
+            return `<div class="fraction"><span>${n}</span><span class="fdn">${d}</span></div>`;
+        }
+
+        function generateQuestion() {
+            const operations = ['+', '-', 'x', ':'];
+            // Bobot operasi: + (40%), - (30%), x (20%), : (10%)
+            const r = Math.random();
+            let op;
+            if (r < 0.4) op = '+';
+            else if (r < 0.7) op = '-';
+            else if (r < 0.9) op = 'x';
+            else op = ':';
+
+            let n1, d1, n2, d2, ansN, ansD;
+            
+            // Pilih penyebut yang ramah anak SD (2, 3, 4, 5, 6, 8, 10)
+            const denominators = [2, 3, 4, 5, 6, 8, 10];
+
+            if (op === '+' || op === '-') {
+                // Penjumlahan/Pengurangan beda penyebut
+                d1 = denominators[Math.floor(Math.random() * denominators.length)];
+                let possibleD2 = denominators.filter(d => d !== d1 && (d % d1 === 0 || d1 % d === 0 || d * d1 <= 24)); // Cari yang KPK-nya mudah
+                if (possibleD2.length === 0) possibleD2 = [2, 3, 4];
+                d2 = possibleD2[Math.floor(Math.random() * possibleD2.length)];
+                
+                n1 = Math.floor(Math.random() * (d1 - 1)) + 1; // Pecahan biasa (<1)
+                n2 = Math.floor(Math.random() * (d2 - 1)) + 1;
+
+                if (op === '-') {
+                    // Pastikan hasil positif untuk SD
+                    const val1 = n1 / d1;
+                    const val2 = n2 / d2;
+                    if (val2 > val1) {
+                        // Tukar jika val2 lebih besar
+                        [n1, n2] = [n2, n1];
+                        [d1, d2] = [d2, d1];
+                    }
+                }
+
+                // Hitung jawaban
+                const commonDenominator = d1 * d2;
+                const newN1 = n1 * d2;
+                const newN2 = n2 * d1;
+                
+                if (op === '+') {
+                    ansN = newN1 + newN2;
+                } else {
+                    ansN = newN1 - newN2;
+                }
+                ansD = commonDenominator;
+
+            } else if (op === 'x') {
+                // Perkalian
+                d1 = denominators[Math.floor(Math.random() * 4)]; // Penyebut kecil (2,3,4,5)
+                d2 = denominators[Math.floor(Math.random() * 4)];
+                n1 = Math.floor(Math.random() * (d1 - 1)) + 1;
+                n2 = Math.floor(Math.random() * (d2 - 1)) + 1;
+                
+                ansN = n1 * n2;
+                ansD = d1 * d2;
+            } else {
+                // Pembagian (kali silang)
+                d1 = denominators[Math.floor(Math.random() * 3)]; // (2,3,4)
+                d2 = denominators[Math.floor(Math.random() * 3)];
+                n1 = Math.floor(Math.random() * (d1 - 1)) + 1;
+                n2 = Math.floor(Math.random() * (d2 - 1)) + 1;
+                
+                ansN = n1 * d2;
+                ansD = d1 * n2;
+            }
+
+            // Sederhanakan jawaban
+            [ansN, ansD] = simplifyFraction(ansN, ansD);
+
+            // Buat HTML Pertanyaan
+            const opSymbol = op === 'x' ? '×' : (op === ':' ? '÷' : op);
+            const questionHTML = `${formatFractionHTML(n1, d1)} <span>${opSymbol}</span> ${formatFractionHTML(n2, d2)} <span>= ?</span>`;
+
+            // Generate opsi salah
+            const wrongAnswers = [];
+            while(wrongAnswers.length < 3) {
+                let wN = ansN + Math.floor(Math.random() * 5) - 2; // -2 to +2
+                let wD = ansD + Math.floor(Math.random() * 5) - 2;
+                
+                if (wD <= 0) wD = ansD + 1;
+                if (wN <= 0 && ansN > 0) wN = 1; // Cegah negatif
+                
+                [wN, wD] = simplifyFraction(wN, wD);
+                
+                const isDuplicate = wrongAnswers.some(w => w.n === wN && w.d === wD);
+                const isCorrect = (wN === ansN && wD === ansD);
+                
+                if (!isDuplicate && !isCorrect && wD > 0) {
+                    wrongAnswers.push({n: wN, d: wD});
+                }
+            }
+
+            // Gabungkan dan acak
+            const options = [
+                {n: ansN, d: ansD, correct: true},
+                ...wrongAnswers.map(w => ({n: w.n, d: w.d, correct: false}))
+            ];
+            
+            // Fisher-Yates shuffle
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+
+            return {
+                html: questionHTML,
+                options: options
+            };
+        }
+
+        function triggerQuestion() {
+            gameState.isPausedForQuestion = true;
+            currentQuestion = generateQuestion();
+            
+            modal.text.innerHTML = currentQuestion.html;
+            
+            modal.answers.innerHTML = '';
+            currentQuestion.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerHTML = formatFractionHTML(opt.n, opt.d);
+                btn.onclick = () => handleAnswer(opt.correct);
+                modal.answers.appendChild(btn);
+            });
+            
+            modal.container.style.display = 'block';
+        }
+
+        function handleAnswer(isCorrect) {
+            modal.container.style.display = 'none';
+            
+            if (isCorrect) {
+                showMessage("BENAR! Kecepatan Bertambah!", 1500, "text-green-400");
+                gameState.score += 50;
+                gameState.speedMultiplier += 0.2; // Tambah kecepatan
+                
+                // Bonus nyawa jika max (opsional, dibatasi maks nyawa)
+                // if (gameState.lives < gameState.maxLives) gameState.lives++;
+                
+                // Efek visual jalan cepat
+                gameState.roadOffset += 50; 
+            } else {
+                showMessage("SALAH! Awas!", 1500, "text-red-400");
+                loseLife();
+                gameState.speedMultiplier = Math.max(1, gameState.speedMultiplier - 0.1); // Kurangi kecepatan
+            }
+            
+            updateHUD();
+            
+            // Lanjutkan game jika masih hidup
+            if (gameState.lives > 0) {
+                // Beri invulnerability singkat / bersihkan musuh dekat
+                enemies = enemies.filter(e => e.y < -CAR_HEIGHT); 
+                
+                gameState.isPausedForQuestion = false;
+                lastTime = performance.now(); // Reset timer agar tidak loncat
+            }
+        }
+
+        function loseLife() {
+            gameState.lives--;
+            updateHUD();
+            
+            // Efek layar merah sekejap
+            const overlay = document.createElement('div');
+            overlay.style.position = 'absolute';
+            overlay.style.top = 0;
+            overlay.style.left = 0;
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(255,0,0,0.4)';
+            overlay.style.zIndex = 30;
+            overlay.style.pointerEvents = 'none';
+            screens.game.appendChild(overlay);
+            
+            setTimeout(() => {
+                if(screens.game.contains(overlay)) screens.game.removeChild(overlay);
+            }, 200);
+
+            if (gameState.lives <= 0) {
+                gameOver();
+            }
+        }
+
+        function showMessage(text, duration = 1000, colorClass = "text-white") {
+            ui.status.textContent = text;
+            ui.status.className = `text-3xl font-bold pixel-font text-shadow drop-shadow-lg z-20 ${colorClass}`;
+            ui.status.style.display = 'block';
+            
+            setTimeout(() => {
+                ui.status.style.display = 'none';
+            }, duration);
+        }
+
+        function updateHUD() {
+            ui.score.textContent = Math.floor(gameState.score);
+            
+            let livesHTML = '';
+            for(let i=0; i<gameState.maxLives; i++) {
+                if (i < gameState.lives) {
+                    livesHTML += '<span class="text-2xl drop-shadow-md">❤️️</span>';
+                } else {
+                    livesHTML += '<span class="text-2xl opacity-30 grayscale">❤️</span>';
+                }
+            }
+            ui.lives.innerHTML = livesHTML;
+        }
+
+        function spawnEnemy() {
+            // Jangan spawn jika terlalu dekat dengan pertanyaan
+            if (gameState.distance % QUESTION_INTERVAL > QUESTION_INTERVAL - 100) return;
+
+            // Batasi jumlah musuh di layar
+            if (enemies.length > 2 + Math.floor(gameState.speedMultiplier)) return;
+
+            const lane = Math.floor(Math.random() * LANES);
+            
+            // Cek apakah jalur sudah ditempati musuh lain di bagian atas
+            const isLaneOccupied = enemies.some(e => e.lane === lane && e.y < CAR_HEIGHT * 2);
+            if (isLaneOccupied) return;
+
+            // Variasi kecepatan musuh
+            const speedVar = (Math.random() * 2) + 1; 
+            
+            // Warna musuh acak
+            const colors = ['#f56565', '#ed8936', '#48bb78', '#9f7aea'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            enemies.push({
+                lane: lane,
+                y: -CAR_HEIGHT * 1.5,
+                width: CAR_WIDTH,
+                height: CAR_HEIGHT,
+                speed: ENEMY_SPEED_BASE + speedVar,
+                color: color
+            });
+        }
+
+        function updateEnemies(dt) {
+            // Kesulitan bertambah berdasarkan speedMultiplier (dari jawaban benar)
+            const currentSpeedMultiplier = gameState.speedMultiplier;
+            
+            // Peluang spawn meningkat seiring kecepatan
+            if (Math.random() < 0.02 * currentSpeedMultiplier) {
+                spawnEnemy();
+            }
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let enemy = enemies[i];
+                
+                // Kecepatan relatif musuh terhadap pemain (pemain seolah bergerak maju, musuh mundur/maju)
+                // Semakin cepat pemain (road speed tinggi), musuh semakin cepat turun
+                const relativeSpeed = (ROAD_SPEED_BASE * currentSpeedMultiplier) - (enemy.speed * 0.5);
+                
+                // Pastikan musuh selalu bergerak ke bawah (relatif terhadap pemain)
+                enemy.y += Math.max(1, relativeSpeed);
+
+                // Hapus musuh yang sudah lewat bawah layar
+                if (enemy.y > canvas.height) {
+                    enemies.splice(i, 1);
+                    gameState.score += 10; // Poin karena berhasil menghindari
+                    updateHUD();
+                    continue;
+                }
+
+                // Cek tabrakan
+                if (checkCollision(playerCar, enemy)) {
+                    enemies.splice(i, 1); // Hapus musuh yang ditabrak
+                    loseLife();
+                    showMessage("TERTABRAK!", 1000, "text-red-500");
+                    // Kurangi kecepatan drastis saat nabrak
+                    gameState.speedMultiplier = 1;
+                }
+            }
+        }
+
+        function checkCollision(player, enemy) {
+            // Karena kita menggunakan jalur (lane), cek tabrakan lebih mudah
+            if (player.lane !== enemy.lane) return false;
+
+            // Hitung posisi Y relatif (hitung hitung offset gambar mobil agar tabrakan tidak terlalu kaku/hitbox lebih kecil)
+            const pTop = player.y + 10;
+            const pBottom = player.y + player.height - 10;
+            const eTop = enemy.y + 10;
+            const eBottom = enemy.y + enemy.height - 10;
+
+            // Jika overlap di sumbu Y
+            if (pBottom > eTop && pTop < eBottom) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function getLaneCenter(laneIndex) {
+            // Hitung posisi X tengah untuk jalur tertentu
+            const roadPixelWidth = canvas.width * ROAD_WIDTH;
+            const roadStartX = (canvas.width - roadPixelWidth) / 2;
+            const laneWidth = roadPixelWidth / LANES;
+            
+            return roadStartX + (laneWidth * laneIndex) + (laneWidth / 2);
+        }
+
+        function drawCar(ctx, x, y, isPlayer, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Bayangan
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(5, 5, CAR_WIDTH, CAR_HEIGHT);
+
+            // Bodi mobil
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, CAR_WIDTH, CAR_HEIGHT, 10);
+            ctx.fill();
+
+            // Kaca
+            ctx.fillStyle = '#2d3748'; // dark gray
+            // Kaca depan
+            ctx.beginPath();
+            ctx.roundRect(5, 15, CAR_WIDTH - 10, 20, 3);
+            ctx.fill();
+            // Kaca belakang
+            ctx.beginPath();
+            ctx.roundRect(8, CAR_HEIGHT - 25, CAR_WIDTH - 16, 15, 2);
+            ctx.fill();
+
+            // Atap (Highlight)
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.roundRect(8, 40, CAR_WIDTH - 16, 30, 2);
+            ctx.fill();
+
+            // Ban
+            ctx.fillStyle = '#1a202c'; // black
+            const tireW = 8;
+            const tireH = 18;
+            ctx.fillRect(-tireW/2, 10, tireW, tireH); // Kiri depan
+            ctx.fillRect(CAR_WIDTH - tireW/2, 10, tireW, tireH); // Kanan depan
+            ctx.fillRect(-tireW/2, CAR_HEIGHT - 30, tireW, tireH); // Kiri belakang
+            ctx.fillRect(CAR_WIDTH - tireW/2, CAR_HEIGHT - 30, tireW, tireH); // Kanan belakang
+
+            // Lampu
+            if (isPlayer) {
+                ctx.fillStyle = '#f6e05e'; // yellow headlights
+                ctx.beginPath();
+                ctx.arc(8, 5, 4, 0, Math.PI * 2);
+                ctx.arc(CAR_WIDTH - 8, 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Lampu belakang
+                ctx.fillStyle = '#e53e3e'; // red taillights
+                ctx.fillRect(4, CAR_HEIGHT - 4, 10, 4);
+                ctx.fillRect(CAR_WIDTH - 14, CAR_HEIGHT - 4, 10, 4);
+            } else {
+                // Musuh punya lampu depan di bawah (karena menghadap bawah)
+                ctx.fillStyle = '#f6e05e'; 
+                ctx.beginPath();
+                ctx.arc(8, CAR_HEIGHT - 5, 4, 0, Math.PI * 2);
+                ctx.arc(CAR_WIDTH - 8, CAR_HEIGHT - 5, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Lampu rem di atas
+                ctx.fillStyle = '#e53e3e';
+                ctx.fillRect(4, 0, 10, 4);
+                ctx.fillRect(CAR_WIDTH - 14, 0, 10, 4);
+            }
+
+            // Garis balap untuk pemain
+            if (isPlayer) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(CAR_WIDTH/2 - 3, 0, 6, CAR_HEIGHT);
+            }
+
+            ctx.restore();
+        }
+
+        function draw() {
+            // Bersihkan kanvas
+            ctx.fillStyle = '#48bb78'; // Rumput hijau di luar jalan
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Hitung dimensi jalan
+            const roadPixelWidth = canvas.width * ROAD_WIDTH;
+            const roadStartX = (canvas.width - roadPixelWidth) / 2;
+            const laneWidth = roadPixelWidth / LANES;
+
+            // Gambar Aspal
+            ctx.fillStyle = '#4a5568';
+            ctx.fillRect(roadStartX, 0, roadPixelWidth, canvas.height);
+
+            // Gambar marka jalan (garis putus-putus)
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 6;
+            ctx.setLineDash([30, 30]); // Panjang garis 30px, jarak 30px
+            
+            // Animasi jalan mengalir
+            const lineOffset = gameState.roadOffset % 60;
+            ctx.lineDashOffset = -lineOffset;
+
+            ctx.beginPath();
+            for (let i = 1; i < LANES; i++) {
+                const lineX = roadStartX + (laneWidth * i);
+                ctx.moveTo(lineX, 0);
+                ctx.lineTo(lineX, canvas.height);
+            }
+            ctx.stroke();
+
+            // Kembalikan line dash ke solid
+            ctx.setLineDash([]);
+
+            // Gambar Musuh
+            enemies.forEach(enemy => {
+                const centerX = getLaneCenter(enemy.lane);
+                drawCar(ctx, centerX - (CAR_WIDTH / 2), enemy.y, false, enemy.color);
+            });
+
+            // Gambar Pemain
+            const playerCenterX = getLaneCenter(playerCar.lane);
+            // Tambahkan animasi perpindahan jalur halus
+            // Simpan target X, tapi untuk kesederhanaan di game canvas basic, kita lompat langsung
+            drawCar(ctx, playerCenterX - (CAR_WIDTH / 2), playerCar.y, true, '#4299e1'); // Mobil biru
+            
+            // Efek kecepatan (garis angin) jika speed tinggi
+            if (gameState.speedMultiplier > 1.2 && !gameState.isPausedForQuestion) {
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for(let i=0; i<5; i++) {
+                    let rx = roadStartX + Math.random() * roadPixelWidth;
+                    let ry = Math.random() * canvas.height;
+                    let length = Math.random() * 50 + 50;
+                    ctx.moveTo(rx, ry);
+                    ctx.lineTo(rx, ry + length);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameState.isPlaying) return;
+
+            // Hitung delta waktu (meskipun tidak dipakai ketat di perhitungan sederhana ini, baik untuk konsistensi)
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (!gameState.isPausedForQuestion) {
+                // Update Logika
+                const currentRoadSpeed = ROAD_SPEED_BASE * gameState.speedMultiplier;
+                gameState.roadOffset += currentRoadSpeed;
+                gameState.distance += currentRoadSpeed;
+                
+                // Tambah skor perlahan berdasarkan jarak
+                gameState.score += (currentRoadSpeed * 0.01);
+                
+                // Update hud secara berkala
+                if (Math.floor(gameState.score) > parseInt(ui.score.textContent)) {
+                     ui.score.textContent = Math.floor(gameState.score);
+                }
+
+                updateEnemies(deltaTime);
+
+                // Cek apakah sudah waktunya kuis (berdasarkan jarak tempuh)
+                const targetDistance = (questionCounter + 1) * QUESTION_INTERVAL;
+                if (gameState.distance >= targetDistance) {
+                    questionCounter++;
+                    triggerQuestion();
+                }
+            }
+
+            // Render Grafis
+            draw();
+
+            // Lanjut loop
+            if (gameState.isPlaying) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+    </script>
+</body>
+</html>
