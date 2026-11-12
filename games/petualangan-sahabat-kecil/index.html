@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Petualangan Sahabat Kecil: Mengenal Diriku - Bahasa Indonesia Kelas 1 SD</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Kids (Fredoka & Quicksand) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            font-family: 'Fredoka', 'Quicksand', cursive, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* Playful Polka Dot Background for Grade 1 Kids */
+        .bg-pattern {
+            background-color: #0284c7;
+            background-image: radial-gradient(#38bdf8 3.5px, transparent 3.5px), radial-gradient(#38bdf8 3.5px, #0369a1 3.5px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.92);
+        }
+
+        .custom-shadow {
+            box-shadow: 0 10px 0px 0px rgba(0, 0, 0, 0.22);
+        }
+
+        .custom-shadow-sm {
+            box-shadow: 0 5px 0px 0px rgba(0, 0, 0, 0.18);
+        }
+
+        .custom-shadow-orange {
+            box-shadow: 0 8px 0px 0px #ea580c;
+        }
+
+        .custom-shadow-green {
+            box-shadow: 0 8px 0px 0px #16a34a;
+        }
+
+        .custom-shadow-purple {
+            box-shadow: 0 8px 0px 0px #7e22ce;
+        }
+
+        /* Wiggle animation for wrong answer */
+        @keyframes wiggle {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-12px); }
+            40%, 80% { transform: translateX(12px); }
+        }
+
+        .wiggle {
+            animation: wiggle 0.45s ease-in-out;
+        }
+
+        /* Pop in animation */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .pop-in {
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Floating pulse */
+        @keyframes floatPulse {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.01); }
+        }
+
+        .float-pulse {
+            animation: floatPulse 2.2s ease-in-out infinite;
+        }
+
+        /* Confetti particle style */
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: fall 2.5s linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-pattern h-screen w-screen overflow-hidden flex flex-col justify-between items-center text-slate-800">
+
+    <!-- SCREEN 1: LOGIN & AVATAR SELECTION -->
+    <div id="login-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-3 md:p-6 bg-gradient-to-b from-sky-400 via-sky-500 to-indigo-700 overflow-y-auto">
+        <div class="bg-white rounded-3xl p-5 md:p-8 max-w-md w-full border-8 border-amber-400 custom-shadow text-center my-auto pop-in">
+            
+            <!-- Game Title Header -->
+            <div class="mb-3">
+                <span class="inline-block bg-amber-400 text-sky-950 text-xs md:text-sm font-extrabold px-4 py-1.5 rounded-full uppercase tracking-wider mb-2 shadow-sm animate-bounce">
+                    <i class="fa-solid fa-child mr-1"></i> Bahasa Indonesia - Kelas 1 SD
+                </span>
+                <h1 class="text-2xl md:text-3xl font-black text-sky-800 leading-tight drop-shadow-sm flex items-center justify-center gap-2">
+                    <span class="text-3xl md:text-4xl">🙋‍♂️</span> MENGENAL DIRIKU
+                </h1>
+                <p class="text-slate-500 text-xs md:text-sm font-bold mt-1">Petualangan Belajar Membaca & Mengeja</p>
+            </div>
+
+            <!-- Form Login -->
+            <form id="login-form" onsubmit="startGame(event)" class="space-y-3.5 text-left">
+                <div>
+                    <label class="block text-slate-700 font-extrabold mb-1 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen text-sky-500"></i> Nama Sahabat Cilik:
+                    </label>
+                    <input type="text" id="player-name" required placeholder="Tulis namamu di sini..." 
+                        class="w-full px-4 py-3 text-base md:text-lg rounded-2xl border-4 border-sky-200 focus:border-sky-500 outline-none font-bold text-slate-800 bg-sky-50 transition placeholder:text-slate-400">
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-extrabold mb-1 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-school text-emerald-500"></i> Pilih Kelas:
+                    </label>
+                    <select id="player-class" required 
+                        class="w-full px-4 py-3 text-base md:text-lg rounded-2xl border-4 border-emerald-200 focus:border-emerald-500 outline-none font-bold text-slate-800 bg-emerald-50 transition">
+                        <option value="1-A">Kelas 1 - A</option>
+                        <option value="1-B">Kelas 1 - B</option>
+                        <option value="1-C">Kelas 1 - C</option>
+                        <option value="1-D">Kelas 1 - D</option>
+                    </select>
+                </div>
+
+                <!-- Avatar Character Selector -->
+                <div>
+                    <label class="block text-slate-700 font-extrabold mb-1 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-face-smile text-amber-500"></i> Pilih Teman Bermain:
+                    </label>
+                    <div class="grid grid-cols-4 gap-2" id="avatar-selector">
+                        <button type="button" onclick="selectAvatar('🐱', 'Kucing Ceria', '#0ea5e9')" class="avatar-option p-2 rounded-2xl border-4 border-amber-400 bg-sky-100 flex flex-col justify-center items-center hover:scale-105 transition active">
+                            <span class="text-3xl">🐱</span>
+                            <span class="text-[10px] font-extrabold text-sky-800 mt-1">Kucing</span>
+                        </button>
+                        <button type="button" onclick="selectAvatar('🐰', 'Kelinci Pintar', '#10b981')" class="avatar-option p-2 rounded-2xl border-2 border-slate-200 bg-emerald-100 flex flex-col justify-center items-center hover:scale-105 transition">
+                            <span class="text-3xl">🐰</span>
+                            <span class="text-[10px] font-extrabold text-emerald-800 mt-1">Kelinci</span>
+                        </button>
+                        <button type="button" onclick="selectAvatar('🐻', 'Beruang Berani', '#8b5cf6')" class="avatar-option p-2 rounded-2xl border-2 border-slate-200 bg-purple-100 flex flex-col justify-center items-center hover:scale-105 transition">
+                            <span class="text-3xl">🐻</span>
+                            <span class="text-[10px] font-extrabold text-purple-800 mt-1">Beruang</span>
+                        </button>
+                        <button type="button" onclick="selectAvatar('🐼', 'Panda Ramah', '#f97316')" class="avatar-option p-2 rounded-2xl border-2 border-slate-200 bg-orange-100 flex flex-col justify-center items-center hover:scale-105 transition">
+                            <span class="text-3xl">🐼</span>
+                            <span class="text-[10px] font-extrabold text-orange-800 mt-1">Panda</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full py-4 bg-amber-400 hover:bg-amber-300 text-sky-950 text-xl font-black rounded-2xl custom-shadow border-4 border-amber-500 btn-bounce flex items-center justify-center gap-3 transition cursor-pointer mt-3">
+                    <i class="fa-solid fa-play text-2xl"></i> MULAI BERMAIN!
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: GAMEPLAY SCREEN -->
+    <div id="game-screen" class="relative w-full h-full flex flex-col justify-between hidden max-w-4xl mx-auto p-2 md:p-4">
+        
+        <!-- HUD Header Bar -->
+        <div class="w-full flex items-center justify-between gap-2 z-20">
+            <!-- Player Info badge -->
+            <div class="bg-white/95 backdrop-blur border-4 border-sky-400 rounded-2xl px-3 py-1.5 custom-shadow-sm flex items-center gap-2">
+                <div id="hud-avatar-icon" class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center text-2xl shadow-inner">
+                    🐱
+                </div>
+                <div>
+                    <p id="hud-player-name" class="font-black text-xs md:text-sm text-slate-800 leading-tight">Nama</p>
+                    <p id="hud-player-class" class="text-[10px] font-extrabold text-sky-600 leading-tight">Kelas 1-A</p>
+                </div>
+            </div>
+
+            <!-- Question Progress -->
+            <div class="bg-amber-300 border-4 border-amber-500 rounded-2xl px-3.5 py-1.5 custom-shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-star text-amber-700 text-base"></i>
+                <div class="text-center">
+                    <span class="text-[9px] font-black text-amber-900 block leading-none">SOAL</span>
+                    <span id="hud-progress" class="text-base md:text-lg font-black text-amber-950 leading-tight">1/10</span>
+                </div>
+            </div>
+
+            <!-- Score Badge & Sound Toggle -->
+            <div class="bg-white/95 backdrop-blur border-4 border-emerald-400 rounded-2xl px-3 py-1.5 custom-shadow-sm flex items-center gap-2">
+                <div class="text-center">
+                    <span class="text-[9px] font-black text-slate-400 block leading-none">SKOR</span>
+                    <span id="hud-score" class="text-base md:text-xl font-black text-emerald-600">0</span>
+                </div>
+                <button onclick="toggleAudio()" id="btn-sound" class="ml-1 w-9 h-9 bg-sky-100 hover:bg-sky-200 border-2 border-sky-400 rounded-xl flex items-center justify-center text-sky-700 text-base btn-bounce">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN QUESTION & PLAY AREA -->
+        <div class="flex-1 flex flex-col justify-center items-center my-2 w-full gap-3">
+            
+            <!-- Question Card Header -->
+            <div id="question-card" class="w-full bg-white rounded-3xl p-4 md:p-6 border-4 md:border-8 border-sky-300 custom-shadow flex flex-col items-center text-center relative float-pulse">
+                
+                <!-- Category Badge -->
+                <span id="category-badge" class="bg-sky-500 text-white text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider mb-2 shadow-sm">
+                    👀 Mengenal Anggota Tubuh
+                </span>
+
+                <!-- Audio TTS Pronunciation Button -->
+                <button onclick="speakCurrentQuestion()" class="mb-2 px-4 py-2 bg-amber-100 hover:bg-amber-200 border-2 border-amber-400 rounded-2xl text-amber-900 font-black text-xs md:text-sm flex items-center gap-2 btn-bounce cursor-pointer shadow-sm">
+                    <i class="fa-solid fa-volume-high text-amber-600 text-lg animate-pulse"></i>
+                    <span>Dengar Suara Ejaan 🔊</span>
+                </button>
+
+                <!-- Clue Illustration & Clue Text -->
+                <div class="flex items-center justify-center gap-3 my-1">
+                    <span id="clue-emoji" class="text-5xl md:text-6xl drop-shadow">👁️</span>
+                    <p id="clue-text" class="text-base md:text-xl font-extrabold text-slate-800 leading-snug max-w-lg">
+                        Anggota tubuh di wajah untuk melihat benda sekitar.
+                    </p>
+                </div>
+
+                <!-- Answer Slots Area (Where selected syllables are placed) -->
+                <div class="w-full mt-3 pt-3 border-t-2 border-dashed border-sky-100">
+                    <p class="text-xs font-bold text-sky-600 mb-2 uppercase tracking-wide">Susunan Suku Kata Jawabanmu:</p>
+                    <div id="answer-slots" class="flex flex-wrap justify-center items-center gap-2.5 min-h-[64px] p-2 bg-sky-50/80 rounded-2xl border-2 border-sky-200">
+                        <!-- Dynamic Answer Tiles Appear Here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syllables / Letters Tile Selection Bank -->
+            <div class="w-full bg-white/90 backdrop-blur rounded-3xl p-3 md:p-5 border-4 border-amber-300 custom-shadow-sm flex flex-col items-center">
+                <p class="text-xs font-black text-amber-800 mb-2 uppercase tracking-wide flex items-center gap-1">
+                    <i class="fa-solid fa-hand-pointer text-amber-600"></i> Tekan Suku Kata Sesuai Urutan:
+                </p>
+                
+                <!-- Tile Options Container -->
+                <div id="tile-options" class="flex flex-wrap justify-center items-center gap-2.5 md:gap-4 w-full">
+                    <!-- Dynamic Tiles injected here -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM CONTROLS & UTILITY BUTTONS -->
+        <div class="w-full flex items-center justify-between gap-3 z-20 pb-1">
+            <button onclick="resetAnswer()" class="flex-1 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-black text-sm md:text-base rounded-2xl border-4 border-slate-300 btn-bounce flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-left"></i> ULANGI
+            </button>
+            <button onclick="checkAnswer()" class="flex-[2] py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-base md:text-xl rounded-2xl custom-shadow-green border-4 border-emerald-600 btn-bounce flex items-center justify-center gap-2">
+                <i class="fa-solid fa-circle-check text-xl"></i> PERIKSA JAWABAN
+            </button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: RESULT / FINISH SCREEN -->
+    <div id="result-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center p-4 bg-sky-950/80 backdrop-blur-md hidden overflow-y-auto">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full border-8 border-amber-400 custom-shadow text-center my-auto pop-in">
+            
+            <!-- Trophy Badge -->
+            <div class="w-20 h-20 mx-auto mb-2 bg-amber-100 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-500 text-4xl animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h2 class="text-2xl md:text-3xl font-black text-slate-800">HEBAT! SELESAI! 🎉</h2>
+            <p class="text-slate-500 font-bold text-xs md:text-sm">Kamu sudah mengenal anggota tubuh dan membaca dengan pintar!</p>
+
+            <!-- Certificate Card -->
+            <div class="my-4 bg-sky-50 rounded-2xl p-4 border-2 border-dashed border-sky-300 text-left space-y-2">
+                <div class="flex justify-between border-b pb-1.5">
+                    <span class="text-slate-500 font-extrabold text-xs md:text-sm">Nama Siswa:</span>
+                    <span id="res-name" class="font-black text-sky-800 text-sm md:text-base">Siswa</span>
+                </div>
+                <div class="flex justify-between border-b pb-1.5">
+                    <span class="text-slate-500 font-extrabold text-xs md:text-sm">Kelas:</span>
+                    <span id="res-class" class="font-black text-emerald-600 text-sm md:text-base">1-A</span>
+                </div>
+                <div class="flex justify-between border-b pb-1.5">
+                    <span class="text-slate-500 font-extrabold text-xs md:text-sm">Total Nilai:</span>
+                    <span id="res-score" class="font-black text-amber-600 text-lg md:text-xl">100 Poin</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-extrabold text-xs md:text-sm">Bintang Prestasi:</span>
+                    <span id="res-stars" class="text-amber-400 font-black text-base md:text-lg">⭐⭐⭐</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button onclick="restartGame()" class="flex-1 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-white font-black text-sm md:text-base rounded-2xl custom-shadow-green border-4 border-emerald-600 btn-bounce flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> MAIN LAGI
+                </button>
+                <button onclick="backToLogin()" class="flex-1 py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-black text-sm md:text-base rounded-2xl custom-shadow border-4 border-sky-700 btn-bounce flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-house"></i> MENU UTAMA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // AUDIO SYNTHESIZER & WEB SPEECH (TTS)
+        // ==========================================
+        let audioEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('btn-sound');
+            if (audioEnabled) {
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+                btn.classList.replace('text-slate-400', 'text-sky-700');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+                btn.classList.replace('text-sky-700', 'text-slate-400');
+            }
+        }
+
+        // Web Audio Synthesizer (No external audio files needed)
+        function playSound(type) {
+            if (!audioEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2); // A5
+                    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.setValueAtTime(160, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'win') {
+                    const notes = [392.00, 523.25, 659.25, 783.99]; // G4, C5, E5, G5
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.frequency.value = freq;
+                        noteGain.gain.setValueAtTime(0.22, audioCtx.currentTime + idx * 0.12);
+                        noteGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.12 + 0.3);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.12);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.12 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+
+        // Text To Speech (TTS) for Indonesian Pronunciation
+        function speakText(text) {
+            if (!audioEnabled) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.82; // Slower pitch suitable for 6yo Kids
+                utterance.pitch = 1.15; // Friendly warm pitch
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // ==========================================
+        // GAME STATE & QUESTION BANK (MENGENAL DIRIKU KELAS 1 SD)
+        // ==========================================
+        let playerData = {
+            name: '',
+            class: '',
+            avatar: '🐱',
+            avatarName: 'Kucing Ceria',
+            avatarColor: '#0ea5e9'
+        };
+
+        let gameState = {
+            currentIdx: 0,
+            score: 0,
+            userSelection: [], // Selected syllable tiles
+            availableTiles: []  // Current tile options
+        };
+
+        // Question Bank Bahasa Indonesia Kelas 1 SD - Materi "Mengenal Diriku"
+        const questionBank = [
+            {
+                category: "👀 Anggota Tubuh & Panca Indra",
+                clueEmoji: "👁️",
+                clueText: "Anggota tubuh di wajah yang berguna untuk melihat.",
+                speechPrompt: "Mata. M A T A. Mata untuk melihat.",
+                correctSyllables: ["MA", "TA"],
+                distractorSyllables: ["PI", "KU"]
+            },
+            {
+                category: "👃 Anggota Tubuh & Panca Indra",
+                clueEmoji: "👃",
+                clueText: "Anggota tubuh yang berguna untuk mencium bau bunga.",
+                speechPrompt: "Hidung. HI DUNG. Hidung untuk mencium bau.",
+                correctSyllables: ["HI", "DUNG"],
+                distractorSyllables: ["LAK", "GANG"]
+            },
+            {
+                category: "🦷 Merawat Diri & Kebersihan",
+                clueEmoji: "🦷",
+                clueText: "Di dalam mulut, berwarna putih untuk mengunyah makanan.",
+                speechPrompt: "Gigi. GI GI. Gigi untuk mengunyah makanan.",
+                correctSyllables: ["GI", "GI"],
+                distractorSyllables: ["BA", "TONG"]
+            },
+            {
+                category: "✋ Anggota Tubuhku",
+                clueEmoji: "🖐️",
+                clueText: "Bagian tubuh untuk memegang pensil dan bersalaman.",
+                speechPrompt: "Tangan. TA NGAN. Tangan untuk memegang.",
+                correctSyllables: ["TA", "NGAN"],
+                distractorSyllables: ["KAK", "RUM"]
+            },
+            {
+                category: "🦶 Anggota Tubuhku",
+                clueEmoji: "🦶",
+                clueText: "Bagian tubuh bawah untuk berjalan dan melompat.",
+                speechPrompt: "Kaki. KA KI. Kaki untuk berjalan.",
+                correctSyllables: ["KA", "KI"],
+                distractorSyllables: ["LIP", "SUNG"]
+            },
+            {
+                category: "👂 Anggota Tubuh & Panca Indra",
+                clueEmoji: "👂",
+                clueText: "Panca indra di kiri dan kanan kepala untuk mendengar musik.",
+                speechPrompt: "Telinga. TE LI NGA. Telinga untuk mendengar.",
+                correctSyllables: ["TE", "LI", "NGA"],
+                distractorSyllables: ["BAM", "PUS"]
+            },
+            {
+                category: "😊 Wajahku & Perasaanku",
+                clueEmoji: "😊",
+                clueText: "Bagian halus di sebelah kanan dan kiri hidungku.",
+                speechPrompt: "Pipi. PI PI. Pipi di wajahku.",
+                correctSyllables: ["PI", "PI"],
+                distractorSyllables: ["DUNG", "MANG"]
+            },
+            {
+                category: "💇 Merawat Diri",
+                clueEmoji: "💇‍♂️",
+                clueText: "Tumbuh di atas kepala dan harus selalu disisir rapi.",
+                speechPrompt: "Rambut. RA BUT. Rambut di kepala.",
+                correctSyllables: ["RA", "BUT"],
+                distractorSyllables: ["TAP", "SANG"]
+            },
+            {
+                category: "👄 Anggota Tubuhku",
+                clueEmoji: "👄",
+                clueText: "Digunakan untuk berbicara sopan dan makan kue.",
+                speechPrompt: "Mulut. MU LUT. Mulut untuk berbicara.",
+                correctSyllables: ["MU", "LUT"],
+                distractorSyllables: ["KAN", "PA"]
+            },
+            {
+                category: "🖐️ Anggota Tubuhku",
+                clueEmoji: "🤏",
+                clueText: "Ada 10 di tangan kita: ibu ..., telunjuk, dan kelingking.",
+                speechPrompt: "Jari. JA RI. Jari-jari tangan.",
+                correctSyllables: ["JA", "RI"],
+                distractorSyllables: ["PANG", "TUNG"]
+            }
+        ];
+
+        function selectAvatar(icon, name, color) {
+            playerData.avatar = icon;
+            playerData.avatarName = name;
+            playerData.avatarColor = color;
+
+            document.querySelectorAll('.avatar-option').forEach(btn => {
+                btn.classList.remove('border-4', 'border-amber-400');
+                btn.classList.add('border-2', 'border-slate-200');
+            });
+            event.currentTarget.classList.remove('border-2', 'border-slate-200');
+            event.currentTarget.classList.add('border-4', 'border-amber-400');
+            playSound('click');
+        }
+
+        function startGame(e) {
+            e.preventDefault();
+            playerData.name = document.getElementById('player-name').value.trim() || 'Sahabat Cilik';
+            playerData.class = document.getElementById('player-class').value;
+
+            // Update HUD
+            document.getElementById('hud-player-name').innerText = playerData.name;
+            document.getElementById('hud-player-class').innerText = `Kelas ${playerData.class}`;
+            document.getElementById('hud-avatar-icon').innerText = playerData.avatar;
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            gameState.currentIdx = 0;
+            gameState.score = 0;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questionBank[gameState.currentIdx];
+            if (!q) {
+                endGame();
+                return;
+            }
+
+            gameState.userSelection = [];
+
+            // Update UI Elements
+            document.getElementById('category-badge').innerText = q.category;
+            document.getElementById('clue-emoji').innerText = q.clueEmoji;
+            document.getElementById('clue-text').innerText = q.clueText;
+            document.getElementById('hud-score').innerText = gameState.score;
+            document.getElementById('hud-progress').innerText = `${gameState.currentIdx + 1}/${questionBank.length}`;
+
+            // Shuffle correct & distractor syllables
+            let tiles = [...q.correctSyllables, ...q.distractorSyllables];
+            tiles.sort(() => Math.random() - 0.5);
+            gameState.availableTiles = tiles;
+
+            renderAnswerSlots();
+            renderTileOptions();
+
+            // Speak Clue Prompt with friendly voice
+            setTimeout(() => {
+                speakCurrentQuestion();
+            }, 300);
+        }
+
+        function speakCurrentQuestion() {
+            const q = questionBank[gameState.currentIdx];
+            if (q) {
+                speakText(q.speechPrompt);
+            }
+        }
+
+        function renderAnswerSlots() {
+            const container = document.getElementById('answer-slots');
+            container.innerHTML = '';
+
+            if (gameState.userSelection.length === 0) {
+                container.innerHTML = `<span class="text-xs md:text-sm text-sky-400 font-bold italic py-2">Tekan suku kata di bawah untuk menjawab...</span>`;
+                return;
+            }
+
+            gameState.userSelection.forEach((tile, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'px-4 py-2.5 bg-amber-400 hover:bg-amber-300 border-4 border-amber-500 rounded-2xl font-black text-lg md:text-2xl text-sky-950 custom-shadow-sm btn-bounce flex items-center gap-1.5 pop-in cursor-pointer';
+                btn.innerHTML = `${tile.text} <i class="fa-solid fa-circle-xmark text-xs opacity-60"></i>`;
+                btn.onclick = () => removeTileFromAnswer(idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderTileOptions() {
+            const container = document.getElementById('tile-options');
+            container.innerHTML = '';
+
+            gameState.availableTiles.forEach((text, originalIdx) => {
+                const isUsed = gameState.userSelection.some(item => item.id === originalIdx);
+
+                const btn = document.createElement('button');
+                if (isUsed) {
+                    btn.className = 'px-4 py-3 bg-slate-200 border-4 border-slate-300 text-slate-400 font-black text-xl md:text-2xl rounded-2xl cursor-not-allowed opacity-50';
+                    btn.disabled = true;
+                    btn.innerText = text;
+                } else {
+                    btn.className = 'px-5 py-3.5 bg-sky-500 hover:bg-sky-400 border-4 border-sky-600 text-white font-black text-xl md:text-3xl rounded-2xl custom-shadow btn-bounce transition cursor-pointer min-w-[70px]';
+                    btn.innerText = text;
+                    btn.onclick = () => selectTile(text, originalIdx);
+                }
+                container.appendChild(btn);
+            });
+        }
+
+        function selectTile(text, id) {
+            playSound('click');
+            speakText(text.toLowerCase()); // Speak syllable phonics
+            gameState.userSelection.push({ text, id });
+            renderAnswerSlots();
+            renderTileOptions();
+        }
+
+        function removeTileFromAnswer(indexInSelection) {
+            playSound('click');
+            gameState.userSelection.splice(indexInSelection, 1);
+            renderAnswerSlots();
+            renderTileOptions();
+        }
+
+        function resetAnswer() {
+            playSound('click');
+            gameState.userSelection = [];
+            renderAnswerSlots();
+            renderTileOptions();
+        }
+
+        function checkAnswer() {
+            const q = questionBank[gameState.currentIdx];
+            const userWord = gameState.userSelection.map(item => item.text).join('');
+            const targetWord = q.correctSyllables.join('');
+
+            const card = document.getElementById('question-card');
+
+            if (userWord === targetWord) {
+                // Correct Answer!
+                playSound('correct');
+                speakText(`Hebat! Jawabannya benar: ${targetWord.toLowerCase()}`);
+
+                gameState.score += 10;
+                document.getElementById('hud-score').innerText = gameState.score;
+
+                // Visual Green Glow Effect
+                card.classList.add('ring-8', 'ring-emerald-400');
+                
+                setTimeout(() => {
+                    card.classList.remove('ring-8', 'ring-emerald-400');
+                    gameState.currentIdx++;
+                    if (gameState.currentIdx < questionBank.length) {
+                        loadQuestion();
+                    } else {
+                        endGame();
+                    }
+                }, 1300);
+
+            } else {
+                // Wrong Answer!
+                playSound('wrong');
+                speakText("Ayo coba susun lagi!");
+
+                card.classList.add('wiggle', 'ring-8', 'ring-rose-400');
+                setTimeout(() => {
+                    card.classList.remove('wiggle', 'ring-8', 'ring-rose-400');
+                }, 600);
+            }
+        }
+
+        function endGame() {
+            playSound('win');
+            speakText(`Luar biasa ${playerData.name}! Kamu pintar sekali membaca anggota tubuh.`);
+
+            document.getElementById('res-name').innerText = playerData.name;
+            document.getElementById('res-class').innerText = `Kelas ${playerData.class}`;
+            document.getElementById('res-score').innerText = `${gameState.score} / ${questionBank.length * 10} Poin`;
+
+            let stars = "⭐";
+            if (gameState.score >= 80) stars = "⭐⭐⭐ (Pintar Luar Biasa!)";
+            else if (gameState.score >= 50) stars = "⭐⭐ (Hebat & Rajin!)";
+            else stars = "⭐ (Bagus, Terus Berlatih!)";
+
+            document.getElementById('res-stars').innerText = stars;
+
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('result-screen').classList.add('hidden');
+            gameState.currentIdx = 0;
+            gameState.score = 0;
+            loadQuestion();
+        }
+
+        function backToLogin() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

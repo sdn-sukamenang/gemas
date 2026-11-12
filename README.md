@@ -22,6 +22,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Ular Tangga Matematika | Herniza Amro, S.Pd. | 1 | Matematika | `games/ular-tangga-matematika/` |
 | Rally Rasio | Nova Sagita, S.Pd. | 6 | Matematika | `games/rally-rasio/` |
 | Math Racing: Rasio & Perbandingan | Armlis, S.Pd. | 4 | Matematika | `games/math-racing/` |
+| Petualangan Sahabat Kecil: Mengenal Diriku | Susanti, S.Pd. | 1 | Bahasa Indonesia | `games/petualangan-sahabat-kecil/` |
 
 ## Cara Menambah Game Baru
 
