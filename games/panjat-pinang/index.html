@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panjat Pinang Bilangan Cacah 1000 - Game Edukasi Kelas 2 SD</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito for child-friendly design -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        culture: {
+                            red: '#DC2626',
+                            gold: '#F59E0B',
+                            green: '#10B981',
+                            brown: '#854D0E',
+                            sky: '#0EA5E9',
+                            wood: '#A16207'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(14px);
+            border: 3px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #cbd5e1;
+        }
+
+        /* Touch Button Animations */
+        .touch-btn {
+            transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        }
+        .touch-btn:active {
+            transform: scale(0.94);
+        }
+
+        @keyframes climbBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-12px) scale(1.05); }
+        }
+
+        .animate-climb {
+            animation: climbBounce 0.6s ease-in-out;
+        }
+
+        @keyframes flagWaver {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .animate-flag {
+            animation: flagWaver 2s ease-in-out infinite;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <script>
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playClick() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(850, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playClimb() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.2);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+
+            playCorrect() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                // Traditional Gamelan-inspired chime scale
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                    gain.gain.setValueAtTime(0.25, now + idx * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.09);
+                    osc.stop(now + idx * 0.09 + 0.25);
+                });
+            }
+
+            playWrong() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(260, now);
+                osc.frequency.linearRampToValueAtTime(130, now + 0.35);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+
+            playVictory() {
+                if (this.muted) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const fanfare = [392, 523.25, 659.25, 783.99, 880, 1046.50, 1318.51];
+                fanfare.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.3, now + i * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.35);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+    </script>
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="bg-slate-800/90 border-b-4 border-amber-400 px-4 py-3 flex items-center justify-between shadow-xl relative z-20">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-red-600 via-amber-500 to-yellow-400 p-2.5 rounded-2xl shadow-md text-white font-extrabold flex items-center justify-center animate-flag">
+                <i class="fa-solid fa-flag text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-red-400">
+                    PANJAT PINANG BILANGAN 1000
+                </h1>
+                <p class="text-xs text-slate-300 font-bold hidden sm:block">Seni Budaya & Matematika SD Kelas 2</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Audio Toggle Button -->
+            <button id="soundToggleBtn" onclick="toggleSound()" class="bg-slate-700 hover:bg-slate-600 border-2 border-amber-400/50 text-yellow-300 p-2.5 rounded-xl shadow-md transition touch-btn text-lg">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+            
+            <!-- User Info Badge -->
+            <div id="headerUserInfo" class="hidden flex items-center bg-slate-700/90 border-2 border-amber-400/60 rounded-xl px-3 py-1.5 space-x-2">
+                <div id="headerAvatar" class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-xs text-white font-black border border-yellow-300">
+                    <i class="fa-solid fa-user-ninja"></i>
+                </div>
+                <div>
+                    <span id="headerName" class="text-xs sm:text-sm font-bold text-white block leading-tight">Nama Siswa</span>
+                    <span id="headerClass" class="text-xs text-amber-300 font-bold block leading-tight">Kelas 2A</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTENT AREA -->
+    <main class="flex-grow flex items-center justify-center p-2 sm:p-4 relative overflow-hidden min-h-[560px]">
+
+        <!-- ================= PAGE 1: LOGIN / SISWA REGISTRATION ================= -->
+        <section id="loginPage" class="w-full max-w-lg glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 my-auto text-slate-100 border-2 border-amber-400/40">
+            <div class="text-center mb-6">
+                <span class="bg-gradient-to-r from-red-500 to-amber-500 text-white font-black px-4 py-1.5 rounded-full text-xs uppercase tracking-wider shadow">
+                    <i class="fa-solid fa-masks-theater mr-1"></i> Tradisi Nusantara & Matematika
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-black text-amber-300 mt-3 drop-shadow-md">
+                    Pembalap Panjat Pinang! 🎋
+                </h2>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1">Masukkan namamu dan pilih kostum baju tradisional pemanjatmu!</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- Input Nama -->
+                <div>
+                    <label class="block text-slate-200 text-sm font-bold mb-1.5">
+                        <i class="fa-solid fa-user text-amber-400 mr-1"></i> Nama Lengkap Siswa:
+                    </label>
+                    <input type="text" id="inputName" required placeholder="Contoh: Anisa Putri"
+                        class="w-full px-4 py-3 rounded-2xl border-4 border-slate-600 bg-slate-800 text-white font-bold text-lg focus:border-amber-400 focus:outline-none transition shadow-inner placeholder-slate-400">
+                </div>
+
+                <!-- Input Kelas & Absen -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-200 text-sm font-bold mb-1.5">
+                            <i class="fa-solid fa-school text-amber-400 mr-1"></i> Kelas:
+                        </label>
+                        <select id="inputClassGroup" class="w-full px-4 py-3 rounded-2xl border-4 border-slate-600 bg-slate-800 text-white font-bold text-base focus:border-amber-400 focus:outline-none transition shadow-inner">
+                            <option value="Kelas 2A">Kelas 2A</option>
+                            <option value="Kelas 2B">Kelas 2B</option>
+                            <option value="Kelas 2C">Kelas 2C</option>
+                            <option value="Kelas 2D">Kelas 2D</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-200 text-sm font-bold mb-1.5">
+                            <i class="fa-solid fa-hashtag text-amber-400 mr-1"></i> No. Absen:
+                        </label>
+                        <input type="number" id="inputAbsen" min="1" max="50" placeholder="1-50" required
+                            class="w-full px-4 py-3 rounded-2xl border-4 border-slate-600 bg-slate-800 text-white font-bold text-base focus:border-amber-400 focus:outline-none transition shadow-inner placeholder-slate-400">
+                    </div>
+                </div>
+
+                <!-- Costume / Color Selection (Seni Budaya Motif Tie-in) -->
+                <div>
+                    <label class="block text-slate-200 text-sm font-bold mb-2">
+                        <i class="fa-solid fa-shirt text-amber-400 mr-1"></i> Pilih Motif & Warna Baju Pemanjat:
+                    </label>
+                    <div class="grid grid-cols-4 gap-2.5" id="costumePicker">
+                        <!-- Costume buttons populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-gradient-to-r from-red-600 via-amber-500 to-yellow-500 hover:from-red-700 hover:to-yellow-600 text-white font-black text-xl py-4 rounded-2xl shadow-xl border-b-8 border-red-900 transition transform hover:-translate-y-0.5 active:translate-y-1 touch-btn flex items-center justify-center space-x-2 mt-4">
+                    <span>SIAP MANJAT PINANG!</span>
+                    <i class="fa-solid fa-angles-up text-2xl"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- ================= PAGE 2: MAIN MENU ================= -->
+        <section id="menuPage" class="hidden w-full max-w-4xl glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 my-auto border-2 border-amber-400/40">
+            <div class="flex flex-col md:flex-row items-center justify-between border-b-2 border-slate-700 pb-5 mb-6 gap-4">
+                <div class="flex items-center space-x-4">
+                    <div id="menuAvatarBox" class="w-20 h-20 rounded-2xl border-4 border-amber-400 bg-slate-800 flex items-center justify-center shadow-lg relative overflow-hidden">
+                        <i id="menuAvatarIcon" class="fa-solid fa-user-ninja text-4xl text-red-500"></i>
+                    </div>
+                    <div>
+                        <span class="text-amber-400 text-xs font-bold uppercase tracking-widest">Pemanjat Aktif</span>
+                        <h2 id="menuStudentName" class="text-2xl font-black text-white">Nama Siswa</h2>
+                        <p id="menuStudentMeta" class="text-slate-300 text-sm font-semibold">Kelas 2A | Absen 12</p>
+                    </div>
+                </div>
+
+                <!-- Material Info Badge -->
+                <div class="bg-slate-800/90 border border-amber-400/40 rounded-2xl p-3 text-right hidden sm:block">
+                    <div class="text-xs text-slate-400 font-bold">Materi Integrasi SD Kelas 2:</div>
+                    <div class="text-sm font-black text-amber-300">1. Matematika: Bilangan Cacah (s.d. 1000)</div>
+                    <div class="text-xs text-emerald-400 font-bold">2. Seni Budaya: Tradisi & Karya Seni Nusantara</div>
+                </div>
+            </div>
+
+            <!-- Navigation Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Mode Utama Panjat Pinang -->
+                <button onclick="startClimbGame()" class="group relative bg-gradient-to-r from-red-600 via-amber-600 to-yellow-500 p-6 rounded-2xl border-b-8 border-red-900 shadow-xl hover:brightness-110 transition text-left flex items-center justify-between touch-btn overflow-hidden">
+                    <div class="z-10">
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider mb-2 inline-block">Mode Utama</span>
+                        <h3 class="text-2xl font-black text-white">PANJAT PINANG</h3>
+                        <p class="text-white/90 text-sm font-semibold mt-1">Jawab matematika & raih puncak pohon!</p>
+                    </div>
+                    <i class="fa-solid fa-cubes text-6xl text-white/30 group-hover:scale-110 transition transform z-0"></i>
+                </button>
+
+                <!-- Panduan Materi Matematika & Tradisi -->
+                <button onclick="showStudyModal()" class="group relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 rounded-2xl border-b-8 border-indigo-900 shadow-xl hover:brightness-110 transition text-left flex items-center justify-between touch-btn overflow-hidden">
+                    <div class="z-10">
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider mb-2 inline-block">Panduan Belajar</span>
+                        <h3 class="text-2xl font-black text-white">MATERI BILANGAN</h3>
+                        <p class="text-white/90 text-sm font-semibold mt-1">Nilai Tempat Ratusan & Budaya Pinang.</p>
+                    </div>
+                    <i class="fa-solid fa-book-open-reader text-6xl text-white/30 group-hover:scale-110 transition transform z-0"></i>
+                </button>
+
+                <!-- Galeri Hadiah Kerajinan Seni Budaya -->
+                <button onclick="showArtGalleryModal()" class="group relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-5 rounded-2xl border-b-8 border-teal-900 shadow-xl hover:brightness-110 transition text-left flex items-center justify-between touch-btn overflow-hidden">
+                    <div class="z-10">
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider mb-1 inline-block">Seni Budaya</span>
+                        <h3 class="text-xl font-black text-white">HADIAH TRADISIONAL</h3>
+                        <p class="text-white/90 text-xs font-semibold">Pelajari Wayang, Kendang, Angklung & Batik.</p>
+                    </div>
+                    <i class="fa-solid fa-gift text-5xl text-white/30 group-hover:scale-110 transition transform z-0"></i>
+                </button>
+
+                <!-- Petunjuk Bermain -->
+                <button onclick="showTutorialModal()" class="group relative bg-gradient-to-r from-purple-600 to-pink-600 p-5 rounded-2xl border-b-8 border-purple-900 shadow-xl hover:brightness-110 transition text-left flex items-center justify-between touch-btn overflow-hidden">
+                    <div class="z-10">
+                        <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full font-black uppercase tracking-wider mb-1 inline-block">Petunjuk</span>
+                        <h3 class="text-xl font-black text-white">CARA BERMAIN</h3>
+                        <p class="text-white/90 text-xs font-semibold">Panduan Papan Interaktif Smartboard & HP.</p>
+                    </div>
+                    <i class="fa-solid fa-gamepad text-5xl text-white/30 group-hover:scale-110 transition transform z-0"></i>
+                </button>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="mt-6 pt-4 border-t border-slate-700 flex justify-between items-center text-xs text-slate-400">
+                <button onclick="logout()" class="hover:text-red-400 underline font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Ganti Siswa / Keluar</span>
+                </button>
+                <span>Mendukung HP, Tablet, Laptop, & Smartboard Sekolah</span>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: PANJAT PINANG GAMEPLAY SCREEN ================= -->
+        <section id="gamePage" class="hidden w-full max-w-5xl flex flex-col items-center justify-center my-auto relative">
+            <!-- Top HUD Bar -->
+            <div class="w-full bg-slate-800/95 border-2 border-amber-400 rounded-t-3xl p-3 sm:p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
+                <div class="flex items-center space-x-4 w-full sm:w-auto justify-between sm:justify-start">
+                    <!-- Skor -->
+                    <div class="flex items-center space-x-2 bg-slate-900 px-3.5 py-1.5 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-trophy text-yellow-400"></i>
+                        <span class="text-xs text-slate-300 font-bold">Skor:</span>
+                        <span id="hudScore" class="text-lg font-black text-amber-300">0</span>
+                    </div>
+
+                    <!-- Ketinggian Panjat -->
+                    <div class="flex items-center space-x-2 bg-slate-900 px-3.5 py-1.5 rounded-xl border border-slate-700">
+                        <i class="fa-solid fa-mountain text-emerald-400"></i>
+                        <span class="text-xs text-slate-300 font-bold">Tinggi:</span>
+                        <span id="hudHeight" class="text-lg font-black text-emerald-300">0 M</span>
+                    </div>
+                </div>
+
+                <!-- Level Progress & Exit -->
+                <div class="flex items-center space-x-3 text-xs sm:text-sm font-bold">
+                    <span class="bg-amber-500/20 text-amber-300 px-3 py-1 rounded-xl border border-amber-500/40">
+                        <i class="fa-solid fa-flag-checkered text-amber-400 mr-1"></i> Posisi <span id="hudQIndex">1</span> / 10
+                    </span>
+                    <button onclick="confirmExitGame()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-xl text-xs font-bold transition touch-btn">
+                        <i class="fa-solid fa-xmark"></i> Keluar
+                    </button>
+                </div>
+            </div>
+
+            <!-- MATH QUESTION BANNER -->
+            <div class="w-full bg-gradient-to-r from-red-950 via-amber-950 to-slate-900 border-x-2 border-amber-400 p-4 shadow-2xl text-center relative z-10">
+                <div class="text-xs uppercase tracking-widest text-amber-300 font-black mb-1">
+                    <i class="fa-solid fa-brain mr-1"></i> Soal Matematika Bilangan Cacah (1 - 1000)
+                </div>
+                <div id="gameQuestionText" class="text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-md">
+                    Memuat Soal Panjat Pinang...
+                </div>
+            </div>
+
+            <!-- CANVAS ARENA (POHON PINANG & PEMANJAT) -->
+            <div class="w-full relative bg-slate-950 border-x-2 border-amber-400 shadow-2xl overflow-hidden min-h-[300px] sm:min-h-[360px] flex justify-center items-center">
+                <canvas id="climbCanvas" class="w-full h-full max-h-[420px] bg-slate-900"></canvas>
+
+                <!-- Feedback Overlay -->
+                <div id="feedbackOverlay" class="hidden absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4 z-20 transition-all">
+                    <div id="feedbackIcon" class="text-6xl sm:text-7xl mb-2 animate-bounce">
+                        🎉
+                    </div>
+                    <h3 id="feedbackTitle" class="text-3xl sm:text-4xl font-black text-yellow-300 drop-shadow-lg">
+                        HEBAT! MANJAT NAIK!
+                    </h3>
+                    <p id="feedbackDetail" class="text-white text-base sm:text-lg mt-1 max-w-md font-semibold">
+                        Jawabanmu tepat! Kamu makin dekat dengan puncak pinang!
+                    </p>
+                </div>
+            </div>
+
+            <!-- ANSWER CHOICE BUTTONS FOR SMARTBOARD / MOBILE TOUCH -->
+            <div class="w-full bg-slate-800/95 border-2 border-amber-400 rounded-b-3xl p-3 sm:p-4 shadow-xl">
+                <div class="text-center text-xs text-amber-300 font-bold mb-2">
+                    Pilih Kotak Hadiah dengan Jawaban yang Benar (Sentuh Layar / Klik Mouse):
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto" id="answerButtonsContainer">
+                    <!-- Dynamic 3 Answer Choice Buttons injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 4: FINISH / RESULT SCREEN ================= -->
+        <section id="resultPage" class="hidden w-full max-w-2xl glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 my-auto text-center border-2 border-amber-400/50">
+            <div class="inline-block bg-gradient-to-r from-yellow-400 via-amber-500 to-red-500 text-white p-4 rounded-full shadow-lg mb-3 animate-bounce">
+                <i class="fa-solid fa-crown text-5xl"></i>
+            </div>
+            
+            <h2 class="text-3xl sm:text-4xl font-black text-amber-300 drop-shadow-md">
+                BERHASIL MENCAPAI PUNCK! 🏆
+            </h2>
+            <p class="text-slate-300 text-sm mt-1">Selamat! Kamu Pemain Panjat Pinang Hebat!</p>
+
+            <!-- Student Summary Card -->
+            <div class="bg-slate-800/90 border-2 border-amber-400 rounded-2xl p-5 my-5 text-left shadow-inner">
+                <div class="flex items-center justify-between border-b border-slate-700 pb-3 mb-3">
+                    <div>
+                        <h3 id="resultName" class="text-xl font-black text-white">Nama Siswa</h3>
+                        <p id="resultClass" class="text-xs text-amber-300 font-bold">Kelas 2A | No. Absen 12</p>
+                    </div>
+                    <div id="resultStars" class="text-2xl text-yellow-400 space-x-1">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-center mb-4">
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">Jawaban Benar</span>
+                        <span id="resultCorrect" class="text-2xl font-black text-emerald-400">8 / 10</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-xs text-slate-400 block font-bold">Total Skor</span>
+                        <span id="resultScore" class="text-2xl font-black text-amber-400">800</span>
+                    </div>
+                </div>
+
+                <!-- Unlocked Prizes Badge List (Seni Budaya tie-in) -->
+                <div>
+                    <span class="text-xs font-bold text-amber-300 block mb-2">🎁 Hadiah Seni Budaya yang Berhasil Diraih:</span>
+                    <div id="unlockedPrizesBox" class="flex flex-wrap gap-2">
+                        <!-- Dynamic prize chips -->
+                    </div>
+                </div>
+
+                <!-- Motivational Praise -->
+                <div id="resultPraiseBox" class="mt-4 p-3 bg-red-900/50 border border-red-400/40 rounded-xl text-xs text-amber-200 text-center font-bold">
+                    Luar biasa! Kamu menguasai Bilangan Cacah dan Melestarikan Tradisi Panjat Pinang!
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onclick="startClimbGame()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3.5 rounded-2xl shadow-lg border-b-4 border-teal-900 transition touch-btn flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>MANJAT LAGI</span>
+                </button>
+                <button onclick="showMenuPage()" class="bg-slate-700 hover:bg-slate-600 text-white font-black py-3.5 rounded-2xl shadow-lg border-b-4 border-slate-900 transition touch-btn flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-house"></i>
+                    <span>MENU UTAMA</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Study Modal (Materi Bilangan Cacah & Panjat Pinang) -->
+    <div id="studyModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border-4 border-amber-400 w-full max-w-2xl rounded-3xl p-6 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b-2 border-slate-700 pb-3 mb-4">
+                <h3 class="text-2xl font-black text-amber-300 flex items-center">
+                    <i class="fa-solid fa-book-open text-amber-400 mr-2"></i> Materi Bilangan Cacah & Panjat Pinang
+                </h3>
+                <button onclick="closeModal('studyModal')" class="text-slate-400 hover:text-white text-2xl font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <!-- Concept 1 -->
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
+                    <h4 class="font-bold text-amber-400 text-base mb-1">1. Nilai Tempat (Ratusan, Puluhan, Satuan)</h4>
+                    <p class="text-slate-300">
+                        Contoh angka: <span class="text-emerald-400 font-extrabold text-lg">862</span>
+                    </p>
+                    <ul class="list-disc list-inside mt-1 text-slate-300 space-y-1">
+                        <li>Angka <strong class="text-yellow-300">8</strong> menempati nilai <span class="underline">Ratusan</span> (800)</li>
+                        <li>Angka <strong class="text-yellow-300">6</strong> menempati nilai <span class="underline">Puluhan</span> (60)</li>
+                        <li>Angka <strong class="text-yellow-300">2</strong> menempati nilai <span class="underline">Satuan</span> (2)</li>
+                    </ul>
+                </div>
+
+                <!-- Concept 2 -->
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
+                    <h4 class="font-bold text-amber-400 text-base mb-1">2. Membandingkan Bilangan Cacah</h4>
+                    <p class="text-slate-300 mb-1">
+                        Perhatikan angka ratusannya terlebih dahulu:
+                    </p>
+                    <div class="bg-slate-950 p-3 rounded-xl font-bold text-center text-amber-300">
+                        730 <span class="text-white">lebih besar dari (&gt;)</span> 690
+                    </div>
+                </div>
+
+                <!-- Concept 3 (Seni Budaya Tie-in) -->
+                <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
+                    <h4 class="font-bold text-amber-400 text-base mb-1">3. Nilai Budaya Panjat Pinang</h4>
+                    <p class="text-slate-300">
+                        Panjat Pinang adalah permainan tradisional Indonesia yang mengajarkan **Kerjasama, Pantang Menyerah, dan Gotong Royong**.
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="closeModal('studyModal')" class="w-full mt-6 bg-amber-500 hover:bg-amber-600 text-slate-900 font-black py-3 rounded-2xl text-lg shadow-lg touch-btn">
+                PAHAM MAU MANJAT! 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- Art Gallery Modal (Hadiah Kerajinan Seni Budaya) -->
+    <div id="artGalleryModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border-4 border-emerald-400 w-full max-w-2xl rounded-3xl p-6 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b-2 border-slate-700 pb-3 mb-4">
+                <h3 class="text-2xl font-black text-emerald-400 flex items-center">
+                    <i class="fa-solid fa-gift text-emerald-400 mr-2"></i> Galeri Hadiah Kerajinan Seni Budaya
+                </h3>
+                <button onclick="closeModal('artGalleryModal')" class="text-slate-400 hover:text-white text-2xl font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-300 mb-4">
+                Di puncak pohon pinang terdapat aneka hadiah karya seni budaya tradisional Nusantara yang indah:
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-drum text-amber-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Kendang Alat Musik</h5>
+                    <p class="text-xs text-slate-400">Seni musik daerah</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-masks-theater text-purple-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Wayang Kulit</h5>
+                    <p class="text-xs text-slate-400">Seni pertunjukan</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-shirt text-red-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Baju Batik</h5>
+                    <p class="text-xs text-slate-400">Kain hias motif daerah</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-fan text-pink-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Kipas Anyaman</h5>
+                    <p class="text-xs text-slate-400">Seni kriya bambu</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-bicycle text-blue-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Sepeda Anak</h5>
+                    <p class="text-xs text-slate-400">Hadiah utama puncak</p>
+                </div>
+                <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                    <i class="fa-solid fa-guitar text-yellow-400 text-3xl mb-1"></i>
+                    <h5 class="font-bold text-sm text-white">Angklung Bambu</h5>
+                    <p class="text-xs text-slate-400">Seni musik tradisional</p>
+                </div>
+            </div>
+
+            <button onclick="closeModal('artGalleryModal')" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-slate-900 font-black py-3 rounded-2xl text-lg shadow-lg touch-btn">
+                TUTUP GALERI
+            </button>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border-4 border-purple-400 w-full max-w-xl rounded-3xl p-6 shadow-2xl text-slate-100">
+            <div class="flex items-center justify-between border-b-2 border-slate-700 pb-3 mb-4">
+                <h3 class="text-2xl font-black text-purple-300 flex items-center">
+                    <i class="fa-solid fa-gamepad text-purple-400 mr-2"></i> Cara Bermain
+                </h3>
+                <button onclick="closeModal('tutorialModal')" class="text-slate-400 hover:text-white text-2xl font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-sm">
+                <div class="flex items-start space-x-3 bg-slate-900 p-3 rounded-xl">
+                    <div class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold shrink-0">1</div>
+                    <p class="text-slate-200">Baca soal matematika bilangan cacah di spanduk atas.</p>
+                </div>
+                <div class="flex items-start space-x-3 bg-slate-900 p-3 rounded-xl">
+                    <div class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold shrink-0">2</div>
+                    <p class="text-slate-200">Tekan/Sentuh salah satu dari 3 kotak tombol pilihan jawaban yang menurutmu benar.</p>
+                </div>
+                <div class="flex items-start space-x-3 bg-slate-900 p-3 rounded-xl">
+                    <div class="bg-purple-500 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold shrink-0">3</div>
+                    <p class="text-slate-200">Jika benar, pemanjat akan naik tinggi menuju puncak untuk merebut hadiah!</p>
+                </div>
+            </div>
+
+            <button onclick="closeModal('tutorialModal')" class="w-full mt-6 bg-purple-500 hover:bg-purple-600 text-white font-black py-3 rounded-2xl text-lg shadow-lg touch-btn">
+                SAYA SIAP! 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        // Student State
+        let studentData = {
+            name: '',
+            classGroup: 'Kelas 2A',
+            absen: '',
+            costume: 'red',
+            costumeName: 'Merah Putih'
+        };
+
+        const costumeOptions = [
+            { id: 'red', name: 'Merah Putih', hex: '#EF4444', class: 'bg-red-500' },
+            { id: 'yellow', name: 'Batik Kuning', hex: '#F59E0B', class: 'bg-amber-400' },
+            { id: 'green', name: 'Hijau Hijau', hex: '#10B981', class: 'bg-emerald-500' },
+            { id: 'blue', name: 'Biru Cerah', hex: '#3B82F6', class: 'bg-blue-500' }
+        ];
+
+        // Traditional Prizes List
+        const prizeList = [
+            { name: 'Kendang Alat Musik', icon: 'fa-drum', color: 'text-amber-400' },
+            { name: 'Wayang Kulit', icon: 'fa-masks-theater', color: 'text-purple-400' },
+            { name: 'Baju Batik Motif', icon: 'fa-shirt', color: 'text-red-400' },
+            { name: 'Kipas Anyaman', icon: 'fa-fan', color: 'text-pink-400' },
+            { name: 'Angklung Bambu', icon: 'fa-guitar', color: 'text-yellow-400' },
+            { name: 'Sepeda Puncak', icon: 'fa-bicycle', color: 'text-cyan-400' }
+        ];
+
+        // Question Pool for Bilangan Cacah s.d. 1000 (SD Kelas 2)
+        const questionPool = [
+            {
+                q: "Lambang bilangan dari 'Enam ratus empat puluh dua' adalah...",
+                answers: ["642", "246", "624"],
+                correct: 0
+            },
+            {
+                q: "Pada bilangan 785, angka 7 menempati nilai tempat...",
+                answers: ["Satuan", "Ratusan", "Puluhan"],
+                correct: 1
+            },
+            {
+                q: "Bilangan tepat setelah 499 adalah...",
+                answers: ["498", "501", "500"],
+                correct: 2
+            },
+            {
+                q: "Pilih bilangan yang LEBIH BESAR dari 620!",
+                answers: ["710", "590", "605"],
+                correct: 0
+            },
+            {
+                q: "Hasil dari 400 + 50 + 6 adalah...",
+                answers: ["465", "456", "546"],
+                correct: 1
+            },
+            {
+                q: "Angka 9 pada bilangan 893 nilainya adalah...",
+                answers: ["9", "900", "90"],
+                correct: 2
+            },
+            {
+                q: "Berapakah hasil dari 300 + 400?",
+                answers: ["700", "800", "600"],
+                correct: 0
+            },
+            {
+                q: "Urutkan dari yang TERKECIL: 350, 120, 480",
+                answers: ["480, 350, 120", "120, 350, 480", "350, 120, 480"],
+                correct: 1
+            },
+            {
+                q: "Isilah titik-titik: 850 ... 805",
+                answers: ["< (Lebih kecil)", "= (Sama)", "> (Lebih besar)"],
+                correct: 2
+            },
+            {
+                q: "Berapakah hasil dari 800 - 300?",
+                answers: ["500", "400", "600"],
+                correct: 0
+            },
+            {
+                q: "Lambang bilangan 'Sembilan ratus delapan' adalah...",
+                answers: ["980", "908", "809"],
+                correct: 1
+            },
+            {
+                q: "Bilangan sebelum 1000 adalah...",
+                answers: ["900", "990", "999"],
+                correct: 2
+            }
+        ];
+
+        // Gameplay variables
+        let activeQuestions = [];
+        let currentQIndex = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let climbProgress = 0; // 0 to 10
+        let isAnswering = false;
+
+        // Canvas variables
+        let canvas, ctx;
+        let animationFrameId;
+        let targetClimberY = 0;
+        let currentClimberY = 0;
+
+        window.onload = function() {
+            renderCostumePickers();
+            setupCanvas();
+            window.addEventListener('resize', setupCanvas);
+        };
+
+        function renderCostumePickers() {
+            const container = document.getElementById('costumePicker');
+            container.innerHTML = '';
+
+            costumeOptions.forEach(c => {
+                const isSelected = studentData.costume === c.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectCostume(c.id);
+                btn.className = `p-3 rounded-2xl border-4 ${isSelected ? 'border-amber-400 scale-105 shadow-lg' : 'border-slate-600'} ${c.class} flex flex-col items-center justify-center transition touch-btn text-white`;
+                btn.innerHTML = `<i class="fa-solid fa-shirt text-2xl mb-1"></i><span class="text-xs font-bold">${c.name}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectCostume(costumeId) {
+            sound.playClick();
+            studentData.costume = costumeId;
+            const found = costumeOptions.find(c => c.id === costumeId);
+            if (found) studentData.costumeName = found.name;
+            renderCostumePickers();
+            updateHeaderInfo();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            sound.playClick();
+
+            const name = document.getElementById('inputName').value.trim();
+            const classGrp = document.getElementById('inputClassGroup').value;
+            const absen = document.getElementById('inputAbsen').value;
+
+            if (!name) return;
+
+            studentData.name = name;
+            studentData.classGroup = classGrp;
+            studentData.absen = absen;
+
+            updateHeaderInfo();
+            showMenuPage();
+        }
+
+        function updateHeaderInfo() {
+            document.getElementById('headerUserInfo').classList.remove('hidden');
+            document.getElementById('headerName').innerText = studentData.name;
+            document.getElementById('headerClass').innerText = `${studentData.classGroup} | Absen ${studentData.absen}`;
+
+            const avatar = document.getElementById('headerAvatar');
+            const selectedCostume = costumeOptions.find(c => c.id === studentData.costume);
+            avatar.style.backgroundColor = selectedCostume ? selectedCostume.hex : '#EF4444';
+
+            document.getElementById('menuStudentName').innerText = studentData.name;
+            document.getElementById('menuStudentMeta').innerText = `${studentData.classGroup} | Absen ${studentData.absen}`;
+            
+            const menuIcon = document.getElementById('menuAvatarIcon');
+            menuIcon.style.color = selectedCostume ? selectedCostume.hex : '#EF4444';
+        }
+
+        function logout() {
+            sound.playClick();
+            document.getElementById('headerUserInfo').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('menuPage').classList.add('hidden');
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('resultPage').classList.add('hidden');
+        }
+
+        function showMenuPage() {
+            sound.playClick();
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('menuPage').classList.remove('hidden');
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('resultPage').classList.add('hidden');
+        }
+
+        function showStudyModal() {
+            sound.playClick();
+            document.getElementById('studyModal').classList.remove('hidden');
+        }
+
+        function showArtGalleryModal() {
+            sound.playClick();
+            document.getElementById('artGalleryModal').classList.remove('hidden');
+        }
+
+        function showTutorialModal() {
+            sound.playClick();
+            document.getElementById('tutorialModal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            sound.playClick();
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function startClimbGame() {
+            sound.playClick();
+            activeQuestions = [...questionPool].sort(() => 0.5 - Math.random()).slice(0, 10);
+            currentQIndex = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            climbProgress = 0;
+            isAnswering = false;
+
+            document.getElementById('hudScore').innerText = score;
+            document.getElementById('hudHeight').innerText = '0 M';
+
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('menuPage').classList.add('hidden');
+            document.getElementById('resultPage').classList.add('hidden');
+            document.getElementById('gamePage').classList.remove('hidden');
+
+            setupCanvas();
+            loadCurrentQuestion();
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function loadCurrentQuestion() {
+            if (currentQIndex >= activeQuestions.length) {
+                finishRace();
+                return;
+            }
+
+            const qObj = activeQuestions[currentQIndex];
+            document.getElementById('hudQIndex').innerText = currentQIndex + 1;
+            document.getElementById('gameQuestionText').innerText = qObj.q;
+
+            const btnContainer = document.getElementById('answerButtonsContainer');
+            btnContainer.innerHTML = '';
+
+            qObj.answers.forEach((ansText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectAnswer(idx);
+                btn.className = "bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-slate-900 font-black text-lg py-4 px-3 rounded-2xl border-b-4 border-amber-900 shadow-xl touch-btn flex items-center justify-center space-x-2";
+                btn.innerHTML = `<span class="bg-slate-900 text-amber-300 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black mr-2">${String.fromCharCode(65 + idx)}</span> <span>${ansText}</span>`;
+                btnContainer.appendChild(btn);
+            });
+
+            isAnswering = false;
+        }
+
+        function selectAnswer(ansIndex) {
+            if (isAnswering) return;
+            isAnswering = true;
+
+            const qObj = activeQuestions[currentQIndex];
+            const isCorrect = (ansIndex === qObj.correct);
+
+            const feedback = document.getElementById('feedbackOverlay');
+            const title = document.getElementById('feedbackTitle');
+            const detail = document.getElementById('feedbackDetail');
+            const icon = document.getElementById('feedbackIcon');
+
+            if (isCorrect) {
+                sound.playCorrect();
+                sound.playClimb();
+                score += 100;
+                correctAnswersCount++;
+                climbProgress++;
+
+                icon.innerText = '🧗‍♂️🎉';
+                title.innerText = 'HEBAT! MANJAT NAIK!';
+                title.className = 'text-3xl sm:text-4xl font-black text-emerald-400 drop-shadow-lg';
+                detail.innerText = `Jawaban '${qObj.answers[qObj.correct]}' Benar! Tinggi bertambah ${climbProgress * 2} Meter!`;
+            } else {
+                sound.playWrong();
+                icon.innerText = '⚠️ slippery!';
+                title.innerText = 'KURANG TEPAT!';
+                title.className = 'text-3xl sm:text-4xl font-black text-red-400 drop-shadow-lg';
+                detail.innerText = `Jawaban yang benar adalah: ${qObj.answers[qObj.correct]}`;
+            }
+
+            document.getElementById('hudScore').innerText = score;
+            document.getElementById('hudHeight').innerText = `${climbProgress * 2} M`;
+            feedback.classList.remove('hidden');
+
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+                currentQIndex++;
+                loadCurrentQuestion();
+            }, 1800);
+        }
+
+        function confirmExitGame() {
+            sound.playClick();
+            if (confirm("Apakah kamu yakin ingin keluar dari Panjat Pinang?")) {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                showMenuPage();
+            }
+        }
+
+        // CANVAS ANIMATION (POHON PINANG & PEMANJAT)
+        function setupCanvas() {
+            canvas = document.getElementById('climbCanvas');
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight || 340;
+            ctx = canvas.getContext('2d');
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const topY = 60;
+            const bottomY = canvas.height - 20;
+
+            // Draw Sky background gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            skyGrad.addColorStop(0, '#0284c7');
+            skyGrad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sun
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(60, 60, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Pole (Pohon Pinang)
+            ctx.fillStyle = '#854d0e';
+            ctx.fillRect(centerX - 16, topY, 32, bottomY - topY);
+
+            // Pole Oil Texture / Rings
+            ctx.strokeStyle = '#a16207';
+            ctx.lineWidth = 3;
+            for (let y = topY + 20; y < bottomY; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(centerX - 16, y);
+                ctx.lineTo(centerX + 16, y);
+                ctx.stroke();
+            }
+
+            // Draw Top Wheel Frame with Prizes (Kerajinan Seni Budaya)
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.ellipse(centerX, topY, 90, 25, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Red White Flag Banner at the top
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(centerX - 25, topY - 35, 50, 12);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - 25, topY - 23, 50, 12);
+
+            // Draw Climber Character
+            const totalLevels = 10;
+            targetClimberY = bottomY - 30 - (climbProgress / totalLevels) * (bottomY - topY - 60);
+            currentClimberY += (targetClimberY - currentClimberY) * 0.15; // smooth movement
+
+            drawClimber(centerX, currentClimberY, studentData.costume);
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function drawClimber(x, y, costumeId) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            const costume = costumeOptions.find(c => c.id === costumeId) || costumeOptions[0];
+
+            // Head / Hair
+            ctx.fillStyle = '#fca5a5';
+            ctx.beginPath();
+            ctx.arc(0, -22, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Red-White Headband (Ikat Kepala Tradisional)
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(-12, -28, 24, 5);
+
+            // Body Shirt
+            ctx.fillStyle = costume.hex;
+            ctx.beginPath();
+            ctx.roundRect(-10, -10, 20, 24, 6);
+            ctx.fill();
+
+            // Arms hugging the pole
+            ctx.strokeStyle = '#fca5a5';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(-10, -5);
+            ctx.lineTo(-18, -12);
+            ctx.lineTo(-8, -18);
+
+            ctx.moveTo(10, -5);
+            ctx.lineTo(18, -12);
+            ctx.lineTo(8, -18);
+            ctx.stroke();
+
+            // Legs clinging to pole
+            ctx.beginPath();
+            ctx.moveTo(-8, 14);
+            ctx.lineTo(-16, 22);
+            ctx.moveTo(8, 14);
+            ctx.lineTo(16, 22);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function finishRace() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            sound.playVictory();
+
+            document.getElementById('gamePage').classList.add('hidden');
+            document.getElementById('resultPage').classList.remove('hidden');
+
+            document.getElementById('resultName').innerText = studentData.name;
+            document.getElementById('resultClass').innerText = `${studentData.classGroup} | Absen ${studentData.absen}`;
+            document.getElementById('resultCorrect').innerText = `${correctAnswersCount} / 10`;
+            document.getElementById('resultScore').innerText = score;
+
+            // Render unlocked prizes list
+            const prizeBox = document.getElementById('unlockedPrizesBox');
+            prizeBox.innerHTML = '';
+
+            const unlockedCount = Math.min(Math.ceil((correctAnswersCount / 10) * prizeList.length), prizeList.length);
+            for (let i = 0; i < unlockedCount; i++) {
+                const p = prizeList[i];
+                const chip = document.createElement('div');
+                chip.className = "bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 flex items-center space-x-2 text-xs font-bold text-white";
+                chip.innerHTML = `<i class="fa-solid ${p.icon} ${p.color}"></i><span>${p.name}</span>`;
+                prizeBox.appendChild(chip);
+            }
+
+            // Stars calculation
+            const starsContainer = document.getElementById('resultStars');
+            let starsHTML = '';
+            let starsCount = 1;
+            if (correctAnswersCount >= 9) starsCount = 3;
+            else if (correctAnswersCount >= 6) starsCount = 2;
+
+            for (let i = 0; i < 3; i++) {
+                if (i < starsCount) {
+                    starsHTML += '<i class="fa-solid fa-star text-yellow-400"></i>';
+                } else {
+                    starsHTML += '<i class="fa-regular fa-star text-slate-600"></i>';
+                }
+            }
+            starsContainer.innerHTML = starsHTML;
+
+            // Praise text
+            const praiseBox = document.getElementById('resultPraiseBox');
+            if (correctAnswersCount === 10) {
+                praiseBox.innerText = "🏆 Sempurna! Kamu Pemuncak Panjat Pinang Sejati & Mahir Bilangan Cacah!";
+            } else if (correctAnswersCount >= 7) {
+                praiseBox.innerText = "🌟 Luar Biasa! Pemanjat Cilik Tangguh, Terus Tingkatkan Belajarmu!";
+            } else {
+                praiseBox.innerText = "💪 Bagus! Mari Pelajari Kembali Materi Bilangan Cacah dan Coba Manjat Lagi!";
+            }
+        }
+
+        function toggleSound() {
+            sound.muted = !sound.muted;
+            const icon = document.getElementById('soundIcon');
+            if (sound.muted) {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            } else {
+                icon.className = 'fa-solid fa-volume-high text-yellow-300';
+            }
+        }
+    </script>
+</body>
+</html>
