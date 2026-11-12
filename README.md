@@ -26,6 +26,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Monopoly Math: Petualangan Bilangan Cacah Seribuan | Yulia Nanda | 3 | Matematika | `games/monopoly-math/` |
 | Grand Prix Bilangan Cacah | Agus Tuti Purnama, S.Pd. | 2 | Seni Budaya | `games/grand-prix-bilangan/` |
 | Classroom Racer - English Game | Muhammad Qussoyi, S.Pd. | 5 | Bahasa Inggris | `games/classroom-racer/` |
+| Tembak Target – Petualangan Siklus Hidup | Ila Aisyah, S.Pd. | 5 | IPAS | `games/tembak-target-siklus-hidup/` |
 
 ## Cara Menambah Game Baru
 

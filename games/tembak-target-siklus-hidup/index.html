@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎯 TEMBAK TARGET – PETUALANGAN SIKLUS HIDUP 🎯</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Animate.css CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Google Fonts: Fredoka & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-sky: #0284c7;
+            --bg-forest: #15803d;
+            --accent-yellow: #facc15;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #0369a1 50%, #15803d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Arena Shooting Gallery Box */
+        .shooting-arena {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            background: radial-gradient(circle at 50% 30%, rgba(56, 189, 248, 0.3) 0%, rgba(15, 23, 42, 0.85) 100%),
+                        linear-gradient(180deg, #0284c7 0%, #0369a1 60%, #166534 100%);
+            border-radius: 1.5rem;
+            border: 4px solid #38bdf8;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.5), inset 0 0 25px rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* Floating Answer Bubble Targets */
+        .target-bubble {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px 18px;
+            border-radius: 9999px;
+            font-family: 'Fredoka', cursive;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255, 255, 255, 0.8);
+            border: 3px solid rgba(255, 255, 255, 0.95);
+            transition: transform 0.15s ease, border-color 0.2s ease, background 0.3s;
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            white-space: nowrap;
+            font-size: 1rem;
+        }
+
+        .target-bubble:hover {
+            transform: scale(1.1);
+            border-color: #facc15;
+            box-shadow: 0 0 25px #facc15;
+        }
+
+        .bubble-cyan { background: linear-gradient(135deg, rgba(56, 189, 248, 0.9), rgba(3, 105, 161, 0.95)); color: white; }
+        .bubble-emerald { background: linear-gradient(135deg, rgba(52, 211, 153, 0.9), rgba(5, 150, 105, 0.95)); color: white; }
+        .bubble-amber { background: linear-gradient(135deg, rgba(251, 191, 36, 0.9), rgba(217, 119, 6, 0.95)); color: white; }
+        .bubble-purple { background: linear-gradient(135deg, rgba(192, 132, 252, 0.9), rgba(126, 34, 206, 0.95)); color: white; }
+        .bubble-pink { background: linear-gradient(135deg, rgba(244, 114, 182, 0.9), rgba(190, 24, 93, 0.95)); color: white; }
+
+        /* Cannon at Bottom Center */
+        .cannon-container {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 90px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .cannon-base {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #facc15 0%, #d97706 100%);
+            border-radius: 9999px;
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 25px #facc15;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+        }
+
+        /* Shot projectile animation */
+        .laser-line {
+            position: absolute;
+            background: linear-gradient(90deg, #38bdf8, #facc15, #ffffff);
+            height: 6px;
+            border-radius: 9999px;
+            box-shadow: 0 0 15px #38bdf8, 0 0 25px #facc15;
+            pointer-events: none;
+            z-index: 15;
+            transform-origin: left center;
+            opacity: 0.9;
+            animation: fadeLaser 0.35s ease-out forwards;
+        }
+
+        @keyframes fadeLaser {
+            0% { opacity: 1; transform: scaleY(1.5); }
+            100% { opacity: 0; transform: scaleY(0.2); }
+        }
+
+        /* Floating background decoration elements */
+        .bg-floating-item {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.25;
+            animation: floatSlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatSlow {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-30px) rotate(15deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
+
+        /* Floating pop overlay badge */
+        .floating-badge {
+            position: absolute;
+            font-family: 'Fredoka', cursive;
+            font-weight: 800;
+            pointer-events: none;
+            z-index: 30;
+            animation: floatUpFade 0.9s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        @keyframes floatUpFade {
+            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -35px) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -60px) scale(0.9); }
+        }
+
+        /* Boss Billboard Container */
+        .boss-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+            border: 4px solid #facc15;
+            box-shadow: 0 0 35px rgba(250, 204, 21, 0.6);
+            border-radius: 1.5rem;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between p-2 sm:p-4 relative">
+
+    <!-- GAME HEADER BAR -->
+    <header class="max-w-5xl mx-auto w-full flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 border-2 border-cyan-400/50 p-3 sm:p-4 rounded-2xl shadow-2xl z-20 backdrop-blur">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center border-2 border-white shadow-md">
+                <span class="text-2xl animate-bounce">🎯</span>
+            </div>
+            <div>
+                <h1 class="font-game text-xl sm:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-cyan-300">
+                    TEMBAK TARGET - PETUALANGAN SIKLUS HIDUP
+                </h1>
+                <p class="text-xs text-cyan-200 font-medium">MEDIA PEMBELAJARAN INTERAKSI IPAS KELAS 5 SD</p>
+            </div>
+        </div>
+
+        <!-- Action Navigation Buttons -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openBelajarModal()" class="px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-xs font-bold shadow transition flex items-center gap-1 border border-emerald-300 text-white">
+                📚 <span>Belajar Dulu</span>
+            </button>
+            
+            <button onclick="toggleAudio()" id="soundToggleBtn" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-yellow-300 transition flex items-center gap-1 border border-slate-600">
+                <span id="soundIcon">🔊</span> <span id="soundText">Suara: ON</span>
+            </button>
+
+            <button onclick="openTeacherMode()" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 rounded-xl text-xs font-bold text-white transition flex items-center gap-1 border border-amber-300">
+                ⚙️ <span>Mode Guru</span>
+            </button>
+
+            <button onclick="toggleFullscreen()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-cyan-300 transition border border-slate-600" title="Layar Penuh">
+                📺
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="max-w-5xl mx-auto w-full flex-grow my-3 flex flex-col justify-center z-10">
+
+        <!-- SPLASH / START SCREEN -->
+        <section id="splashScreen" class="bg-slate-900/95 border-2 border-cyan-400 rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto w-full shadow-2xl my-auto animate__animated animate__fadeIn relative overflow-hidden">
+            <!-- Background Floating Icons -->
+            <div class="bg-floating-item text-4xl top-4 left-6">🥚</div>
+            <div class="bg-floating-item text-4xl top-10 right-8">🐛</div>
+            <div class="bg-floating-item text-4xl bottom-8 left-10">🪆</div>
+            <div class="bg-floating-item text-4xl bottom-6 right-8">🦋</div>
+
+            <div class="inline-block p-4 bg-cyan-950/80 rounded-3xl border border-cyan-400/40 mb-4 animate__animated animate__pulse animate__infinite">
+                <div class="text-4xl sm:text-6xl mb-1">🥚 ➔ 🐛 ➔ 🪆 ➔ 🦋</div>
+            </div>
+
+            <h2 class="font-game text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-cyan-300 mb-2">
+                🎯 TEMBAK TARGET 🎯
+            </h2>
+            <p class="font-game text-xl text-amber-300 mb-2">PETUALANGAN SIKLUS HIDUP</p>
+            <p class="text-cyan-200 text-sm font-semibold mb-6">“Bidik! Tembak! Jawab dengan benar!”</p>
+
+            <p class="text-slate-300 text-xs sm:text-sm max-w-md mx-auto mb-8 leading-relaxed">
+                Uji pengetahuanmu tentang daur hidup Kupu-Kupu, Katak, Ayam, Tumbuhan, dan hewan lainnya. Gunakan tembakan bola energi edukatif tanpa kekerasan!
+            </p>
+
+            <button onclick="startGame()" class="w-full sm:w-80 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:to-amber-300 text-slate-950 font-game text-2xl font-black py-4 px-8 rounded-2xl shadow-xl transition transform hover:scale-105 active:scale-95 border-2 border-white">
+                ▶ MULAI GAME
+            </button>
+        </section>
+
+        <!-- MAIN GAMEPLAY SCREEN -->
+        <section id="gameScreen" class="hidden flex-col gap-3">
+
+            <!-- HUD STATUS BAR (Score, Level, Timer, Hearts, Combo) -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900/90 border-2 border-cyan-400/80 p-3 rounded-2xl shadow-xl">
+                <!-- Level Indicator -->
+                <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-700 text-center col-span-1">
+                    <span class="text-[10px] text-cyan-300 font-bold block uppercase">LEVEL</span>
+                    <span id="hudLevelText" class="font-game text-xs sm:text-sm font-bold text-yellow-300">LEVEL 1 / 5</span>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-1 overflow-hidden">
+                        <div id="hudLevelBar" class="bg-yellow-400 h-full w-1/5 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Score -->
+                <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-700 text-center col-span-1">
+                    <span class="text-[10px] text-cyan-300 font-bold block uppercase">SKOR</span>
+                    <span id="hudScoreText" class="font-game text-base sm:text-xl font-black text-emerald-400">0</span>
+                </div>
+
+                <!-- Combo -->
+                <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-700 text-center col-span-1">
+                    <span class="text-[10px] text-cyan-300 font-bold block uppercase">COMBO</span>
+                    <span id="hudComboText" class="font-game text-base sm:text-xl font-black text-amber-400">x1</span>
+                </div>
+
+                <!-- Hearts / Lives -->
+                <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-700 text-center col-span-1">
+                    <span class="text-[10px] text-cyan-300 font-bold block uppercase">NYAWA</span>
+                    <span id="hudHeartsText" class="font-game text-sm sm:text-base">❤️ ❤️ ❤️</span>
+                </div>
+
+                <!-- Countdown Timer -->
+                <div class="bg-slate-950/80 p-2 rounded-xl border border-slate-700 text-center col-span-2 sm:col-span-1">
+                    <span class="text-[10px] text-cyan-300 font-bold block uppercase">WAKTU</span>
+                    <span id="hudTimerText" class="font-game text-base sm:text-xl font-black text-amber-300">10s</span>
+                </div>
+            </div>
+
+            <!-- QUESTION & INSTRUCTION BANNER -->
+            <div class="bg-slate-900/95 border-2 border-yellow-400/90 p-3 sm:p-4 rounded-2xl text-center shadow-lg relative overflow-hidden">
+                <div id="badgeQuestionType" class="inline-block px-3 py-0.5 bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 rounded-full text-[11px] font-bold uppercase mb-1">
+                    🎯 TEMBAK JAWABAN BENAR:
+                </div>
+                <h3 id="questionText" class="font-game text-base sm:text-2xl font-bold text-white leading-snug">
+                    Tahap daur hidup kupu-kupu setelah telur (larva) adalah...
+                </h3>
+                <!-- Sequence Step Tracker (Visible only in Sequence Mode) -->
+                <div id="sequenceTracker" class="hidden mt-2 flex justify-center items-center gap-2">
+                    <span class="text-xs font-bold text-cyan-300">Urutan:</span>
+                    <div id="sequenceStepsContainer" class="flex gap-1 sm:gap-2"></div>
+                </div>
+            </div>
+
+            <!-- SHOOTING ARENA -->
+            <div class="shooting-arena" id="shootingArena" onclick="handleArenaClick(event)">
+                <!-- Target Bubbles injected by JS -->
+
+                <!-- Water Laser Cannon Base -->
+                <div class="cannon-container">
+                    <div class="cannon-base">💧</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- VICTORY / GAME OVER SCREEN -->
+        <section id="victoryScreen" class="hidden bg-slate-900/95 border-2 border-yellow-400 rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto w-full shadow-2xl animate__animated animate__zoomIn">
+            <div class="text-6xl mb-2" id="victoryEmoji">🏆</div>
+            <h2 id="victoryTitle" class="font-game text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-cyan-300 mb-2">
+                PETUALANGAN SELESAI!
+            </h2>
+            <div id="starRating" class="text-3xl my-2">⭐⭐⭐</div>
+
+            <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-700 my-4 max-w-md mx-auto grid grid-cols-2 gap-3 text-left text-xs sm:text-sm">
+                <div><span class="text-slate-400">Nama Pemain:</span> <strong id="resPlayerName" class="text-cyan-300">Petualang SD</strong></div>
+                <div><span class="text-slate-400">Skor Akhir:</span> <strong id="resFinalScore" class="text-emerald-400">0</strong></div>
+                <div><span class="text-slate-400">Jawaban Benar:</span> <strong id="resCorrect" class="text-emerald-400">0</strong></div>
+                <div><span class="text-slate-400">Jawaban Salah:</span> <strong id="resWrong" class="text-rose-400">0</strong></div>
+            </div>
+
+            <p id="victorySubtitle" class="text-slate-200 text-xs sm:text-sm mb-6 leading-relaxed">
+                Hebat sekali! Kamu telah menyelesaikan petualangan menembak target siklus hidup dengan sangat luar biasa!
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="startGame()" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-game font-black py-3 px-6 rounded-2xl text-lg shadow-xl transition transform hover:scale-105 border-2 border-white">
+                    🔄 MAIN LAGI
+                </button>
+                <button onclick="openBelajarModal()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-game font-black py-3 px-6 rounded-2xl text-lg shadow-xl transition transform hover:scale-105 border-2 border-white">
+                    📚 BELAJAR LAGI
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: BELAJAR DULU (EDUCATIONAL STUDY MATERIAL) -->
+    <div id="belajarModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-slate-900 border-2 border-emerald-400 rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate__animated animate__fadeInDown">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-emerald-800 to-teal-800 p-4 border-b border-emerald-500/50 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📚</span>
+                    <h3 class="font-game text-xl font-bold text-white">MATERI IPAS – SIKLUS HIDUP MAKHLUK HIDUP</h3>
+                </div>
+                <button onclick="closeBelajarModal()" class="w-8 h-8 bg-emerald-950 hover:bg-emerald-800 rounded-full text-emerald-200 font-bold text-lg border border-emerald-400 flex items-center justify-center">✕</button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-6 text-slate-200 text-xs sm:text-sm leading-relaxed">
+                <!-- 1. Kupu-Kupu -->
+                <div class="bg-slate-950/70 p-4 rounded-2xl border border-emerald-500/30">
+                    <h4 class="font-game text-lg text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                        <span>🦋</span> 1. Metamorfosis Sempurna (Contoh: Kupu-kupu)
+                    </h4>
+                    <p class="mb-3 text-slate-300">Metamorfosis sempurna adalah daur hidup hewan yang mengalami perubahan bentuk tubuh sangat berbeda pada setiap tahapannya (memiliki tahap kepompong/pupa).</p>
+                    <div class="p-3 bg-emerald-950/50 rounded-xl border border-emerald-500/40 text-center font-bold text-emerald-300 text-sm mb-3">
+                        🥚 TELUR ➔ 🐛 ULAT (LARVA) ➔ 🫘 KEPOMPONG (PUPA) ➔ 🦋 KUPU-KUPU DEWASA
+                    </div>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-300">
+                        <li><strong>Telur:</strong> Diletakkan di atas daun tanaman.</li>
+                        <li><strong>Ulat (Larva):</strong> Hobi makan daun segar dan tumbuh cepat.</li>
+                        <li><strong>Kepompong (Pupa):</strong> Masa berdiam diri membentuk tubuh kupu-kupu.</li>
+                        <li><strong>Kupu-Kupu Dewasa (Imago):</strong> Bertelur kembali untuk melanjutkan siklus.</li>
+                    </ul>
+                </div>
+
+                <!-- 2. Katak -->
+                <div class="bg-slate-950/70 p-4 rounded-2xl border border-emerald-500/30">
+                    <h4 class="font-game text-lg text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                        <span>🐸</span> 2. Daur Hidup Katak (Amfibi)
+                    </h4>
+                    <div class="p-3 bg-emerald-950/50 rounded-xl border border-emerald-500/40 text-center font-bold text-emerald-300 text-sm mb-3">
+                        🥚 TELUR ➔ 🐸 BERUDU (KECEBONG) ➔ 🐸 KATAK BEREKOR ➔ 🐸 KATAK DEWASA
+                    </div>
+                    <p class="text-slate-300">Berudu hidup di dalam air dan bernapas dengan <strong>insang</strong>. Katak dewasa bernapas menggunakan <strong>paru-paru dan kulit basah</strong>.</p>
+                </div>
+
+                <!-- 3. Ayam -->
+                <div class="bg-slate-950/70 p-4 rounded-2xl border border-emerald-500/30">
+                    <h4 class="font-game text-lg text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                        <span>🐔</span> 3. Daur Hidup Ayam (Tanpa Metamorfosis)
+                    </h4>
+                    <div class="p-3 bg-emerald-950/50 rounded-xl border border-emerald-500/40 text-center font-bold text-emerald-300 text-sm mb-3">
+                        🥚 TELUR ➔ 🐣 EMBRIO & MENETAS ➔ 🐥 ANAK AYAM ➔ 🐓 AYAM DEWASA
+                    </div>
+                    <p class="text-slate-300">Ayam tidak mengalami metamorfosis karena bentuk anak ayam sama dengan ayam dewasa, hanya berukuran lebih kecil.</p>
+                </div>
+
+                <!-- 4. Tumbuhan -->
+                <div class="bg-slate-950/70 p-4 rounded-2xl border border-emerald-500/30">
+                    <h4 class="font-game text-lg text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                        <span>🌱</span> 4. Daur Hidup Tumbuhan Berbiji
+                    </h4>
+                    <div class="p-3 bg-emerald-950/50 rounded-xl border border-emerald-500/40 text-center font-bold text-emerald-300 text-sm mb-3">
+                        🫘 BIJI ➔ 🌱 PERKECAMBAHAN ➔ 🌿 TUMBUHAN MUDA ➔ 🌳 TUMBUHAN DEWASA ➔ 🌸 BERBUNGA & BERBUAH
+                    </div>
+                    <p class="text-slate-300">Biji membutuhkan air, udara, dan suhu yang sesuai untuk berkecambah. Bunga yang mengalami penyerbukan akan menghasilkan buah dan biji baru.</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-950 border-t border-slate-800 text-center">
+                <button onclick="closeBelajarModal()" class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-game font-bold rounded-xl text-sm shadow">
+                    SIAP BERMAIN & MENEMBAK TARGET!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: MODE GURU (TEACHER CONTROL PANEL) -->
+    <div id="teacherModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-slate-900 border-2 border-amber-400 rounded-3xl max-w-xl w-full p-5 shadow-2xl animate__animated animate__zoomIn">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-800">
+                <h3 class="font-game text-xl font-bold text-amber-300 flex items-center gap-2">
+                    ⚙️ PANEL KONTROL GURU (TEACHER MODE)
+                </h3>
+                <button onclick="closeTeacherMode()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+            </div>
+
+            <div class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="block text-slate-300 font-bold mb-1">Lompat Langsung ke Level:</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button onclick="jumpToLevel(1)" class="p-2 bg-slate-800 hover:bg-amber-600 rounded-xl text-white font-bold text-center border border-slate-700">Lvl 1</button>
+                        <button onclick="jumpToLevel(2)" class="p-2 bg-slate-800 hover:bg-amber-600 rounded-xl text-white font-bold text-center border border-slate-700">Lvl 2</button>
+                        <button onclick="jumpToLevel(3)" class="p-2 bg-slate-800 hover:bg-amber-600 rounded-xl text-white font-bold text-center border border-slate-700">Lvl 3</button>
+                        <button onclick="jumpToLevel(4)" class="p-2 bg-slate-800 hover:bg-amber-600 rounded-xl text-white font-bold text-center border border-slate-700">Lvl 4</button>
+                        <button onclick="jumpToLevel(5)" class="p-2 bg-slate-800 hover:bg-amber-600 rounded-xl text-white font-bold text-center border border-slate-700">Lvl 5</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-300 font-bold mb-1">Pengaturan Kecepatan Target Gelembung:</label>
+                    <select id="settingSpeed" onchange="updateTargetSpeed()" class="w-full bg-slate-950 text-white p-2.5 rounded-xl border border-slate-700">
+                        <option value="slow">Lambat (Cocok untuk Pemula SD)</option>
+                        <option value="normal" selected>Normal (Standar Kelas 5)</option>
+                        <option value="fast">Cepat (Tantangan Ekstra)</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="resetGameScore()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl border border-rose-400">
+                        🔄 Reset Skor & Game
+                    </button>
+                    <button onclick="closeTeacherMode()" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl border border-amber-300">
+                        Selesai
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER COPYRIGHT & CREDITS -->
+    <footer class="max-w-5xl mx-auto w-full text-center text-cyan-200/60 text-[11px] py-2 z-10">
+        MEDIA PEMBELAJARAN INTERAKSI IPAS KELAS 5 SD – MATERI SIKLUS HIDUP MAKHLUK HIDUP
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           1. WEB AUDIO API SYNTHESIZER (PROCEDURAL AUDIO - NO EXTERNAL DEPENDENCY)
+           ========================================================================== */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playLaserShot() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playPop() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.08);
+
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.08);
+            }
+
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+
+                    gain.gain.setValueAtTime(0, now + idx * 0.06);
+                    gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.06 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.06 + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now + idx * 0.06);
+                    osc.stop(now + idx * 0.06 + 0.25);
+                });
+            }
+
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+
+            playTick() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.04);
+            }
+
+            playFanfare() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const arpeggio = [440, 554.37, 659.25, 880, 1108.73];
+                arpeggio.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+
+                    gain.gain.setValueAtTime(0.3, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.4);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.4);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        function toggleAudio() {
+            sound.enabled = !sound.enabled;
+            document.getElementById('soundIcon').innerText = sound.enabled ? '🔊' : '🔇';
+            document.getElementById('soundText').innerText = sound.enabled ? 'Suara: ON' : 'Suara: OFF';
+        }
+
+        /* ==========================================================================
+           2. QUESTION BANK DATA (40+ QUESTIONS ACROSS 5 LEVELS)
+           ========================================================================== */
+        const QUESTION_BANK = [
+            // LEVEL 1: SIKLUS HIDUP KUPU-KUPU & METAMORFOSIS SEMPURNA
+            { level: 1, type: 'standard', question: 'Tahap pertama dalam daur hidup kupu-kupu setelah bertelur di daun adalah...', targets: [{ text: 'TELUR', correct: true }, { text: 'ULAT', correct: false }, { text: 'KEPOMPONG', correct: false }, { text: 'KUPU-KUPU', correct: false }] },
+            { level: 1, type: 'standard', question: 'Tahap larva pada daur hidup kupu-kupu yang sangat aktif makan daun adalah...', targets: [{ text: 'ULAT', correct: true }, { text: 'PUPA', correct: false }, { text: 'TELUR', correct: false }, { text: 'IMAGO', correct: false }] },
+            { level: 1, type: 'standard', question: 'Tahap diam di mana ulat membungkus diri membentuk pupa disebut...', targets: [{ text: 'KEPOMPONG', correct: true }, { text: 'BERUDU', correct: false }, { text: 'NIMFA', correct: false }, { text: 'LARVA', correct: false }] },
+            { level: 1, type: 'sequence', question: 'Tembak tahapan daur hidup kupu-kupu secara berurutan!', sequence: ['TELUR', 'ULAT', 'KEPOMPONG', 'KUPU-KUPU'] },
+            { level: 1, type: 'standard', question: 'Kupu-kupu mengalami metamorfosis sempurna karena...', targets: [{ text: 'Bentuk larva sangat berbeda dengan dewasa', correct: true }, { text: 'Tidak pernah bertelur', correct: false }, { text: 'Bentuknya sama sejak lahir', correct: false }] },
+            { level: 1, type: 'standard', question: 'Selain kupu-kupu, hewan yang mengalami metamorfosis sempurna adalah...', targets: [{ text: 'NYAMUK', correct: true }, { text: 'BELALANG', correct: false }, { text: 'AYAM', correct: false }, { text: 'KUCING', correct: false }] },
+            { level: 1, type: 'standard', question: 'Tahap larva pada nyamuk yang hidup di dalam air tenang disebut...', targets: [{ text: 'JENTIK-JENTIK', correct: true }, { text: 'KEPOPMONG', correct: false }, { text: 'BERUDU', correct: false }] },
+            { level: 1, type: 'boss', question: '🐛 BOSS CHALLENGE LEVEL 1: Urutan metamorfosis sempurna yang tepat adalah...', targets: [{ text: 'Telur ➔ Larva ➔ Pupa ➔ Dewasa', correct: true }, { text: 'Telur ➔ Dewasa ➔ Larva', correct: false }, { text: 'Larva ➔ Telur ➔ Pupa', correct: false }] },
+
+            // LEVEL 2: SIKLUS HIDUP KATAK & METAMORFOSIS AMFIBI
+            { level: 2, type: 'standard', question: 'Katak dewasa bertelur di tempat lingkungan...', targets: [{ text: 'AIR', correct: true }, { text: 'POHON', correct: false }, { text: 'PASIR KERING', correct: false }] },
+            { level: 2, type: 'standard', question: 'Anak katak yang baru menetas dari telur dan bernapas dengan insang disebut...', targets: [{ text: 'BERUDU / KECEBONG', correct: true }, { text: 'JENTIK', correct: false }, { text: 'ULAT', correct: false }] },
+            { level: 2, type: 'sequence', question: 'Tembak tahapan daur hidup katak secara berurutan!', sequence: ['TELUR', 'BERUDU', 'KATAK BEREKOR', 'KATAK DEWASA'] },
+            { level: 2, type: 'standard', question: 'Alat pernapasan utama pada katak dewasa adalah...', targets: [{ text: 'PARU-PARU & KULIT', correct: true }, { text: 'INSANG OUTSIDE', correct: false }, { text: 'TRAKEA', correct: false }] },
+            { level: 2, type: 'standard', question: 'Hewan yang mengalami metamorfosis TIDAK sempurna (tanpa kepompong) adalah...', targets: [{ text: 'BELALANG', correct: true }, { text: 'KUPU-KUPU', correct: false }, { text: 'LALAT', correct: false }] },
+            { level: 2, type: 'standard', question: 'Tahap hewan muda pada metamorfosis tidak sempurna disebut...', targets: [{ text: 'NIMFA', correct: true }, { text: 'PUPA', correct: false }, { text: 'LARVA', correct: false }] },
+            { level: 2, type: 'standard', question: 'Metamorfosis katak dikategorikan unik karena mengalami perubahan organ dari...', targets: [{ text: 'Insang menjadi paru-paru', correct: true }, { text: 'Paru-paru menjadi insang', correct: false }, { text: 'Sayap menjadi kaki', correct: false }] },
+            { level: 2, type: 'boss', question: '🐸 BOSS CHALLENGE LEVEL 2: Mana hewan di bawah ini yang melalui metamorfosis TIDAK sempurna?', targets: [{ text: 'Belalang & Capung', correct: true }, { text: 'Kupu-kupu & Nyamuk', correct: false }, { text: 'Lalat & Katak', correct: false }] },
+
+            // LEVEL 3: SIKLUS HIDUP AYAM, UNGGAS & REPTIL
+            { level: 3, type: 'standard', question: 'Daur hidup ayam dimulai dari tahap...', targets: [{ text: 'TELUR', correct: true }, { text: 'ANAK AYAM', correct: false }, { text: 'KEPOMPONG', correct: false }] },
+            { level: 3, type: 'standard', question: 'Proses menjaga kehangatan telur ayam agar embrio berkembang disebut...', targets: [{ text: 'MENGERAM', correct: true }, { text: 'METAMORFOSIS', correct: false }, { text: 'PERKECAMBAHAN', correct: false }] },
+            { level: 3, type: 'sequence', question: 'Tembak tahapan daur hidup ayam secara berurutan!', sequence: ['TELUR', 'MENGETAS', 'ANAK AYAM', 'AYAM DEWASA'] },
+            { level: 3, type: 'standard', question: 'Apakah ayam mengalami proses metamorfosis?', targets: [{ text: 'TIDAK (Bentuknya mirip sejak menetas)', correct: true }, { text: 'YA (Metamorfosis Sempurna)', correct: false }] },
+            { level: 3, type: 'standard', question: 'Penyu dan ular berkembang biak dengan cara bertelur yang disebut...', targets: [{ text: 'OVIPAR', correct: true }, { text: 'VIVIPAR', correct: false }, { text: 'OVUPAR', correct: false }] },
+            { level: 3, type: 'standard', question: 'Bayi penyu yang baru menetas di pantai dan berlari ke laut disebut...', targets: [{ text: 'TUKIK', correct: true }, { text: 'BERUDU', correct: false }, { text: 'LARVA', correct: false }] },
+            { level: 3, type: 'boss', question: '🐓 BOSS CHALLENGE LEVEL 3: Ciri utama daur hidup hewan tanpa metamorfosis adalah...', targets: [{ text: 'Bentuk anak mirip dengan induknya', correct: true }, { text: 'Mengalami fase kepompong', correct: false }, { text: 'Bernapas dengan insang saat kecil', correct: false }] },
+
+            // LEVEL 4: SIKLUS HIDUP TUMBUHAN
+            { level: 4, type: 'standard', question: 'Daur hidup tumbuhan berbiji diawali dari tahap...', targets: [{ text: 'BIJI', correct: true }, { text: 'BUNGA', correct: false }, { text: 'BUAH', correct: false }] },
+            { level: 4, type: 'standard', question: 'Proses tumbuhnya akar dan tunas pertama dari dalam biji disebut...', targets: [{ text: 'PERKECAMBAHAN', correct: true }, { text: 'FOTOSINTESIS', correct: false }, { text: 'PENYERBUKAN', correct: false }] },
+            { level: 4, type: 'sequence', question: 'Tembak tahapan daur hidup tumbuhan secara berurutan!', sequence: ['BIJI', 'KECAMBAH', 'TUMBUHAN MUDA', 'BERBUNGA'] },
+            { level: 4, type: 'standard', question: 'Bagian tumbuhan yang berfungsi sebagai alat perkembangbiakan generatif adalah...', targets: [{ text: 'BUNGA', correct: true }, { text: 'BATANG', correct: false }, { text: 'AKAR', correct: false }] },
+            { level: 4, type: 'standard', question: 'Tumbuhan paku dan lumut berkembang biak tidak menggunakan biji, melainkan...', targets: [{ text: 'SPORA', correct: true }, { text: 'PUPA', correct: false }, { text: 'TELUR', correct: false }] },
+            { level: 4, type: 'standard', question: 'Peristiwa jatuhnya serbuk sari ke kepala putik pada bunga disebut...', targets: [{ text: 'PENYERBUKAN', correct: true }, { text: 'INFILTRASI', correct: false }, { text: 'EVAPORASI', correct: false }] },
+            { level: 4, type: 'boss', question: '🌸 BOSS CHALLENGE LEVEL 4: Urutan daur hidup tumbuhan berbiji lengkap adalah...', targets: [{ text: 'Biji ➔ Kecambah ➔ Tumbuhan Dewasa ➔ Bunga ➔ Buah', correct: true }, { text: 'Bunga ➔ Biji ➔ Kecambah ➔ Akar', correct: false }, { text: 'Buah ➔ Kecambah ➔ Biji ➔ Bunga', correct: false }] },
+
+            // LEVEL 5: TANTANGAN CAMPURAN & KECEPATAN
+            { level: 5, type: 'standard', question: 'Daur hidup hewan yang mengalami perubahan bentuk tubuh drastis disebut...', targets: [{ text: 'METAMORFOSIS', correct: true }, { text: 'PERKECAMBAHAN', correct: false }, { text: 'EVAPORASI', correct: false }] },
+            { level: 5, type: 'standard', question: 'Nyamuk bertelur dan menetas menjadi larva di...', targets: [{ text: 'AIR GENANGAN', correct: true }, { text: 'TANAH KERING', correct: false }, { text: 'DAUN POHON', correct: false }] },
+            { level: 5, type: 'standard', question: 'Kepompong ulat sutra dimanfaatkan manusia untuk membuat kain...', targets: [{ text: 'SUTRA', correct: true }, { text: 'KATUN', correct: false }, { text: 'WOL', correct: false }] },
+            { level: 5, type: 'sequence', question: 'Tembak urutan metamorfosis lalat secara berurutan!', sequence: ['TELUR', 'BELATUNG (LARVA)', 'PUPA', 'LALAT DEWASA'] },
+            { level: 5, type: 'standard', question: 'Manakah hewan di bawah ini yang TIDAK bertelur?', targets: [{ text: 'KUCHING / MAMALIA', correct: true }, { text: 'AYAM', correct: false }, { text: 'KATAK', correct: false }] },
+            { level: 5, type: 'boss', question: '🏆 FINAL BOSS CHALLENGE: Mengapa daur hidup mahluk hidup penting bagi kelestarian alam?', targets: [{ text: 'Menjaga kelangsungan jenis makhluk hidup', correct: true }, { text: 'Membuat hewan bertambah sedikit', correct: false }, { text: 'Menghilangkan populasi tanaman', correct: false }] }
+        ];
+
+        /* ==========================================================================
+           3. GAME STATE & CONTROLLER
+           ========================================================================== */
+        let gameState = {
+            currentLevel: 1,
+            score: 0,
+            combo: 1,
+            hearts: 3,
+            timer: 10,
+            timerInterval: null,
+            currentQuestionIndex: 0,
+            filteredQuestions: [],
+            currentSequenceStep: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            playerName: "Petualang SD",
+            speedMultiplier: 1.0,
+            targets: [], // Active target objects in DOM
+            targetMoveInterval: null,
+            questionStartTime: 0
+        };
+
+        // DOM Element Refs
+        const splashScreen = document.getElementById('splashScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const victoryScreen = document.getElementById('victoryScreen');
+        const shootingArena = document.getElementById('shootingArena');
+        const questionText = document.getElementById('questionText');
+        const badgeQuestionType = document.getElementById('badgeQuestionType');
+        const sequenceTracker = document.getElementById('sequenceTracker');
+        const sequenceStepsContainer = document.getElementById('sequenceStepsContainer');
+
+        // HUD Refs
+        const hudLevelText = document.getElementById('hudLevelText');
+        const hudLevelBar = document.getElementById('hudLevelBar');
+        const hudScoreText = document.getElementById('hudScoreText');
+        const hudComboText = document.getElementById('hudComboText');
+        const hudHeartsText = document.getElementById('hudHeartsText');
+        const hudTimerText = document.getElementById('hudTimerText');
+
+        function startGame() {
+            sound.init();
+            sound.playFanfare();
+
+            gameState.currentLevel = 1;
+            gameState.score = 0;
+            gameState.combo = 1;
+            gameState.hearts = 3;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+
+            splashScreen.classList.add('hidden');
+            victoryScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
+
+            loadLevelQuestions(gameState.currentLevel);
+        }
+
+        function loadLevelQuestions(level) {
+            gameState.currentLevel = level;
+            gameState.filteredQuestions = QUESTION_BANK.filter(q => q.level === level);
+            gameState.currentQuestionIndex = 0;
+
+            updateHUD();
+            displayCurrentQuestion();
+        }
+
+        function displayCurrentQuestion() {
+            clearInterval(gameState.timerInterval);
+            clearInterval(gameState.targetMoveInterval);
+            clearArenaTargets();
+
+            if (gameState.currentQuestionIndex >= gameState.filteredQuestions.length) {
+                // Level Completed!
+                if (gameState.currentLevel < 5) {
+                    sound.playCorrect();
+                    showFloatingBadge("✨ LEVEL " + gameState.currentLevel + " BERHASIL! ✨", "yellow");
+                    setTimeout(() => {
+                        loadLevelQuestions(gameState.currentLevel + 1);
+                    }, 1200);
+                } else {
+                    endGame(true);
+                }
+                return;
+            }
+
+            const currentQ = gameState.filteredQuestions[gameState.currentQuestionIndex];
+            questionText.innerText = currentQ.question;
+            gameState.questionStartTime = Date.now();
+
+            // Setup Question Mode
+            if (currentQ.type === 'sequence') {
+                badgeQuestionType.innerText = '⚡ MODE TEMBAK URUTAN:';
+                badgeQuestionType.className = "inline-block px-3 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[11px] font-bold uppercase mb-1";
+                sequenceTracker.classList.remove('hidden');
+                gameState.currentSequenceStep = 0;
+                renderSequenceTracker(currentQ.sequence);
+                spawnSequenceTargets(currentQ.sequence);
+            } else if (currentQ.type === 'boss') {
+                badgeQuestionType.innerText = '🐛 BOSS CHALLENGE:';
+                badgeQuestionType.className = "inline-block px-3 py-0.5 bg-rose-400/20 text-rose-300 border border-rose-400/40 rounded-full text-[11px] font-bold uppercase mb-1 animate-pulse";
+                sequenceTracker.classList.add('hidden');
+                spawnBossTargets(currentQ.targets);
+            } else {
+                badgeQuestionType.innerText = '🎯 TEMBAK JAWABAN BENAR:';
+                badgeQuestionType.className = "inline-block px-3 py-0.5 bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 rounded-full text-[11px] font-bold uppercase mb-1";
+                sequenceTracker.classList.add('hidden');
+                spawnStandardTargets(currentQ.targets);
+            }
+
+            startTimer(10);
+            startTargetMovement();
+        }
+
+        function spawnStandardTargets(targetList) {
+            const colors = ['bubble-cyan', 'bubble-emerald', 'bubble-amber', 'bubble-purple'];
+            const shuffled = [...targetList].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach((t, i) => {
+                const el = document.createElement('div');
+                el.className = `target-bubble ${colors[i % colors.length]}`;
+                el.innerText = t.text;
+                el.dataset.correct = t.correct ? "true" : "false";
+
+                // Initial Position
+                const posX = 10 + (i * 22) + Math.random() * 8;
+                const posY = 15 + Math.random() * 45;
+                el.style.left = posX + "%";
+                el.style.top = posY + "%";
+
+                // Movement Vectors
+                el.dataset.vx = (Math.random() - 0.5) * 0.4 * gameState.speedMultiplier;
+                el.dataset.vy = (Math.random() - 0.5) * 0.4 * gameState.speedMultiplier;
+
+                el.onclick = (e) => handleTargetHit(e, el, t.correct, t.text);
+                shootingArena.appendChild(el);
+            });
+        }
+
+        function spawnSequenceTargets(sequenceList) {
+            const colors = ['bubble-cyan', 'bubble-emerald', 'bubble-amber', 'bubble-purple'];
+            const shuffled = [...sequenceList].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach((text, i) => {
+                const el = document.createElement('div');
+                el.className = `target-bubble ${colors[i % colors.length]}`;
+                el.innerText = text;
+                el.dataset.stepText = text;
+
+                const posX = 10 + (i * 20) + Math.random() * 5;
+                const posY = 15 + Math.random() * 45;
+                el.style.left = posX + "%";
+                el.style.top = posY + "%";
+
+                el.dataset.vx = (Math.random() - 0.5) * 0.35 * gameState.speedMultiplier;
+                el.dataset.vy = (Math.random() - 0.5) * 0.35 * gameState.speedMultiplier;
+
+                el.onclick = (e) => handleSequenceHit(e, el, text, sequenceList);
+                shootingArena.appendChild(el);
+            });
+        }
+
+        function spawnBossTargets(targetList) {
+            targetList.forEach((t, i) => {
+                const el = document.createElement('div');
+                el.className = `target-bubble bubble-pink text-sm sm:text-base p-3 sm:p-4 border-4 border-yellow-300`;
+                el.innerText = t.text;
+                el.dataset.correct = t.correct ? "true" : "false";
+
+                const posX = 12 + (i * 28);
+                const posY = 35 + (i % 2 * 12);
+                el.style.left = posX + "%";
+                el.style.top = posY + "%";
+
+                el.dataset.vx = (Math.random() - 0.5) * 0.2 * gameState.speedMultiplier;
+                el.dataset.vy = (Math.random() - 0.5) * 0.2 * gameState.speedMultiplier;
+
+                el.onclick = (e) => handleTargetHit(e, el, t.correct, t.text);
+                shootingArena.appendChild(el);
+            });
+        }
+
+        function clearArenaTargets() {
+            const existing = shootingArena.querySelectorAll('.target-bubble');
+            existing.forEach(el => el.remove());
+        }
+
+        function startTargetMovement() {
+            clearInterval(gameState.targetMoveInterval);
+            gameState.targetMoveInterval = setInterval(() => {
+                const bubbles = shootingArena.querySelectorAll('.target-bubble');
+                bubbles.forEach(b => {
+                    let vx = parseFloat(b.dataset.vx) || 0.2;
+                    let vy = parseFloat(b.dataset.vy) || 0.2;
+
+                    let currentX = parseFloat(b.style.left);
+                    let currentY = parseFloat(b.style.top);
+
+                    let nextX = currentX + vx;
+                    let nextY = currentY + vy;
+
+                    // Bounce off walls
+                    if (nextX <= 5 || nextX >= 80) vx *= -1;
+                    if (nextY <= 10 || nextY >= 70) vy *= -1;
+
+                    b.dataset.vx = vx;
+                    b.dataset.vy = vy;
+                    b.style.left = nextX + "%";
+                    b.style.top = nextY + "%";
+                });
+            }, 30);
+        }
+
+        function handleArenaClick(event) {
+            // Create Laser Line from Cannon (Bottom Center) to Click Position
+            const rect = shootingArena.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            const cannonX = rect.width / 2;
+            const cannonY = rect.height - 20;
+
+            const angle = Math.atan2(clickY - cannonY, clickX - cannonX) * (180 / Math.PI);
+            const distance = Math.hypot(clickX - cannonX, clickY - cannonY);
+
+            const laser = document.createElement('div');
+            laser.className = 'laser-line';
+            laser.style.width = distance + 'px';
+            laser.style.left = cannonX + 'px';
+            laser.style.top = cannonY + 'px';
+            laser.style.transform = `rotate(${angle}deg)`;
+
+            shootingArena.appendChild(laser);
+            sound.playLaserShot();
+
+            setTimeout(() => laser.remove(), 350);
+        }
+
+        function handleTargetHit(event, element, isCorrect, targetText) {
+            event.stopPropagation(); // Avoid triggering arena background click twice
+            handleArenaClick(event);
+
+            if (isCorrect) {
+                // Correct Answer!
+                sound.playPop();
+                sound.playCorrect();
+                gameState.correctCount++;
+
+                // Speed Bonus Calculation
+                const timeTakenSec = (Date.now() - gameState.questionStartTime) / 1000;
+                let bonus = 0;
+                if (timeTakenSec < 4.0) {
+                    bonus = 5;
+                    showFloatingBadge("+5 BONUS CEPAT!", "yellow");
+                }
+
+                // Score & Combo
+                const earnedPoints = (10 + bonus) * gameState.combo;
+                gameState.score += earnedPoints;
+
+                // Increase Combo
+                if (gameState.combo < 5) gameState.combo++;
+
+                createParticleBurst(event.clientX, event.clientY);
+                showFloatingBadge(`+${earnedPoints} BENAR!`, "emerald");
+                element.remove();
+
+                nextQuestionDelay();
+            } else {
+                // Wrong Answer!
+                sound.playWrong();
+                gameState.wrongCount++;
+                gameState.combo = 1; // Reset Combo
+                gameState.hearts--;
+
+                showFloatingBadge("UPS! BELUM TEPAT", "rose");
+                element.classList.add('animate__animated', 'animate__shakeX');
+
+                updateHUD();
+
+                if (gameState.hearts <= 0) {
+                    endGame(false);
+                }
+            }
+        }
+
+        function handleSequenceHit(event, element, clickedText, sequenceList) {
+            event.stopPropagation();
+            handleArenaClick(event);
+
+            const expectedText = sequenceList[gameState.currentSequenceStep];
+
+            if (clickedText === expectedText) {
+                // Correct sequence step!
+                sound.playPop();
+                gameState.currentSequenceStep++;
+                element.remove();
+
+                updateSequenceTrackerUI(gameState.currentSequenceStep, sequenceList.length);
+
+                if (gameState.currentSequenceStep >= sequenceList.length) {
+                    // Sequence Completed Perfectly!
+                    sound.playCorrect();
+                    gameState.correctCount++;
+                    gameState.score += 25 * gameState.combo;
+                    showFloatingBadge("🏆 URUTAN SEMPURNA! +25", "emerald");
+                    nextQuestionDelay();
+                } else {
+                    showFloatingBadge("TEPAT!", "cyan");
+                }
+            } else {
+                // Wrong Sequence Step!
+                sound.playWrong();
+                gameState.wrongCount++;
+                gameState.combo = 1;
+                gameState.hearts--;
+                showFloatingBadge("SALAH URUTAN!", "rose");
+
+                updateHUD();
+
+                if (gameState.hearts <= 0) {
+                    endGame(false);
+                }
+            }
+        }
+
+        function nextQuestionDelay() {
+            updateHUD();
+            clearInterval(gameState.timerInterval);
+            setTimeout(() => {
+                gameState.currentQuestionIndex++;
+                displayCurrentQuestion();
+            }, 1000);
+        }
+
+        function startTimer(seconds) {
+            gameState.timer = seconds;
+            hudTimerText.innerText = gameState.timer + "s";
+            hudTimerText.className = "font-game text-base sm:text-xl font-black text-amber-300";
+
+            gameState.timerInterval = setInterval(() => {
+                gameState.timer--;
+                hudTimerText.innerText = gameState.timer + "s";
+
+                if (gameState.timer <= 3 && gameState.timer > 0) {
+                    sound.playTick();
+                    hudTimerText.className = "font-game text-base sm:text-xl font-black text-rose-400 animate-ping";
+                }
+
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    sound.playWrong();
+                    gameState.wrongCount++;
+                    gameState.combo = 1;
+                    gameState.hearts--;
+                    showFloatingBadge("⏰ WAKTU HABIS!", "rose");
+
+                    updateHUD();
+
+                    if (gameState.hearts <= 0) {
+                        endGame(false);
+                    } else {
+                        nextQuestionDelay();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateHUD() {
+            hudLevelText.innerText = `LEVEL ${gameState.currentLevel} / 5`;
+            hudLevelBar.style.width = `${(gameState.currentLevel / 5) * 100}%`;
+            hudScoreText.innerText = gameState.score;
+            hudComboText.innerText = `x${gameState.combo}`;
+
+            // Render Hearts
+            let heartsStr = "";
+            for (let i = 0; i < 3; i++) {
+                heartsStr += (i < gameState.hearts) ? "❤️ " : "🖤 ";
+            }
+            hudHeartsText.innerText = heartsStr;
+        }
+
+        function renderSequenceTracker(sequenceList) {
+            sequenceStepsContainer.innerHTML = '';
+            sequenceList.forEach((step, idx) => {
+                const badge = document.createElement('span');
+                badge.id = `seqBadge-${idx}`;
+                badge.className = 'px-2 py-0.5 bg-slate-800 text-slate-400 border border-slate-700 rounded-md text-[10px] font-bold';
+                badge.innerText = `${idx + 1}. ${step}`;
+                sequenceStepsContainer.appendChild(badge);
+            });
+        }
+
+        function updateSequenceTrackerUI(currentStep, totalSteps) {
+            for (let i = 0; i < totalSteps; i++) {
+                const badge = document.getElementById(`seqBadge-${i}`);
+                if (badge) {
+                    if (i < currentStep) {
+                        badge.className = 'px-2 py-0.5 bg-emerald-600 text-white border border-emerald-400 rounded-md text-[10px] font-bold animate__animated animate__pulse';
+                    }
+                }
+            }
+        }
+
+        function showFloatingBadge(text, colorType) {
+            const badge = document.createElement('div');
+            let colorClass = 'text-yellow-300';
+            if (colorType === 'emerald') colorClass = 'text-emerald-400';
+            if (colorType === 'rose') colorClass = 'text-rose-400';
+            if (colorType === 'cyan') colorClass = 'text-cyan-300';
+
+            badge.className = `floating-badge text-lg sm:text-2xl ${colorClass}`;
+            badge.innerText = text;
+            badge.style.left = '50%';
+            badge.style.top = '40%';
+
+            shootingArena.appendChild(badge);
+            setTimeout(() => badge.remove(), 900);
+        }
+
+        function createParticleBurst(x, y) {
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('div');
+                p.innerText = ['✨', '⭐', '💧', '🌟'][Math.floor(Math.random() * 4)];
+                p.style.position = 'fixed';
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                p.style.pointerEvents = 'none';
+                p.style.zIndex = '100';
+                p.style.fontSize = (12 + Math.random() * 14) + 'px';
+                p.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+
+                document.body.appendChild(p);
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 40 + Math.random() * 60;
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist;
+
+                requestAnimationFrame(() => {
+                    p.style.transform = `translate(${tx}px, ${ty}px) scale(1.4)`;
+                    p.style.opacity = '0';
+                });
+
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        function endGame(isVictory) {
+            clearInterval(gameState.timerInterval);
+            clearInterval(gameState.targetMoveInterval);
+
+            gameScreen.classList.add('hidden');
+            victoryScreen.classList.remove('hidden');
+
+            const victoryTitle = document.getElementById('victoryTitle');
+            const victoryEmoji = document.getElementById('victoryEmoji');
+            const victorySubtitle = document.getElementById('victorySubtitle');
+            const starRating = document.getElementById('starRating');
+
+            document.getElementById('resFinalScore').innerText = gameState.score;
+            document.getElementById('resCorrect').innerText = gameState.correctCount;
+            document.getElementById('resWrong').innerText = gameState.wrongCount;
+
+            if (isVictory) {
+                sound.playFanfare();
+                victoryEmoji.innerText = "🏆";
+                victoryTitle.innerText = "PETUALANGAN SELESAI!";
+                victorySubtitle.innerText = "Luar biasa! Kamu telah menguasai seluruh materi Siklus Hidup Makhluk Hidup IPAS Kelas 5 SD dengan sangat sempurna!";
+
+                // Stars calculation
+                if (gameState.score >= 250) starRating.innerText = "⭐⭐⭐";
+                else if (gameState.score >= 150) starRating.innerText = "⭐⭐";
+                else starRating.innerText = "⭐";
+
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+            } else {
+                sound.playWrong();
+                victoryEmoji.innerText = "💔";
+                victoryTitle.innerText = "GAME OVER";
+                starRating.innerText = "⭐";
+                victorySubtitle.innerText = "Jangan berkecil hati! Pelajari kembali materi daur hidup dan coba lagi tembak targetnya!";
+            }
+        }
+
+        function openTeacherMode() {
+            document.getElementById('teacherModal').classList.remove('hidden');
+        }
+
+        function closeTeacherMode() {
+            document.getElementById('teacherModal').classList.add('hidden');
+        }
+
+        function openBelajarModal() {
+            document.getElementById('belajarModal').classList.remove('hidden');
+        }
+
+        function closeBelajarModal() {
+            document.getElementById('belajarModal').classList.add('hidden');
+        }
+
+        function jumpToLevel(lvl) {
+            closeTeacherMode();
+            if (gameScreen.classList.contains('hidden')) {
+                startGame();
+            }
+            loadLevelQuestions(lvl);
+        }
+
+        function updateTargetSpeed() {
+            const val = document.getElementById('settingSpeed').value;
+            if (val === 'slow') gameState.speedMultiplier = 0.5;
+            else if (val === 'normal') gameState.speedMultiplier = 1.0;
+            else if (val === 'fast') gameState.speedMultiplier = 1.8;
+        }
+
+        function resetGameScore() {
+            closeTeacherMode();
+            startGame();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => console.log(e));
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
