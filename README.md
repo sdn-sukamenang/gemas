@@ -8,7 +8,8 @@ Portal game pembelajaran karya guru-guru. Halaman utama berisi kartu-kartu game;
 
 | Judul | Guru | Kelas | Mata Pelajaran | Lokasi |
 |---|---|---|---|---|
-| Panjat Pinang | Oka Melya, S.Pd. | 3 | Matematika | `games/panjat-pinang/` |
+| Panjat Pinang | Oka Melya, S.Pd. | 2 | Matematika | `games/panjat-pinang/` |
+| Tarik Tambang Matematika | Mat Supri, S.Pd. | 5 | Matematika | `kelas5matematika.html` |
 
 ## Cara Menambah Game Baru
 
