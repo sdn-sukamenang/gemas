@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math Racing: Rasio & Perbandingan (Kelas 4 SD)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    /* Container Utama Responsif */
+    #game-container {
+      width: 100%;
+      max-width: 800px;
+      height: 90vh;
+      max-height: 700px;
+      background: #222;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #f39c12;
+    }
+
+    /* Halaman Login */
+    #login-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #ff7e5f, #feb47b);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      z-index: 10;
+      text-align: center;
+    }
+
+    #login-screen h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px #d35400;
+    }
+
+    #login-screen p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .btn-start {
+      background: #2ecc71;
+      color: white;
+      font-size: 1.3rem;
+      font-weight: bold;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px #27ae60;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-start:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px #27ae60;
+    }
+
+    /* Layar Arena Game */
+    #game-screen {
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+    }
+
+    /* Header UI Game */
+    #hud {
+      background: #34495e;
+      padding: 10px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      font-weight: bold;
+      border-bottom: 3px solid #f1c40f;
+    }
+
+    #question-box {
+      background: #f1c40f;
+      color: #2c3e50;
+      padding: 12px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      box-shadow: inset 0 -3px rgba(0,0,0,0.2);
+    }
+
+    /* Canvas Area */
+    canvas {
+      flex: 1;
+      width: 100%;
+      background: #555;
+      touch-action: none;
+    }
+
+    /* Kontrol Sentuh Mobile & Papan Interaktif */
+    #touch-controls {
+      display: flex;
+      height: 70px;
+      background: #111;
+    }
+
+    .touch-btn {
+      flex: 1;
+      background: #3498db;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: 1px solid #2980b9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .touch-btn:active {
+      background: #2980b9;
+    }
+
+    /* Modal Game Over */
+    #game-over-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    #game-over-screen h2 {
+      font-size: 2.5rem;
+      color: #e74c3c;
+      margin-bottom: 10px;
+    }
+
+    #final-stats {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- Halaman Login -->
+    <div id="login-screen">
+      <h1>🏎️ Math Racing!</h1>
+      <p>Materi: Rasio & Perbandingan (Kelas 4 SD)</p>
+      
+      <div class="form-group">
+        <label for="player-name">Nama Siswa:</label>
+        <input type="text" id="player-name" placeholder="Masukkan nama..." required>
+      </div>
+      
+      <div class="form-group">
+        <label for="player-class">Pilih Kelas:</label>
+        <select id="player-class">
+          <option value="4-A">Kelas 4-A</option>
+          <option value="4-B">Kelas 4-B</option>
+          <option value="4-C">Kelas 4-C</option>
+        </select>
+      </div>
+
+      <button class="btn-start" onclick="startGame()">MULAI BALAPAN 🏁</button>
+    </div>
+
+    <!-- Arena Game -->
+    <div id="game-screen">
+      <div id="hud">
+        <div>👤 <span id="hud-name">-</span> (<span id="hud-class">-</span>)</div>
+        <div>🏆 Skor: <span id="hud-score">0</span></div>
+        <div>❤️ Nyawa: <span id="hud-lives">3</span></div>
+      </div>
+      
+      <div id="question-box">Soal: <span id="current-question">1 : 2 setara dengan...</span></div>
+      
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Kontrol Layar Sentuh -->
+      <div id="touch-controls">
+        <div class="touch-btn" onclick="moveLeft()">⬅️ KIRI</div>
+        <div class="touch-btn" onclick="moveRight()">KANAN ➡️</div>
+      </div>
+    </div>
+
+    <!-- Layar Game Over / Selesai -->
+    <div id="game-over-screen">
+      <h2 id="game-over-title">Game Over!</h2>
+      <div id="final-stats"></div>
+      <button class="btn-start" onclick="resetGame()">Main Lagi 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    // Data Soal Rasio & Perbandingan
+    const questionBank = [
+      { q: "Bentuk sederhana dari rasio 2 : 4 adalah...", options: ["1 : 2", "1 : 3", "2 : 3"], correct: 0 },
+      { q: "Rasio apel merah dan hijau adalah 3 : 5. Jumlah apel merah 6, berapa apel hijau?", options: ["8", "10", "12"], correct: 1 },
+      { q: "Manakah rasio yang senilai dengan 1 : 3?", options: ["2 : 5", "3 : 9", "4 : 10"], correct: 1 },
+      { q: "Perbandingan kelereng Andi dan Budi 2 : 3. Kelereng Andi 8, kelereng Budi...", options: ["12", "10", "15"], correct: 0 },
+      { q: "Bentuk sederhana dari rasio 5 : 15 adalah...", options: ["1 : 2", "1 : 5", "1 : 3"], correct: 2 },
+      { q: "Rasio 4 : 8 sama nilainya dengan...", options: ["1 : 2", "2 : 3", "3 : 4"], correct: 0 },
+      { q: "Siti punya 4 buku, Budi punya 8 buku. Perbandingan buku Siti & Budi adalah...", options: ["1 : 4", "1 : 2", "2 : 3"], correct: 1 },
+      { q: "Rasio 3 : 4 senilai dengan...", options: ["6 : 8", "5 : 7", "9 : 10"], correct: 0 }
+    ];
+
+    let player = { name: "", class: "", score: 0, lives: 3, lane: 1 };
+    let currentQuestion = null;
+    let gates = [];
+    
+    // KECEPATAN DIPERLAMBAT (Nilai awal 1.5, sangat cocok untuk siswa SD)
+    let speed = 1.5; 
+    let isGameOver = false;
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Penyesuaian ukuran Canvas
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Jalankan Game
+    function startGame() {
+      const nameInput = document.getElementById('player-name').value;
+      if (!nameInput.trim()) {
+        alert("Silakan masukkan nama siswa terlebih dahulu!");
+        return;
+      }
+
+      player.name = nameInput;
+      player.class = document.getElementById('player-class').value;
+      player.score = 0;
+      player.lives = 3;
+      player.lane = 1;
+
+      document.getElementById('hud-name').innerText = player.name;
+      document.getElementById('hud-class').innerText = player.class;
+      document.getElementById('hud-score').innerText = player.score;
+      document.getElementById('hud-lives').innerText = player.lives;
+
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'flex';
+      document.getElementById('game-over-screen').style.display = 'none';
+
+      resizeCanvas();
+      loadNextQuestion();
+      isGameOver = false;
+      requestAnimationFrame(updateGame);
+    }
+
+    // Memuat Soal Baru
+    function loadNextQuestion() {
+      const randomIndex = Math.floor(Math.random() * questionBank.length);
+      currentQuestion = questionBank[randomIndex];
+      document.getElementById('current-question').innerText = currentQuestion.q;
+
+      // Buat 3 Gerbang di atas (y: -150 memberikan jarak yang lebih jauh agar ada waktu berpikir)
+      gates = [];
+      const laneWidth = canvas.width / 3;
+      for (let i = 0; i < 3; i++) {
+        gates.push({
+          x: i * laneWidth + laneWidth / 2,
+          y: -150,
+          text: currentQuestion.options[i],
+          isCorrect: i === currentQuestion.correct
+        });
+      }
+    }
+
+    // Navigasi
+    function moveLeft() {
+      if (player.lane > 0) player.lane--;
+    }
+
+    function moveRight() {
+      if (player.lane < 2) player.lane++;
+    }
+
+    // Keyboard Controller
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeft();
+      if (e.key === 'ArrowRight' || e.key === 'd') moveRight();
+    });
+
+    // Touch Direct / Click pada Lane
+    canvas.addEventListener('pointerdown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const laneWidth = canvas.width / 3;
+      
+      if (clickX < laneWidth) player.lane = 0;
+      else if (clickX < laneWidth * 2) player.lane = 1;
+      else player.lane = 2;
+    });
+
+    // Loop Utama Game
+    function updateGame() {
+      if (isGameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const laneWidth = canvas.width / 3;
+
+      // Gambar Jalur Jalan
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([20, 20]);
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * laneWidth, 0);
+        ctx.lineTo(i * laneWidth, canvas.height);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Update & Gambar Gerbang Jawaban
+      let gateHit = false;
+      gates.forEach(gate => {
+        gate.y += speed; // Kecepatan pelan diterapkan di sini
+
+        // Gambar Kotak Gerbang
+        ctx.fillStyle = '#e67e22';
+        ctx.fillRect(gate.x - laneWidth / 2.5, gate.y, laneWidth * 0.8, 50);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(gate.x - laneWidth / 2.5, gate.y, laneWidth * 0.8, 50);
+
+        // Teks Jawaban
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(gate.text, gate.x, gate.y + 32);
+
+        // Deteksi Tabrakan
+        const carY = canvas.height - 100;
+        if (gate.y + 50 >= carY && gate.y <= carY + 70) {
+          const currentCarLaneX = player.lane * laneWidth + laneWidth / 2;
+          if (Math.abs(gate.x - currentCarLaneX) < 10) {
+            gateHit = true;
+            if (gate.isCorrect) {
+              player.score += 10;
+              document.getElementById('hud-score').innerText = player.score;
+            } else {
+              player.lives--;
+              document.getElementById('hud-lives').innerText = player.lives;
+            }
+          }
+        }
+      });
+
+      if (gateHit || gates[0].y > canvas.height) {
+        if (player.lives <= 0) {
+          endGame();
+          return;
+        }
+        loadNextQuestion();
+      }
+
+      // Gambar Mobil Player
+      const carX = player.lane * laneWidth + laneWidth / 2;
+      const carY = canvas.height - 100;
+
+      // Bodi Mobil
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(carX - 20, carY, 40, 70);
+      // Atap Mobil
+      ctx.fillStyle = '#3498db';
+      ctx.fillRect(carX - 15, carY + 20, 30, 30);
+      // Roda
+      ctx.fillStyle = '#000';
+      ctx.fillRect(carX - 25, carY + 10, 8, 15);
+      ctx.fillRect(carX + 17, carY + 10, 8, 15);
+      ctx.fillRect(carX - 25, carY + 45, 8, 15);
+      ctx.fillRect(carX + 17, carY + 45, 8, 15);
+
+      requestAnimationFrame(updateGame);
+    }
+
+    // Akhir Game
+    function endGame() {
+      isGameOver = true;
+      document.getElementById('game-over-screen').style.display = 'flex';
+      document.getElementById('final-stats').innerHTML = `
+        Siswa: <b>${player.name}</b> (${player.class})<br>
+        Total Skor: <b>${player.score}</b>
+      `;
+    }
+
+    function resetGame() {
+      document.getElementById('game-over-screen').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('game-screen').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
