@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balap Lokomotor 3 SD - Game Edukasi PJOK</title>
+    <!-- Tailwind CSS untuk tata letak responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Fredoka & Nunito yang ceria, bulat, dan sangat jelas dibaca anak SD -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Pengaturan Dasar & Tipografi Ramah Anak */
+        :root {
+            --font-display: 'Fredoka', sans-serif;
+            --font-body: 'Nunito', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: var(--font-display);
+        }
+
+        /* Efek Tombol 3D Arcade yang besar dan empuk ditekan (bagus untuk layar sentuh & IFP) */
+        .btn-arcade {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25), 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .btn-arcade:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+        .btn-arcade:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Kartu Pilihan Mobil */
+        .car-card {
+            transition: all 0.25s ease;
+            border: 4px solid transparent;
+        }
+        .car-card.selected {
+            border-color: #facc15;
+            background-color: #fef9c3;
+            transform: scale(1.04);
+            box-shadow: 0 10px 25px -5px rgba(250, 204, 21, 0.5);
+        }
+
+        /* Animasi Mengambang & Denyut */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1s ease-in-out infinite;
+        }
+
+        /* Canvas Responsif */
+        #raceCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 1.25rem;
+        }
+
+        /* Custom Scrollbar untuk modal kecil di HP landscape */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- ==================== HEADER / TOP BAR GLOBAL ==================== -->
+    <header class="w-full px-4 py-2.5 flex items-center justify-between bg-white/90 backdrop-blur-md shadow-md z-30">
+        <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl shadow-inner">
+                🏎️
+            </div>
+            <div>
+                <h1 class="font-display text-lg sm:text-2xl font-bold text-indigo-700 leading-tight">
+                    Balap Lokomotor 3 SD
+                </h1>
+                <p class="text-xs sm:text-sm font-bold text-slate-500 hidden sm:block">
+                    PJOK Kelas 3 • Mengenal Gerak Berpindah Tempat
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Tombol Panduan Singkat -->
+            <button id="btnHelp" onclick="toggleHelpModal(true)" class="btn-arcade px-3 py-2 rounded-xl bg-sky-100 text-sky-700 font-bold text-sm sm:text-base flex items-center gap-1.5 border-2 border-sky-300" title="Cara Bermain">
+                <span>❓</span>
+                <span class="hidden md:inline">Cara Main</span>
+            </button>
+
+            <!-- Tombol Mute / Unmute Audio -->
+            <button id="btnAudio" onclick="toggleAudio()" class="btn-arcade px-3 py-2 rounded-xl bg-amber-100 text-amber-800 font-bold text-sm sm:text-base flex items-center gap-1.5 border-2 border-amber-300" title="Suara Game">
+                <span id="audioIcon">🔊</span>
+                <span id="audioLabel" class="hidden md:inline">Suara On</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <main class="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-5 flex flex-col justify-center">
+
+        <!-- ============================================================ -->
+        <!-- 1. HALAMAN LOGIN (MASUK SISWA)                               -->
+        <!-- ============================================================ -->
+        <section id="screenLogin" class="w-full max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-white/80 transition-all">
+            <div class="text-center mb-6">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-extrabold text-xs sm:text-sm tracking-wide uppercase mb-2">
+                    🏁 Sirkuit Juara PJOK Kelas 3 SD 🏁
+                </span>
+                <h2 class="font-display text-2xl sm:text-4xl font-bold text-slate-800">
+                    Siap Melaju & Belajar?
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-1 font-semibold">
+                    Isi data pembalapmu dulu sebelum masuk ke garis start!
+                </p>
+            </div>
+
+            <!-- Pesan Peringatan Validasi (Pengganti alert) -->
+            <div id="loginAlert" class="hidden mb-4 p-3.5 rounded-2xl bg-rose-100 border-2 border-rose-400 text-rose-800 font-bold text-sm sm:text-base flex items-center gap-2.5 animate-bounce">
+                <span class="text-xl">⚠️</span>
+                <span id="loginAlertText">Ayo isi Nama Lengkap dan Kelas kamu terlebih dahulu!</span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleStartGame(event)" class="space-y-5">
+                <!-- Input Nama & Kelas -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label for="playerName" class="block text-sm sm:text-base font-extrabold text-slate-700 mb-1.5">
+                            👦👧 Nama Lengkap Siswa:
+                        </label>
+                        <input type="text" id="playerName" placeholder="Contoh: Budi Santoso" maxlength="25"
+                            class="w-full px-4 py-3.5 text-base sm:text-lg font-bold rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 outline-none transition bg-slate-50">
+                    </div>
+
+                    <div>
+                        <label for="playerClass" class="block text-sm sm:text-base font-extrabold text-slate-700 mb-1.5">
+                            🏫 Kelas:
+                        </label>
+                        <input type="text" id="playerClass" list="classSuggestions" placeholder="Contoh: 3A" maxlength="10"
+                            class="w-full px-4 py-3.5 text-base sm:text-lg font-bold rounded-2xl border-2 border-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-200 outline-none transition bg-slate-50 uppercase">
+                        <datalist id="classSuggestions">
+                            <option value="3A">
+                            <option value="3B">
+                            <option value="3C">
+                            <option value="3D">
+                        </datalist>
+                    </div>
+                </div>
+
+                <!-- Pilihan Mobil Balap -->
+                <div>
+                    <label class="block text-sm sm:text-base font-extrabold text-slate-700 mb-2">
+                        🏎️ Pilih Mobil Balap Andalanmu:
+                    </label>
+                    <div class="grid grid-cols-3 gap-2.5 sm:gap-4" id="carSelector">
+                        <!-- Mobil 1: Merah -->
+                        <div onclick="selectCar('red')" id="car-red" class="car-card selected cursor-pointer rounded-2xl bg-slate-100 p-3 sm:p-4 text-center flex flex-col items-center">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-1 animate-float">
+                                <!-- SVG Mobil Merah -->
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <rect x="18" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="16" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <path d="M32 14 L68 14 L76 40 L76 85 Q50 92 24 85 L24 40 Z" fill="#ef4444"/>
+                                    <path d="M36 18 L64 18 L68 38 L32 38 Z" fill="#fca5a5"/>
+                                    <rect x="46" y="14" width="8" height="72" fill="#ffffff" opacity="0.85"/>
+                                    <path d="M33 42 L67 42 L64 56 L36 56 Z" fill="#0f172a"/>
+                                    <rect x="26" y="82" width="48" height="8" rx="3" fill="#b91c1c"/>
+                                </svg>
+                            </div>
+                            <span class="font-display font-bold text-xs sm:text-base text-rose-600">Merah Kilat</span>
+                        </div>
+
+                        <!-- Mobil 2: Biru -->
+                        <div onclick="selectCar('blue')" id="car-blue" class="car-card cursor-pointer rounded-2xl bg-slate-100 p-3 sm:p-4 text-center flex flex-col items-center">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-1">
+                                <!-- SVG Mobil Biru -->
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <rect x="18" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="16" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <path d="M32 14 L68 14 L76 40 L76 85 Q50 92 24 85 L24 40 Z" fill="#2563eb"/>
+                                    <path d="M36 18 L64 18 L68 38 L32 38 Z" fill="#93c5fd"/>
+                                    <polygon points="50,15 42,48 52,48 46,84 60,44 50,44" fill="#facc15"/>
+                                    <path d="M33 42 L67 42 L64 56 L36 56 Z" fill="#0f172a"/>
+                                    <rect x="26" y="82" width="48" height="8" rx="3" fill="#1d4ed8"/>
+                                </svg>
+                            </div>
+                            <span class="font-display font-bold text-xs sm:text-base text-blue-600">Biru Petir</span>
+                        </div>
+
+                        <!-- Mobil 3: Hijau -->
+                        <div onclick="selectCar('green')" id="car-green" class="car-card cursor-pointer rounded-2xl bg-slate-100 p-3 sm:p-4 text-center flex flex-col items-center">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mb-1">
+                                <!-- SVG Mobil Hijau -->
+                                <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                    <rect x="18" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="25" width="14" height="22" rx="4" fill="#1e293b"/>
+                                    <rect x="16" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <rect x="68" y="62" width="16" height="24" rx="4" fill="#1e293b"/>
+                                    <path d="M32 14 L68 14 L76 40 L76 85 Q50 92 24 85 L24 40 Z" fill="#10b981"/>
+                                    <path d="M36 18 L64 18 L68 38 L32 38 Z" fill="#6ee7b7"/>
+                                    <circle cx="50" cy="70" r="10" fill="#facc15"/>
+                                    <path d="M33 42 L67 42 L64 56 L36 56 Z" fill="#0f172a"/>
+                                    <rect x="26" y="82" width="48" height="8" rx="3" fill="#047857"/>
+                                </svg>
+                            </div>
+                            <span class="font-display font-bold text-xs sm:text-base text-emerald-600">Hijau Juara</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Mulai -->
+                <div class="pt-2">
+                    <button type="submit" class="btn-arcade w-full py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-display text-xl sm:text-2xl font-bold tracking-wide flex items-center justify-center gap-3 border-b-4 border-green-800">
+                        <span>🚦</span>
+                        <span>MULAI BALAPAN!</span>
+                        <span>🏁</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 2. LAYAR UTAMA PERMAINAN (BALAPAN + HUD + KUIS)              -->
+        <!-- ============================================================ -->
+        <section id="screenGame" class="hidden w-full flex-col gap-3">
+            
+            <!-- HUD (Head-Up Display) Atas -->
+            <div class="bg-white/95 backdrop-blur rounded-2xl p-3 sm:px-5 shadow-lg border-2 border-indigo-100 flex flex-wrap items-center justify-between gap-2">
+                <!-- Info Siswa -->
+                <div class="flex items-center gap-2.5">
+                    <div id="hudCarBadge" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-100 flex items-center justify-center text-2xl font-bold border-2 border-rose-300">
+                        🏎️
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="hudName" class="font-display font-bold text-base sm:text-xl text-slate-800">Nama Siswa</span>
+                            <span id="hudClass" class="px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white font-bold text-xs sm:text-sm">3A</span>
+                        </div>
+                        <div class="text-xs sm:text-sm font-bold text-slate-500">
+                            Posisi Balap: <span id="hudRank" class="text-amber-600 font-extrabold">Ke-3</span> dari 3 Mobil
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Jarak Menuju Finish -->
+                <div class="order-3 md:order-2 w-full md:w-1/3">
+                    <div class="flex justify-between text-xs font-extrabold text-slate-600 mb-1">
+                        <span>🚩 START</span>
+                        <span id="hudProgressText" class="text-indigo-700">Jarak: 0%</span>
+                        <span>🏁 FINISH</span>
+                    </div>
+                    <div class="w-full h-4 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-300">
+                        <div id="hudProgressBar" class="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-emerald-500 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Skor & Bensin/Nyawa -->
+                <div class="order-2 md:order-3 flex items-center gap-3 sm:gap-5">
+                    <div class="text-center bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
+                        <div class="text-[10px] sm:text-xs font-extrabold text-amber-700 uppercase">Skor</div>
+                        <div id="hudScore" class="font-display font-bold text-lg sm:text-2xl text-amber-600">0</div>
+                    </div>
+                    <div class="text-center bg-rose-50 px-3 py-1 rounded-xl border border-rose-200">
+                        <div class="text-[10px] sm:text-xs font-extrabold text-rose-700 uppercase">Energi</div>
+                        <div id="hudLives" class="text-base sm:text-xl tracking-tighter">❤️❤️❤️</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area Lintasan Balap (Canvas) -->
+            <div class="relative w-full h-[52vh] sm:h-[58vh] min-h-[320px] max-h-[560px] bg-emerald-600 rounded-3xl shadow-2xl border-4 border-white overflow-hidden">
+                <canvas id="raceCanvas"></canvas>
+
+                <!-- Banner Status Turbo / Peringatan di atas lintasan -->
+                <div id="trackBanner" class="hidden absolute top-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-amber-400 text-slate-900 font-display font-bold text-base sm:text-xl shadow-lg border-2 border-white whitespace-nowrap z-10">
+                    🔥 NITRO TURBO AKTIF! 🔥
+                </div>
+
+                <!-- Kontrol Geser Jalur (Touch / Mouse / Keyboard) di bagian bawah canvas -->
+                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
+                    <button onmousedown="moveLane(-1)" ontouchstart="moveLane(-1); event.preventDefault();"
+                        class="pointer-events-auto btn-arcade w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/90 hover:bg-white text-indigo-700 font-display font-bold text-2xl sm:text-3xl flex items-center justify-center border-2 border-indigo-300 shadow-xl">
+                        ⬅️
+                    </button>
+
+                    <!-- Tombol Pemicu Kuis / Turbo Manual -->
+                    <button id="btnTriggerQuiz" onclick="openQuizNow()"
+                        class="pointer-events-auto btn-arcade px-5 py-3 sm:px-8 sm:py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 font-display font-extrabold text-base sm:text-xl border-2 border-white shadow-xl animate-pulse-fast flex items-center gap-2">
+                        <span>⚡</span>
+                        <span>JAWAB KUIS TURBO!</span>
+                    </button>
+
+                    <button onmousedown="moveLane(1)" ontouchstart="moveLane(1); event.preventDefault();"
+                        class="pointer-events-auto btn-arcade w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/90 hover:bg-white text-indigo-700 font-display font-bold text-2xl sm:text-3xl flex items-center justify-center border-2 border-indigo-300 shadow-xl">
+                        ➡️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- 3. MODAL KUIS PJOK GERAK LOKOMOTOR (INTERAKTIF)              -->
+        <!-- ============================================================ -->
+        <div id="quizModal" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-40 flex items-center justify-center p-3 sm:p-5">
+            <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border-4 border-amber-400 p-5 sm:p-7 max-h-[92vh] overflow-y-auto">
+                <!-- Header Soal -->
+                <div class="flex items-center justify-between gap-2 pb-3 mb-4 border-b-2 border-slate-100">
+                    <span class="px-3.5 py-1.5 rounded-xl bg-indigo-100 text-indigo-800 font-display font-bold text-sm sm:text-base">
+                        🏃 POS NITRO PJOK • Soal <span id="quizNumber">1</span>
+                    </span>
+                    <span class="px-3 py-1 rounded-xl bg-amber-100 text-amber-800 font-extrabold text-xs sm:text-sm">
+                        Jawab Benar = Turbo Cepat! 🚀
+                    </span>
+                </div>
+
+                <!-- Teks Pertanyaan -->
+                <div class="bg-sky-50 rounded-2xl p-4 sm:p-5 mb-5 border-2 border-sky-200">
+                    <p id="quizQuestion" class="font-display font-bold text-lg sm:text-2xl text-slate-800 leading-snug">
+                        Pertanyaan akan muncul di sini...
+                    </p>
+                </div>
+
+                <!-- Pilihan Jawaban (Tombol Besar Ramah IFP & HP) -->
+                <div id="quizOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                    <!-- Diisi lewat JS -->
+                </div>
+
+                <!-- Kotak Umpan Balik Edukatif (Muncul setelah menjawab) -->
+                <div id="quizFeedback" class="hidden rounded-2xl p-4 sm:p-5 mb-4 border-2">
+                    <div class="flex items-start gap-3">
+                        <span id="feedbackIcon" class="text-3xl sm:text-4xl">🎉</span>
+                        <div class="flex-1">
+                            <h4 id="feedbackTitle" class="font-display font-bold text-lg sm:text-xl mb-1">
+                                Hebat Sekali!
+                            </h4>
+                            <p id="feedbackExplanation" class="text-sm sm:text-base font-bold leading-relaxed">
+                                Penjelasan materi PJOK akan muncul di sini.
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="closeQuizAndResume()" class="btn-arcade mt-4 w-full py-3.5 rounded-xl bg-indigo-600 text-white font-display font-bold text-lg sm:text-xl">
+                        Lanjut Balapan! 🏎️💨
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 4. LAYAR KEMENANGAN / PODIUM JUARA                           -->
+        <!-- ============================================================ -->
+        <section id="screenResult" class="hidden w-full max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-5 sm:p-8 border-4 border-amber-300 text-center">
+            <div class="mb-4">
+                <div id="resultTrophy" class="text-6xl sm:text-7xl mb-2 animate-bounce">🏆</div>
+                <span id="resultBadge" class="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 font-display font-bold text-sm sm:text-lg mb-2">
+                    SELAMAT! KAMU JUARA 1!
+                </span>
+                <h2 class="font-display text-2xl sm:text-4xl font-bold text-slate-800">
+                    Garis Finish Tercapai!
+                </h2>
+            </div>
+
+            <!-- Kartu Sertifikat Mini Siswa -->
+            <div class="bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 rounded-2xl p-4 sm:p-6 border-2 border-indigo-200 mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                    <div class="bg-white p-3 rounded-xl shadow-sm">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Pembalap</div>
+                        <div id="resName" class="font-display font-bold text-base sm:text-lg text-indigo-700 truncate">Budi</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Kelas</div>
+                        <div id="resClass" class="font-display font-bold text-base sm:text-lg text-indigo-700">3A</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Posisi Juara</div>
+                        <div id="resRank" class="font-display font-bold text-base sm:text-lg text-amber-600">Juara 1 🥇</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-sm">
+                        <div class="text-xs font-bold text-slate-400 uppercase">Total Skor</div>
+                        <div id="resScore" class="font-display font-bold text-base sm:text-lg text-emerald-600">100</div>
+                    </div>
+                </div>
+
+                <!-- Rangkuman Materi PJOK Kelas 3 SD -->
+                <div class="mt-5 text-left bg-white/90 rounded-xl p-4 border border-sky-200">
+                    <h3 class="font-display font-bold text-base sm:text-lg text-indigo-800 mb-2 flex items-center gap-2">
+                        <span>📘</span> Rangkuman Pintar PJOK: Gerak Lokomotor
+                    </h3>
+                    <ul class="text-xs sm:text-sm font-bold text-slate-700 space-y-1.5 list-disc pl-5">
+                        <li><strong>Gerak Lokomotor</strong> adalah gerak tubuh yang <strong>berpindah tempat</strong> dari satu titik ke titik lain.</li>
+                        <li><strong>Contoh Gerak Lokomotor:</strong> Berjalan, berlari, melompat, meloncat, merangkak, dan berguling.</li>
+                        <li><strong>Perbedaan Melompat & Meloncat:</strong> Melompat menggunakan tumpuan <strong>1 kaki</strong>, sedangkan meloncat menggunakan tumpuan <strong>2 kaki</strong>.</li>
+                        <li>Sebelum melakukan olahraga lokomotor, selalu lakukan <strong>pemanasan</strong> agar otot siap dan terhindar dari cedera.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi Akhir -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <button onclick="restartRaceSamePlayer()" class="btn-arcade py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-display font-bold text-lg sm:text-xl flex items-center justify-center gap-2">
+                    <span>🔄</span>
+                    <span>Main Lagi</span>
+                </button>
+                <button onclick="switchPlayer()" class="btn-arcade py-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-display font-bold text-lg sm:text-xl flex items-center justify-center gap-2">
+                    <span>👤</span>
+                    <span>Ganti Pemain</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL PANDUAN CARA BERMAIN ==================== -->
+    <div id="helpModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-3xl p-6 border-4 border-sky-400 shadow-2xl">
+            <h3 class="font-display text-2xl font-bold text-indigo-700 mb-3 flex items-center gap-2">
+                <span>🎮</span> Cara Bermain Balap Lokomotor
+            </h3>
+            <ol class="space-y-2.5 text-sm sm:text-base font-bold text-slate-700 list-decimal pl-5 mb-5">
+                <li>Masukkan <strong>Nama Lengkap</strong> dan <strong>Kelas</strong>, lalu pilih mobil favoritmu.</li>
+                <li>Mobilmu akan melaju otomatis di lintasan. Gunakan tombol <strong>⬅️ Kiri / Kanan ➡️</strong> (atau tombol panah keyboard) untuk berpindah jalur dan mengambil bintang bonus!</li>
+                <li>Setiap beberapa saat (atau saat kamu menekan tombol <strong>Jawab Kuis Turbo!</strong>), akan muncul pertanyaan PJOK tentang <strong>Gerak Lokomotor</strong>.</li>
+                <li>Jika menjawab <strong>BENAR</strong>, mobilmu menyalakan <strong>Api Nitro Turbo</strong> dan menyalip lawan menuju garis Finish!</li>
+            </ol>
+            <button onclick="toggleHelpModal(false)" class="btn-arcade w-full py-3 rounded-2xl bg-sky-500 text-white font-display font-bold text-lg">
+                Mengerti, Ayo Main! 👍
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPT LOGIKA GAME & AUDIO ==================== -->
+    <script>
+        /**
+         * ============================================================================
+         * 1. BANK SOAL PJOK KELAS 3 SD - MATERI GERAK LOKOMOTOR (12 SOAL EDUKATIF)
+         * ============================================================================
+         */
+        const QUESTION_BANK = [
+            {
+                q: "Apa yang dimaksud dengan gerak lokomotor dalam pelajaran PJOK?",
+                options: [
+                    "Gerak tubuh yang berpindah tempat",
+                    "Gerak tubuh di tempat tanpa berpindah",
+                    "Gerak memutar kepala saja",
+                    "Gerak tidur di atas matras"
+                ],
+                answer: 0,
+                explanation: "Benar! Gerak lokomotor adalah gerak memindahkan tubuh dari satu tempat ke tempat lain, seperti berjalan dan berlari."
+            },
+            {
+                q: "Manakah di bawah ini yang termasuk contoh gerak lokomotor?",
+                options: [
+                    "Menekuk lutut di tempat",
+                    "Mengayun kedua lengan",
+                    "Berlari menuju garis finish",
+                    "Membungkukkan badan"
+                ],
+                answer: 2,
+                explanation: "Tepat sekali! Berlari membuat tubuh kita berpindah tempat, sehingga termasuk gerak lokomotor."
+            },
+            {
+                q: "Apa perbedaan utama antara gerak melompat dan meloncat?",
+                options: [
+                    "Melompat memakai tangan, meloncat memakai kaki",
+                    "Melompat bertumpu 1 kaki, meloncat bertumpu 2 kaki",
+                    "Melompat ke belakang, meloncat ke samping",
+                    "Tidak ada perbedaannya sama sekali"
+                ],
+                answer: 1,
+                explanation: "Hebat! Melompat menggunakan tolakan SATU kaki (seperti lompat jauh), sedangkan meloncat menggunakan tolakan DUA kaki bersamaan (seperti katak)."
+            },
+            {
+                q: "Hewan katak bergerak berpindah tempat dengan cara...",
+                options: [
+                    "Merayap",
+                    "Terbang",
+                    "Meloncat dengan dua kaki",
+                    "Berjalan mundur"
+                ],
+                answer: 2,
+                explanation: "Betul! Katak menolakkan kedua kakinya secara bersamaan untuk berpindah tempat, gerakan ini disebut meloncat."
+            },
+            {
+                q: "Sebelum melakukan kegiatan berlari dan melompat, sebaiknya kita melakukan...",
+                options: [
+                    "Makan makanan yang sangat pedas",
+                    "Pemanasan (stretching) terlebih dahulu",
+                    "Langsung tidur di lapangan",
+                    "Duduk diam tanpa bergerak"
+                ],
+                answer: 1,
+                explanation: "Pintar! Pemanasan membuat otot menjadi lentur dan siap bergerak sehingga tubuh terhindar dari cedera."
+            },
+            {
+                q: "Saat berjalan santai ke depan, bagian kaki yang pertama kali menyentuh tanah adalah...",
+                options: [
+                    "Ujung jari kaki",
+                    "Tumit kaki",
+                    "Lutut kaki",
+                    "Sisi samping kaki"
+                ],
+                answer: 1,
+                explanation: "Bagus! Dalam teknik berjalan yang benar, tumit mendarat lebih dulu lalu diikuti telapak dan ujung jari kaki."
+            },
+            {
+                q: "Permainan tradisional 'Engklek' melatih gerak dasar lokomotor berupa...",
+                options: [
+                    "Melompat dengan satu kaki",
+                    "Berguling ke samping",
+                    "Merangkak di atas pasir",
+                    "Berenang gaya bebas"
+                ],
+                answer: 0,
+                explanation: "Keren! Dalam permainan Engklek, kita melompat dari satu kotak ke kotak lain menggunakan tumpuan satu kaki."
+            },
+            {
+                q: "Gerakan menirukan kepiting berjalan ke arah kiri dan kanan termasuk gerak lokomotor arah...",
+                options: [
+                    "Maju ke depan",
+                    "Mundur ke belakang",
+                    "Ke samping",
+                    "Berputar di tempat"
+                ],
+                answer: 2,
+                explanation: "Tepat! Berjalan ke kiri atau ke kanan adalah variasi gerak lokomotor ke arah samping."
+            },
+            {
+                q: "Saat melakukan lari cepat (sprint), posisi tubuh yang baik adalah...",
+                options: [
+                    "Condong sedikit ke depan dengan ayunan lengan",
+                    "Doyong jauh ke belakang",
+                    "Tangan dimasukkan ke saku celana",
+                    "Mata tertutup rapat"
+                ],
+                answer: 0,
+                explanation: "Benar sekali! Badan sedikit condong ke depan dan ayunan lengan yang kuat membantu lari menjadi lebih cepat dan seimbang."
+            },
+            {
+                q: "Gerakan berpindah tempat dengan bertumpu pada kedua tangan dan lutut seperti bayi disebut...",
+                options: [
+                    "Meloncat",
+                    "Merangkak",
+                    "Melompat",
+                    "Berjingkat"
+                ],
+                answer: 1,
+                explanation: "Betul! Merangkak menggunakan tumpuan kedua telapak tangan dan lutut untuk berpindah tempat."
+            },
+            {
+                q: "Berikut ini yang BUKAN merupakan gerak lokomotor adalah...",
+                options: [
+                    "Berjalan zig-zag",
+                    "Berlari estafet",
+                    "Memutar pinggang di tempat",
+                    "Melompati rintangan kardus"
+                ],
+                answer: 2,
+                explanation: "Jitu! Memutar pinggang di tempat tidak membuat tubuh berpindah posisi, sehingga disebut gerak non-lokomotor."
+            },
+            {
+                q: "Berlari zig-zag melewati rintangan cone melatih kemampuan tubuh dalam hal...",
+                options: [
+                    "Kelincahan mengubah arah gerak",
+                    "Kekuatan menahan napas",
+                    "Kemampuan tidur nyenyak",
+                    "Keseimbangan duduk diam"
+                ],
+                answer: 0,
+                explanation: "Luar biasa! Lari zig-zag melatih kelincahan kaki dan tubuh saat berpindah tempat dengan mengubah arah."
+            }
+        ];
+
+        /**
+         * ============================================================================
+         * 2. WEB AUDIO API (EFEK SUARA SINTETIS TANPA FILE EKSTERNAL)
+         * ============================================================================
+         */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            document.getElementById('audioIcon').textContent = isMuted ? '🔇' : '🔊';
+            document.getElementById('audioLabel').textContent = isMuted ? 'Suara Off' : 'Suara On';
+            if (!isMuted) playSound('click');
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'lane') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(480, now + 0.07);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+                    osc.start(now);
+                    osc.stop(now + 0.07);
+                } else if (type === 'star') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now); // D5
+                    osc.frequency.setValueAtTime(880, now + 0.08); // A5
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'turbo') {
+                    // Suara mesin roket/turbo naik
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.55);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                } else if (type === 'wrong') {
+                    // Suara lembut koreksi (tidak mengagetkan anak)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.linearRampToValueAtTime(190, now + 0.35);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'win') {
+                    // Fanfare Kemenangan Ceria (C - E - G - C6)
+                    const notes = [523.25, 659.25, 783.99, 1046.50];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + i * 0.13);
+                        g.gain.setValueAtTime(0.2, now + i * 0.13);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.13 + 0.35);
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.start(now + i * 0.13);
+                        o.stop(now + i * 0.13 + 0.35);
+                    });
+                }
+            } catch (e) {
+                console.warn('Audio tidak tersedia:', e);
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 3. STATE & VARIABEL GLOBAL PERMAINAN
+         * ============================================================================
+         */
+        const CAR_THEMES = {
+            red:   { name: 'Merah Kilat', primary: '#ef4444', secondary: '#fca5a5', dark: '#b91c1c', stripe: '#ffffff' },
+            blue:  { name: 'Biru Petir',  primary: '#2563eb', secondary: '#93c5fd', dark: '#1d4ed8', stripe: '#facc15' },
+            green: { name: 'Hijau Juara', primary: '#10b981', secondary: '#6ee7b7', dark: '#047857', stripe: '#facc15' }
+        };
+
+        let gameState = {
+            playerName: '',
+            playerClass: '',
+            carColor: 'red',
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            lives: 3,
+            // Jarak balapan (0 sampai 1000 meter)
+            finishDistance: 1000,
+            playerDistance: 0,
+            playerSpeed: 0,
+            baseSpeed: 2.3,
+            turboTimer: 0,
+            slowTimer: 0,
+            // Jalur (0 = Kiri, 1 = Tengah, 2 = Kanan)
+            playerLane: 1,
+            visualLaneX: 1, // Untuk animasi perpindahan jalur yang halus
+            // Mobil lawan (AI)
+            rivals: [],
+            // Item di lintasan (Bintang Skor & Gerbang Kuis)
+            trackItems: [],
+            roadOffset: 0,
+            // Manajemen Kuis
+            usedQuestions: [],
+            questionsAnswered: 0,
+            nextQuizMilestone: 140, // Jarak pemicu kuis otomatis pertama
+            currentQuestion: null,
+            lastAnswerCorrect: false
+        };
+
+        const canvas = document.getElementById('raceCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationFrameId = null;
+
+        /**
+         * ============================================================================
+         * 4. NAVIGASI HALAMAN & FORM LOGIN
+         * ============================================================================
+         */
+        function selectCar(color) {
+            playSound('click');
+            gameState.carColor = color;
+            ['red', 'blue', 'green'].forEach(c => {
+                const el = document.getElementById(`car-${c}`);
+                if (c === color) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+        }
+
+        function toggleHelpModal(show) {
+            playSound('click');
+            document.getElementById('helpModal').classList.toggle('hidden', !show);
+        }
+
+        function handleStartGame(e) {
+            e.preventDefault();
+            initAudio();
+            playSound('click');
+
+            const nameInput = document.getElementById('playerName').value.trim();
+            const classInput = document.getElementById('playerClass').value.trim().toUpperCase();
+            const alertBox = document.getElementById('loginAlert');
+
+            if (!nameInput || !classInput) {
+                alertBox.classList.remove('hidden');
+                playSound('wrong');
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+            gameState.playerName = nameInput;
+            gameState.playerClass = classInput;
+
+            // Tampilkan layar game
+            document.getElementById('screenLogin').classList.add('hidden');
+            document.getElementById('screenResult').classList.add('hidden');
+            const screenGame = document.getElementById('screenGame');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+
+            setupNewRace();
+        }
+
+        function setupNewRace() {
+            // Reset state balapan
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.playerDistance = 0;
+            gameState.playerSpeed = gameState.baseSpeed;
+            gameState.turboTimer = 0;
+            gameState.slowTimer = 0;
+            gameState.playerLane = 1;
+            gameState.visualLaneX = 1;
+            gameState.usedQuestions = [];
+            gameState.questionsAnswered = 0;
+            gameState.nextQuizMilestone = 130;
+            gameState.trackItems = [];
+
+            // Inisialisasi 2 Mobil Lawan (AI) dengan kecepatan bervariasi
+            gameState.rivals = [
+                {
+                    name: 'Rival Kuning',
+                    lane: 0,
+                    distance: 35,
+                    speed: 2.55,
+                    color: { primary: '#f59e0b', secondary: '#fde68a', dark: '#b45309', stripe: '#1e293b' }
+                },
+                {
+                    name: 'Rival Ungu',
+                    lane: 2,
+                    distance: 55,
+                    speed: 2.75,
+                    color: { primary: '#8b5cf6', secondary: '#ddd6fe', dark: '#5b21b6', stripe: '#ffffff' }
+                }
+            ];
+
+            // Isi item awal di lintasan
+            spawnInitialItems();
+
+            // Update HUD
+            document.getElementById('hudName').textContent = gameState.playerName;
+            document.getElementById('hudClass').textContent = gameState.playerClass;
+            updateHUD();
+
+            resizeCanvas();
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function spawnInitialItems() {
+            for (let i = 1; i <= 6; i++) {
+                gameState.trackItems.push({
+                    type: 'star',
+                    lane: Math.floor(Math.random() * 3),
+                    distance: i * 110 + 60,
+                    collected: false
+                });
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 5. KONTROL JALUR & RESPONSIVITAS CANVAS
+         * ============================================================================
+         */
+        function resizeCanvas() {
+            if (!canvas.parentElement) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', () => {
+            if (gameState.isPlaying) resizeCanvas();
+        });
+
+        function moveLane(dir) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const target = gameState.playerLane + dir;
+            if (target >= 0 && target <= 2) {
+                gameState.playerLane = target;
+                playSound('lane');
+            }
+        }
+
+        // Kontrol Keyboard (Panah Kiri/Kanan, A/D, Spasi untuk Kuis)
+        window.addEventListener('keydown', (e) => {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                moveLane(-1);
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                moveLane(1);
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                openQuizNow();
+            }
+        });
+
+        // Kontrol Swipe Sentuh di atas Canvas (HP / Tablet / Smartboard)
+        let touchStartX = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].screenX;
+            const diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 30) {
+                moveLane(diff > 0 ? 1 : -1);
+            }
+        }, { passive: true });
+
+        /**
+         * ============================================================================
+         * 6. SISTEM KUIS INTERAKTIF PJOK GERAK LOKOMOTOR
+         * ============================================================================
+         */
+        function openQuizNow() {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            playSound('click');
+            triggerQuizModal();
+        }
+
+        function triggerQuizModal() {
+            gameState.isPaused = true;
+
+            // Ambil soal acak yang belum pernah muncul
+            let availableIndices = QUESTION_BANK.map((_, idx) => idx)
+                .filter(idx => !gameState.usedQuestions.includes(idx));
+
+            if (availableIndices.length === 0) {
+                gameState.usedQuestions = [];
+                availableIndices = QUESTION_BANK.map((_, idx) => idx);
+            }
+
+            const chosenIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            gameState.usedQuestions.push(chosenIdx);
+            gameState.questionsAnswered++;
+            gameState.currentQuestion = QUESTION_BANK[chosenIdx];
+
+            // Isi tampilan Modal Kuis
+            document.getElementById('quizNumber').textContent = gameState.questionsAnswered;
+            document.getElementById('quizQuestion').textContent = gameState.currentQuestion.q;
+
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+
+            gameState.currentQuestion.options.forEach((optText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-arcade text-left p-4 rounded-2xl bg-white hover:bg-indigo-50 border-2 border-slate-300 font-bold text-base sm:text-lg text-slate-800 flex items-center gap-3 transition';
+                btn.innerHTML = `
+                    <span class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-display font-bold flex items-center justify-center shrink-0">
+                        ${letters[index]}
+                    </span>
+                    <span>${optText}</span>
+                `;
+                btn.onclick = () => submitQuizAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Sembunyikan kotak umpan balik
+            document.getElementById('quizFeedback').classList.add('hidden');
+            document.getElementById('quizModal').classList.remove('hidden');
+        }
+
+        function submitQuizAnswer(selectedIndex, selectedBtn) {
+            const qObj = gameState.currentQuestion;
+            const isCorrect = (selectedIndex === qObj.answer);
+            gameState.lastAnswerCorrect = isCorrect;
+
+            // Nonaktifkan semua tombol opsi dan beri warna penanda
+            const allBtns = document.getElementById('quizOptions').querySelectorAll('button');
+            allBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qObj.answer) {
+                    btn.classList.remove('bg-white', 'border-slate-300');
+                    btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.remove('bg-white', 'border-slate-300');
+                    btn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                }
+            });
+
+            // Tampilkan Umpan Balik Edukatif
+            const fbBox = document.getElementById('quizFeedback');
+            const fbIcon = document.getElementById('feedbackIcon');
+            const fbTitle = document.getElementById('feedbackTitle');
+            const fbExp = document.getElementById('feedbackExplanation');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-400', 'bg-amber-50', 'border-amber-400');
+
+            if (isCorrect) {
+                playSound('turbo');
+                gameState.score += 20;
+                fbBox.classList.add('bg-emerald-50', 'border-emerald-400');
+                fbIcon.textContent = '🚀';
+                fbTitle.textContent = 'JAWABAN BENAR! +20 Poin & NITRO TURBO!';
+                fbTitle.className = 'font-display font-bold text-lg sm:text-xl mb-1 text-emerald-700';
+            } else {
+                playSound('wrong');
+                gameState.lives = Math.max(1, gameState.lives - 1);
+                fbBox.classList.add('bg-amber-50', 'border-amber-400');
+                fbIcon.textContent = '💡';
+                fbTitle.textContent = 'Kurang Tepat, Yuk Belajar Lagi!';
+                fbTitle.className = 'font-display font-bold text-lg sm:text-xl mb-1 text-amber-800';
+            }
+
+            fbExp.textContent = qObj.explanation;
+            updateHUD();
+        }
+
+        function closeQuizAndResume() {
+            playSound('click');
+            document.getElementById('quizModal').classList.add('hidden');
+
+            // Atur milestone kuis berikutnya
+            gameState.nextQuizMilestone = gameState.playerDistance + 165;
+
+            if (gameState.lastAnswerCorrect) {
+                // Berikan dorongan Turbo besar untuk menyalip lawan!
+                gameState.turboTimer = 170; // sekitar 2.8 detik turbo kencang
+                gameState.slowTimer = 0;
+                showTrackBanner('🔥 NITRO TURBO AKTIF! MENYALIP LAWAN! 🔥', 'bg-amber-400 text-slate-900');
+            } else {
+                // Mobil melambat sebentar namun tetap melaju
+                gameState.slowTimer = 90;
+                gameState.turboTimer = 0;
+                showTrackBanner('⛽ Mesin Melambat Sebentar... Ayo Semangat!', 'bg-rose-500 text-white');
+            }
+
+            gameState.isPaused = false;
+        }
+
+        function showTrackBanner(text, colorClasses) {
+            const banner = document.getElementById('trackBanner');
+            banner.textContent = text;
+            banner.className = `absolute top-4 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full font-display font-bold text-sm sm:text-xl shadow-lg border-2 border-white whitespace-nowrap z-10 animate-bounce ${colorClasses}`;
+            banner.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 2600);
+        }
+
+        /**
+         * ============================================================================
+         * 7. LOOP ANIMASI & RENDER LINTASAN BALAP (CANVAS 2D)
+         * ============================================================================
+         */
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+
+            if (!gameState.isPaused) {
+                updatePhysics();
+            }
+            renderScene();
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            // 1. Hitung kecepatan mobil pemain saat ini
+            if (gameState.turboTimer > 0) {
+                gameState.playerSpeed = 5.4;
+                gameState.turboTimer--;
+            } else if (gameState.slowTimer > 0) {
+                gameState.playerSpeed = 1.3;
+                gameState.slowTimer--;
+            } else {
+                gameState.playerSpeed = gameState.baseSpeed;
+            }
+
+            // 2. Majukan jarak pemain & animasi jalan
+            gameState.playerDistance += gameState.playerSpeed * 0.45;
+            gameState.roadOffset = (gameState.roadOffset + gameState.playerSpeed * 4.2) % 80;
+
+            // Interpolasi halus perpindahan jalur
+            gameState.visualLaneX += (gameState.playerLane - gameState.visualLaneX) * 0.22;
+
+            // 3. Gerakkan mobil lawan (AI)
+            gameState.rivals.forEach(rival => {
+                // Sedikit variasi kecepatan AI agar balapan seru
+                const wave = Math.sin(gameState.playerDistance * 0.03 + rival.lane) * 0.25;
+                rival.distance += (rival.speed + wave) * 0.45;
+            });
+
+            // 4. Cek pengambilan Bintang Skor di lintasan
+            gameState.trackItems.forEach(item => {
+                if (!item.collected) {
+                    const distDiff = Math.abs(item.distance - gameState.playerDistance);
+                    if (distDiff < 16 && item.lane === gameState.playerLane) {
+                        item.collected = true;
+                        gameState.score += 10;
+                        playSound('star');
+                    }
+                    // Jika bintang terlewat jauh di belakang, munculkan bintang baru di depan
+                    if (item.distance < gameState.playerDistance - 60 && gameState.playerDistance < gameState.finishDistance - 150) {
+                        item.distance = gameState.playerDistance + 240 + Math.random() * 120;
+                        item.lane = Math.floor(Math.random() * 3);
+                        item.collected = false;
+                    }
+                }
+            });
+
+            // 5. Pemicu Pos Kuis Otomatis setiap mencapai jarak tertentu
+            if (gameState.playerDistance >= gameState.nextQuizMilestone &&
+                gameState.playerDistance < gameState.finishDistance - 70) {
+                triggerQuizModal();
+                return;
+            }
+
+            // 6. Update HUD (Posisi Juara, Progress, Skor)
+            updateHUD();
+
+            // 7. Cek apakah sudah mencapai Garis Finish!
+            if (gameState.playerDistance >= gameState.finishDistance) {
+                finishRace();
+            }
+        }
+
+        function getPlayerRank() {
+            let rank = 1;
+            gameState.rivals.forEach(r => {
+                if (r.distance > gameState.playerDistance) rank++;
+            });
+            return rank;
+        }
+
+        function updateHUD() {
+            const pct = Math.min(100, Math.floor((gameState.playerDistance / gameState.finishDistance) * 100));
+            document.getElementById('hudProgressText').textContent = `Jarak: ${pct}%`;
+            document.getElementById('hudProgressBar').style.width = `${pct}%`;
+            document.getElementById('hudScore').textContent = gameState.score;
+
+            const rank = getPlayerRank();
+            document.getElementById('hudRank').textContent = `Ke-${rank}`;
+
+            let hearts = '';
+            for (let i = 0; i < 3; i++) {
+                hearts += i < gameState.lives ? '❤️' : '🤍';
+            }
+            document.getElementById('hudLives').textContent = hearts;
+        }
+
+        function renderScene() {
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // Latar Belakang Rumput Hijau Sirkuit
+            ctx.fillStyle = '#16a34a';
+            ctx.fillRect(0, 0, w, h);
+
+            // Dekorasi Pohon / Semak di pinggir lintasan agar terasa melaju
+            const roadWidth = Math.min(w * 0.78, 560);
+            const roadX = (w - roadWidth) / 2;
+
+            ctx.fillStyle = '#15803d';
+            for (let y = -80 + gameState.roadOffset; y < h + 80; y += 80) {
+                // Kiri
+                ctx.beginPath();
+                ctx.arc(roadX * 0.45, y, 18, 0, Math.PI * 2);
+                ctx.fill();
+                // Kanan
+                ctx.beginPath();
+                ctx.arc(roadX + roadWidth + (w - (roadX + roadWidth)) * 0.55, y + 40, 18, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Kerb (Pembatas Merah-Putih Pinggir Jalan)
+            const kerbWidth = 14;
+            for (let y = -80 + gameState.roadOffset; y < h + 80; y += 40) {
+                const isRed = Math.floor((y - gameState.roadOffset) / 40) % 2 === 0;
+                ctx.fillStyle = isRed ? '#ef4444' : '#ffffff';
+                ctx.fillRect(roadX - kerbWidth, y, kerbWidth, 40);
+                ctx.fillRect(roadX + roadWidth, y, kerbWidth, 40);
+            }
+
+            // Aspal Lintasan Balap
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(roadX, 0, roadWidth, h);
+
+            // Garis Pembagi 3 Jalur (Putus-putus Putih)
+            const laneWidth = roadWidth / 3;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([28, 28]);
+            ctx.lineDashOffset = -gameState.roadOffset;
+
+            for (let i = 1; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.moveTo(roadX + laneWidth * i, 0);
+                ctx.lineTo(roadX + laneWidth * i, h);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Posisi Y Mobil Pemain di layar (sekitar 74% dari atas)
+            const playerScreenY = h * 0.74;
+            const pixelsPerMeter = 4.2;
+
+            // Gambar Garis Finish jika sudah dekat!
+            const distToFinish = gameState.finishDistance - gameState.playerDistance;
+            const finishScreenY = playerScreenY - distToFinish * pixelsPerMeter;
+            if (finishScreenY > -60 && finishScreenY < h + 60) {
+                drawCheckeredLine(roadX, finishScreenY, roadWidth);
+            }
+
+            // Gambar Gerbang Pos Kuis di lintasan (visual penanda)
+            const distToQuiz = gameState.nextQuizMilestone - gameState.playerDistance;
+            const quizScreenY = playerScreenY - distToQuiz * pixelsPerMeter;
+            if (quizScreenY > -40 && quizScreenY < h + 40 && gameState.nextQuizMilestone < gameState.finishDistance - 70) {
+                ctx.fillStyle = 'rgba(250, 204, 21, 0.35)';
+                ctx.fillRect(roadX, quizScreenY - 14, roadWidth, 28);
+                ctx.fillStyle = '#facc15';
+                ctx.font = 'bold 16px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚡ POS NITRO KUIS PJOK ⚡', w / 2, quizScreenY + 6);
+            }
+
+            // Gambar Bintang Poin di lintasan
+            gameState.trackItems.forEach(item => {
+                if (item.collected) return;
+                const relDist = item.distance - gameState.playerDistance;
+                const itemY = playerScreenY - relDist * pixelsPerMeter;
+                if (itemY > -40 && itemY < h + 40) {
+                    const itemX = roadX + laneWidth * (item.lane + 0.5);
+                    drawStar(itemX, itemY, 16);
+                }
+            });
+
+            // Gambar Mobil Lawan (AI)
+            gameState.rivals.forEach(rival => {
+                const relDist = rival.distance - gameState.playerDistance;
+                const rivalY = playerScreenY - relDist * pixelsPerMeter;
+                if (rivalY > -120 && rivalY < h + 120) {
+                    const rivalX = roadX + laneWidth * (rival.lane + 0.5);
+                    drawRaceCar(rivalX, rivalY, laneWidth * 0.52, rival.color, false, rival.name);
+                }
+            });
+
+            // Gambar Mobil Pemain Utama
+            const playerX = roadX + laneWidth * (gameState.visualLaneX + 0.5);
+            const playerTheme = CAR_THEMES[gameState.carColor];
+            drawRaceCar(playerX, playerScreenY, laneWidth * 0.56, playerTheme, gameState.turboTimer > 0, gameState.playerName);
+        }
+
+        function drawCheckeredLine(x, y, width) {
+            const rows = 2;
+            const cols = 12;
+            const boxW = width / cols;
+            const boxH = 14;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#0f172a';
+                    ctx.fillRect(x + c * boxW, y + r * boxH, boxW, boxH);
+                }
+            }
+        }
+
+        function drawStar(cx, cy, radius) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * radius,
+                           -Math.sin((18 + i * 72) * Math.PI / 180) * radius);
+                ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (radius * 0.45),
+                           -Math.sin((54 + i * 72) * Math.PI / 180) * (radius * 0.45));
+            }
+            ctx.closePath();
+            ctx.fillStyle = '#facc15';
+            ctx.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#b45309';
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawRaceCar(cx, cy, width, theme, hasTurbo, label) {
+            const w = Math.min(width, 68);
+            const h = w * 1.65;
+            const left = cx - w / 2;
+            const top = cy - h / 2;
+
+            ctx.save();
+
+            // Efek Api Nitro Turbo di knalpot jika aktif!
+            if (hasTurbo) {
+                const flameH = 26 + Math.random() * 18;
+                ctx.fillStyle = '#f97316';
+                ctx.beginPath();
+                ctx.moveTo(cx - w * 0.25, top + h);
+                ctx.lineTo(cx, top + h + flameH);
+                ctx.lineTo(cx + w * 0.25, top + h);
+                ctx.fill();
+
+                ctx.fillStyle = '#fef08a';
+                ctx.beginPath();
+                ctx.moveTo(cx - w * 0.14, top + h);
+                ctx.lineTo(cx, top + h + flameH * 0.65);
+                ctx.lineTo(cx + w * 0.14, top + h);
+                ctx.fill();
+            }
+
+            // Bayangan Mobil
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.roundRect(left + 4, top + 6, w, h, 14);
+            ctx.fill();
+
+            // Roda (4 Ban Hitam)
+            ctx.fillStyle = '#0f172a';
+            const wheelW = w * 0.18;
+            const wheelH = h * 0.22;
+            ctx.fillRect(left - wheelW * 0.5, top + h * 0.16, wheelW, wheelH);
+            ctx.fillRect(left + w - wheelW * 0.5, top + h * 0.16, wheelW, wheelH);
+            ctx.fillRect(left - wheelW * 0.5, top + h * 0.64, wheelW, wheelH);
+            ctx.fillRect(left + w - wheelW * 0.5, top + h * 0.64, wheelW, wheelH);
+
+            // Bodi Utama Mobil
+            ctx.fillStyle = theme.primary;
+            ctx.beginPath();
+            ctx.roundRect(left, top, w, h, 16);
+            ctx.fill();
+
+            // Garis Balap Tengah
+            ctx.fillStyle = theme.stripe;
+            ctx.fillRect(cx - w * 0.08, top + 4, w * 0.16, h - 8);
+
+            // Kaca Depan Kokpit
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(left + w * 0.16, top + h * 0.28, w * 0.68, h * 0.22, 6);
+            ctx.fill();
+
+            // Sayap Spoiler Belakang
+            ctx.fillStyle = theme.dark;
+            ctx.beginPath();
+            ctx.roundRect(left - 2, top + h * 0.84, w + 4, h * 0.12, 4);
+            ctx.fill();
+
+            // Label Nama di atas mobil
+            ctx.font = 'bold 13px Nunito, sans-serif';
+            ctx.textAlign = 'center';
+            const shortName = label.length > 12 ? label.substring(0, 11) + '…' : label;
+            const textW = ctx.measureText(shortName).width + 12;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(cx - textW / 2, top - 24, textW, 19, 8);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(shortName, cx, top - 10);
+
+            ctx.restore();
+        }
+
+        /**
+         * ============================================================================
+         * 8. LAYAR AKHIR / PODIUM JUARA
+         * ============================================================================
+         */
+        function finishRace() {
+            gameState.isPlaying = false;
+            cancelAnimationFrame(animationFrameId);
+            playSound('win');
+
+            const finalRank = getPlayerRank();
+            // Bonus skor berdasarkan peringkat juara
+            const rankBonus = finalRank === 1 ? 50 : (finalRank === 2 ? 30 : 15);
+            gameState.score += rankBonus;
+
+            // Transisi Layar
+            const screenGame = document.getElementById('screenGame');
+            screenGame.classList.add('hidden');
+            screenGame.classList.remove('flex');
+            document.getElementById('screenResult').classList.remove('hidden');
+
+            // Isi data Podium
+            const trophyMap = { 1: '🏆', 2: '🥈', 3: '🥉' };
+            const rankTextMap = { 1: 'Juara 1 🥇', 2: 'Juara 2 🥈', 3: 'Juara 3 🥉' };
+
+            document.getElementById('resultTrophy').textContent = trophyMap[finalRank] || '🏆';
+            document.getElementById('resultBadge').textContent = `HEBAT! KAMU FINIS DI POSISI JUARA ${finalRank}!`;
+            document.getElementById('resName').textContent = gameState.playerName;
+            document.getElementById('resClass').textContent = gameState.playerClass;
+            document.getElementById('resRank').textContent = rankTextMap[finalRank];
+            document.getElementById('resScore').textContent = `${gameState.score} Poin`;
+        }
+
+        function restartRaceSamePlayer() {
+            playSound('click');
+            document.getElementById('screenResult').classList.add('hidden');
+            const screenGame = document.getElementById('screenGame');
+            screenGame.classList.remove('hidden');
+            screenGame.classList.add('flex');
+            setupNewRace();
+        }
+
+        function switchPlayer() {
+            playSound('click');
+            document.getElementById('screenResult').classList.add('hidden');
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerClass').value = '';
+            document.getElementById('screenLogin').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

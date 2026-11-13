@@ -27,6 +27,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Grand Prix Bilangan Cacah | Agus Tuti Purnama, S.Pd. | 2 | Seni Budaya | `games/grand-prix-bilangan/` |
 | Classroom Racer - English Game | Muhammad Qussoyi, S.Pd. | 5 | Bahasa Inggris | `games/classroom-racer/` |
 | Tembak Target – Petualangan Siklus Hidup | Ila Aisyah, S.Pd. | 5 | IPAS | `games/tembak-target-siklus-hidup/` |
+| Balap Lokomotor | Anhar Trias Kharisma, S.Pd. | 3 | PJOK | `games/balap-lokomotor/` |
 
 ## Cara Menambah Game Baru
 
