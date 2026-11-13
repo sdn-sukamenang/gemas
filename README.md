@@ -29,6 +29,7 @@ Logo Kabupaten Musi Rawas Utara dan logo SDN Sukamenang tampil di kepala (header
 | Tembak Target – Petualangan Siklus Hidup | Ila Aisyah, S.Pd. | 5 | IPAS | `games/tembak-target-siklus-hidup/` |
 | Balap Lokomotor | Anhar Trias Kharisma, S.Pd. | 3 | PJOK | `games/balap-lokomotor/` |
 | Petualangan Cerdas Kelas 5 | Weni Ardiyanti, S.Pd. | 5 | Bahasa Indonesia | `games/petualangan-cerdas/` |
+| Bangga Menjadi Anak Indonesia | Nova Sagita, S.Pd. | 6 | PPKn | `games/bangga-anak-indonesia/` |
 
 ## Cara Menambah Game Baru
 

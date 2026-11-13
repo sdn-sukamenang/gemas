@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangga Menjadi Anak Indonesia - Game Edukasi Budaya Nusantara</title>
+    <!-- Tailwind CSS untuk desain modern dan responsif di berbagai perangkat -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome untuk ikon visual -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            touch-action: manipulation;
+        }
+        .bg-pattern {
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#15803d 0.8px, transparent 0.8px), radial-gradient(#15803d 0.8px, #f0fdf4 0.8px);
+            background-size: 32px 32px;
+            background-position: 0 0, 16px 16px;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(22, 163, 74, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(22, 163, 74, 0.8); }
+        }
+        .glow-box {
+            animation: pulseGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen text-slate-800 flex flex-col justify-between select-none">
+
+    <!-- Header / Navigasi Atas -->
+    <header class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg border-2 border-white">
+                    🇮🇩
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-sm md:text-lg text-emerald-800 tracking-tight">Anak Indonesia Hebat</h1>
+                    <p class="text-xs text-slate-500 font-medium">Kelas 6 SD • Kurikulum Kebudayaan Nasional</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleSound()" id="soundToggleBtn" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition flex items-center space-x-1 shadow-sm">
+                    <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    <span class="hidden sm:inline" id="soundText">Suara Aktif</span>
+                </button>
+                <button onclick="openDownloadModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition flex items-center space-x-1 shadow-md">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">Unduh Permainan</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Kontainer Utama -->
+    <main class="max-w-4xl w-full mx-auto p-4 md:p-6 flex-grow flex flex-col justify-center items-center">
+
+        <!-- LAYAR 1: Halaman Utama / Beranda -->
+        <div id="screen-home" class="w-full bg-white rounded-3xl shadow-2xl p-6 md:p-10 border border-emerald-100 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-emerald-100 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-red-100 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+
+            <div class="inline-block bg-emerald-50 text-emerald-700 px-4 py-1.5 rounded-full text-xs md:text-sm font-bold mb-4 tracking-wide uppercase border border-emerald-200">
+                ✨ Media Pembelajaran Interaktif Budaya Nusantara ✨
+            </div>
+
+            <h2 class="text-2xl md:text-4xl font-extrabold text-slate-800 mb-3 leading-tight">
+                Bangga Menjadi <span class="text-red-600">Anak Indonesia</span>
+            </h2>
+            <p class="text-sm md:text-base text-slate-600 max-w-xl mx-auto mb-8 leading-relaxed">
+                Halo Kakak Kelas 6 yang cerdas dan luar biasa! Mari kita eksplorasi kekayaan rumah adat, pakaian tradisional, senjata, tarian, serta nilai-nilai persatuan dari Sabang sampai Merauke melalui permainan edukasi interaktif ini.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                    <div class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 font-bold">🏛️</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">1. Kenal Budaya</h4>
+                        <p class="text-xs text-slate-500">Mempelajari ciri khas tiap provinsi</p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                    <div class="bg-sky-100 text-sky-700 w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 font-bold">🗺️</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">2. Tantangan Pasang</h4>
+                        <p class="text-xs text-slate-500">Uji ketepatan mencocokkan daerah</p>
+                    </div>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center space-x-3">
+                    <div class="bg-rose-100 text-rose-700 w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 font-bold">⭐</div>
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">3. Uji Evaluasi</h4>
+                        <p class="text-xs text-slate-500">Raih skor tertinggi dan lencana</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" class="w-full sm:w-auto bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-base md:text-lg px-8 py-4 rounded-2xl shadow-xl hover:shadow-emerald-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center space-x-3 mx-auto glow-box">
+                <i class="fa-solid fa-gamepad text-xl"></i>
+                <span>Mulai Petualangan Belajar</span>
+            </button>
+        </div>
+
+        <!-- LAYAR 2: Modul Belajar Budaya Interaktif -->
+        <div id="screen-learn" class="w-full bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-emerald-100 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Modul 1: Eksplorasi Nusantara</span>
+                    <h3 class="text-xl md:text-2xl font-extrabold text-slate-800 mt-1">Mengenal Warisan Budaya Provinsi</h3>
+                </div>
+                <button onclick="speakCurrentCard()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 p-3 rounded-xl font-bold transition flex items-center space-x-2 text-sm shadow-sm" title="Dengarkan Suara Narator">
+                    <i class="fa-solid fa-volume-high text-lg"></i>
+                    <span class="hidden sm:inline">Bacakan Materi</span>
+                </button>
+            </div>
+
+            <!-- Kartu Materi Budaya -->
+            <div id="cultureCard" class="bg-gradient-to-br from-slate-50 to-emerald-50/50 rounded-2xl p-6 border border-slate-200 mb-6 shadow-sm">
+                <div class="flex flex-col md:flex-row gap-6 items-center">
+                    <div class="w-full md:w-1/3 bg-white p-6 rounded-2xl shadow-inner border border-slate-100 text-center">
+                        <span id="cardEmoji" class="text-6xl md:text-7xl block mb-2 animate-float">🏛️</span>
+                        <span id="cardRegion" class="inline-block bg-red-100 text-red-700 font-bold text-xs px-3 py-1 rounded-full">Sumatera Utara</span>
+                    </div>
+                    <div class="w-full md:w-2/3 space-y-3">
+                        <h4 id="cardTitle" class="text-xl font-bold text-slate-800">Rumah Bolon & Kain Ulos</h4>
+                        <p id="cardDescription" class="text-sm md:text-base text-slate-600 leading-relaxed">
+                            Rumah Adat Bolon merupakan simbol kebanggaan dan status sosial masyarakat Batak di Sumatera Utara. Kain tenun tradisionalnya disebut Ulos, yang sarat akan makna luhur dalam upacara adat.
+                        </p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <span class="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-200 font-semibold shadow-xs">Tarian: Tari Tortor</span>
+                            <span class="bg-white text-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-200 font-semibold shadow-xs">Senjata: Piso Surit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol Navigasi Kartu -->
+            <div class="flex justify-between items-center">
+                <button onclick="prevCard()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl transition flex items-center space-x-2 text-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Sebelumnya</span>
+                </button>
+                <span id="cardIndicator" class="text-xs font-semibold text-slate-500">1 dari 5 Provinsi</span>
+                <button onclick="nextCardOrMatch()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center space-x-2 text-sm shadow-md">
+                    <span id="nextBtnText">Selanjutnya</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LAYAR 3: Tantangan Mencocokkan Budaya -->
+        <div id="screen-match" class="w-full bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-emerald-100 hidden">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-3 py-1 rounded-full">Modul 2: Tantangan Ketepatan Budaya</span>
+                    <h3 class="text-lg md:text-xl font-extrabold text-slate-800 mt-1">Pasangkan Ciri Khas Daerah dengan Tepat</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Pertanyaan Ke</span>
+                    <span id="matchProgress" class="text-xl font-extrabold text-sky-600">1 / 3</span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center mb-6">
+                    <span id="matchClueEmoji" class="text-5xl block mb-2">⛵</span>
+                    <h4 id="matchClueText" class="text-base md:text-lg font-bold text-slate-800 leading-snug">
+                        Petunjuk pertanyaan akan muncul di sini...
+                    </h4>
+                </div>
+                <div id="matchOptionsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Tombol Opsi Dinamis -->
+                </div>
+            </div>
+
+            <div id="matchFeedback" class="hidden p-4 rounded-xl mb-4 text-sm font-semibold flex items-center space-x-3"></div>
+
+            <div class="flex justify-end">
+                <button id="nextMatchBtn" onclick="nextMatchQuestion()" class="hidden bg-sky-600 hover:bg-sky-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md">
+                    Lanjut ke Uji Evaluasi <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LAYAR 4: Uji Evaluasi Kelas 6 -->
+        <div id="screen-quiz" class="w-full bg-white rounded-3xl shadow-2xl p-6 md:p-8 border border-emerald-100 hidden">
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div>
+                    <span id="quizProgress" class="text-xs font-bold uppercase tracking-wider text-red-600 bg-red-50 px-3 py-1 rounded-full">Modul 3: Soal 1 dari 5</span>
+                    <h3 class="text-lg md:text-xl font-extrabold text-slate-800 mt-1">Uji Pemahaman Wawasan Nusantara</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-slate-500 block">Skor Kamu</span>
+                    <span id="currentScore" class="text-xl font-extrabold text-emerald-600">0</span>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h4 id="questionText" class="text-base md:text-lg font-bold text-slate-800 mb-4 leading-snug">
+                    Pertanyaan kuis akan muncul di sini...
+                </h4>
+                <div id="optionsContainer" class="grid grid-cols-1 gap-3">
+                    <!-- Tombol Opsi Kuis Dinamis -->
+                </div>
+            </div>
+
+            <div id="quizFeedback" class="hidden p-4 rounded-xl mb-4 text-sm font-semibold flex items-center space-x-3"></div>
+
+            <div class="flex justify-end">
+                <button id="nextQuestionBtn" onclick="nextQuestion()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md">
+                    Lanjut Soal Berikutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LAYAR 5: Hasil Akhir & Penghargaan -->
+        <div id="screen-result" class="w-full bg-white rounded-3xl shadow-2xl p-6 md:p-10 border border-emerald-100 text-center hidden">
+            <div class="w-24 h-24 bg-amber-100 text-amber-600 rounded-3xl mx-auto flex items-center justify-center text-4xl mb-4 shadow-inner animate-bounce">
+                🏆
+            </div>
+            <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2">Luar Biasa, Anak Indonesia!</h3>
+            <p class="text-sm md:text-base text-slate-600 mb-6">Kamu telah berhasil menyelesaikan seluruh rangkaian petualangan belajar budaya bangsa dengan sangat baik dan membanggakan.</p>
+
+            <div class="bg-slate-50 max-w-sm mx-auto p-6 rounded-2xl border border-slate-200 mb-8 shadow-sm">
+                <span class="text-xs text-slate-500 uppercase font-bold tracking-wider block mb-1">Skor Perolehan Akhir</span>
+                <span id="finalScoreText" class="text-4xl md:text-5xl font-extrabold text-emerald-600">100</span>
+                <div id="badgeTitle" class="mt-3 bg-red-100 text-red-700 text-xs font-bold py-1.5 px-4 rounded-full inline-block">
+                    🏅 Duta Budaya Cilik Teladan
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+                <button onclick="restartGame()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Mainkan Kembali</span>
+                </button>
+                <button onclick="openDownloadModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh Permainan untuk Luring</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t bg-white/50">
+        <p>© 2026 Permainan Edukasi Budaya Indonesia • Dirancang Khusus untuk Siswa Kelas 6 SD/MI 🇮🇩</p>
+    </footer>
+
+    <!-- MODAL: Unduh Permainan (Paket Luring) -->
+    <div id="downloadModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="bg-emerald-100 text-emerald-700 w-9 h-9 rounded-xl flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800">Unduh Berkas Permainan</h3>
+                </div>
+                <button onclick="closeDownloadModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2 font-bold">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                Anda dapat mengunduh seluruh permainan ini ke dalam satu berkas format HTML. Berkas ini dapat langsung dijalankan di komputer, laptop, gawai, komputer tablet, maupun papan interaktif digital tanpa memerlukan sambungan internet.
+            </p>
+
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6 text-xs text-slate-600 space-y-2">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Kompatibel di HP, Komputer Tablet, Laptop, & Papan Interaktif Digital</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Dilengkapi fitur narator suara otomatis berbahasa Indonesia yang jelas</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Gratis, aman, dan sangat mudah digunakan untuk pembelajaran di kelas</span>
+                </div>
+            </div>
+
+            <div class="flex space-x-3">
+                <button onclick="closeDownloadModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition text-sm">
+                    Batal
+                </button>
+                <button onclick="downloadGameFile()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition text-sm shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh Berkas .HTML</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logika Permainan & Sintesis Suara Bahasa Indonesia -->
+    <script>
+        // Data Materi Budaya Nusantara Kelas 6
+        const cultureData = [
+            {
+                region: "Sumatera Utara",
+                emoji: "🏛️",
+                title: "Rumah Bolon & Kain Ulos",
+                description: "Rumah Adat Bolon merupakan lambang kebanggaan dan status sosial masyarakat Batak di Sumatera Utara. Kain tenun tradisionalnya disebut Ulos, yang sarat akan makna luhur dalam berbagai upacara adat.",
+                dance: "Tari Tortor",
+                weapon: "Piso Surit"
+            },
+            {
+                region: "DI Yogyakarta",
+                emoji: "👑",
+                title: "Keraton & Kain Batik Parang",
+                description: "Daerah Istimewa Yogyakarta terkenal dengan istana sultan yang megah. Kain batik motif Parang serta tarian klasik istana mencerminkan keluhuran dan kesopanan budi pekerti masyarakat Jawa.",
+                dance: "Tari Serimpi",
+                weapon: "Keris"
+            },
+            {
+                region: "Bali",
+                emoji: "🏝️",
+                title: "Pura & Tari Pendet",
+                description: "Bali dijuluki Pulau Dewata karena kaya akan tradisi keagamaan Hindu Nusantara, arsitektur pura yang indah, ukiran kayu yang megah, serta seni musik gamelan yang dinamis.",
+                dance: "Tari Pendet & Barong",
+                weapon: "Keris Bali"
+            },
+            {
+                region: "Sulawesi Selatan",
+                emoji: "⛵",
+                title: "Rumah Tongkonan & Kapal Pinisi",
+                description: "Masyarakat Toraja di Sulawesi Selatan memiliki Rumah Tongkonan beratap melengkung seperti perahu. Kehebatan bahari leluhur diabadikan melalui pembuatan Kapal Pinisi warisan dunia UNESCO.",
+                dance: "Tari Pakarena",
+                weapon: "Badik"
+            },
+            {
+                region: "Papua",
+                emoji: "🦅",
+                title: "Rumah Honai & Tas Noken",
+                description: "Rumah Honai beratap bundar dirancang untuk menghangatkan suhu tubuh di pegunungan Papua. Tas tradisional Noken dari serat kayu diakui oleh UNESCO sebagai warisan budaya tak benda.",
+                dance: "Tari Yospan",
+                weapon: "Panah Tradisional"
+            }
+        ];
+
+        // Data Tantangan Minigame Mencocokkan Budaya
+        const matchData = [
+            {
+                emoji: "⛵",
+                clue: "Kapal Pinisi yang mendunia serta Rumah Adat Tongkonan beratap perahu berasal dari provinsi mana?",
+                options: ["Sumatera Barat", "Sulawesi Selatan", "Kalimantan Timur", "Nusa Tenggara Timur"],
+                answer: 1,
+                explanation: "Kapal Pinisi dan Rumah Tongkonan adalah ikon kebudayaan maritim serta adat kebanggaan Provinsi Sulawesi Selatan."
+            },
+            {
+                emoji: "🦅",
+                clue: "Tas rajut tradisional Noken yang disandang di kepala dan Rumah Honai yang khas di pegunungan merupakan kebudayaan dari...",
+                options: ["Papua", "Maluku", "Bali", "Aceh"],
+                answer: 0,
+                explanation: "Noken dan Honai adalah identitas kebudayaan asli masyarakat yang tinggal di wilayah Papua."
+            },
+            {
+                emoji: "👑",
+                clue: "Daerah Istimewa yang terkenal dengan tradisi keraton, kain batik motif Parang, dan tarian klasik kerajaan adalah...",
+                options: ["Surabaya", "DI Yogyakarta", "Bandung", "Semarang"],
+                answer: 1,
+                explanation: "DI Yogyakarta adalah pusat kebudayaan Jawa yang kaya akan nilai sejarah kesultanan dan tradisi luhur."
+            }
+        ];
+
+        // Data Kuis Evaluasi Kelas 6 SD
+        const quizData = [
+            {
+                question: "Apa nama kain tenun tradisional yang berasal dari suku Batak di Provinsi Sumatera Utara?",
+                options: ["Kain Ulos", "Kain Batik", "Kain Tenun Ikat", "Kain Songket"],
+                answer: 0,
+                explanation: "Kain Ulos adalah kain tenun tradisional suku Batak yang memiliki nilai sakral dan kehormatan dalam adat istiadat."
+            },
+            {
+                question: "Rumah adat khas suku Toraja di Sulawesi Selatan yang bentuk atapnya melengkung menyerupai perahu disebut...",
+                options: ["Rumah Gadang", "Rumah Tongkonan", "Rumah Honai", "Rumah Joglo"],
+                answer: 1,
+                explanation: "Rumah Tongkonan adalah rumah adat Toraja dengan arsitektur atap perahu yang sangat unik dan filosofis."
+            },
+            {
+                question: "Tas tradisional khas Papua yang dibuat dari anyaman serat kulit kayu dan diakui oleh UNESCO bernama...",
+                options: ["Ransel", "Noken", "Selendang", "Totobuang"],
+                answer: 1,
+                explanation: "Noken adalah tas tradisional Papua yang unik dan terbuat dari anyaman serat alam warisan dunia."
+            },
+            {
+                question: "Senjata tradisional khas dari masyarakat Bugis-Makassar di Provinsi Sulawesi Selatan adalah...",
+                options: ["Keris", "Mandau", "Badik", "Rencong"],
+                answer: 2,
+                explanation: "Badik adalah senjata tradisional khas masyarakat Sulawesi Selatan yang memiliki bentuk bilah pendek dan tajam."
+            },
+            {
+                question: "Sebagai anak Indonesia kelas 6 yang cerdas, sikap manakah yang paling tepat dalam melestarikan budaya bangsa?",
+                options: [
+                    "Hanya menyukai budaya populer dari luar negeri",
+                    "Mempelajari, menghargai, dan bangga mengenalkan ragam budaya daerah",
+                    "Menganggap kebudayaan daerah lain sebagai sesuatu yang kuno",
+                    "Acuh tak acuh terhadap pelestarian tradisi lokal"
+                ],
+                answer: 1,
+                explanation: "Sebagai generasi penerus bangsa, kita wajib bangga, menghargai, serta melestarikan ragam budaya Nusantara demi persatuan Indonesia."
+            }
+        ];
+
+        let currentCardIndex = 0;
+        let currentMatchIndex = 0;
+        let currentQuizIndex = 0;
+        let score = 0;
+        let soundEnabled = true;
+
+        // Memulai Permainan
+        function startGame() {
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-learn').classList.remove('hidden');
+            loadCardContent();
+            speakText("Selamat datang di petualangan budaya Nusantara. Mari kita pelajari kekayaan provinsi di Indonesia bersama-sama dengan gembira.");
+        }
+
+        // Pengendali Kartu Pembelajaran
+        function loadCardContent() {
+            const data = cultureData[currentCardIndex];
+            document.getElementById('cardEmoji').innerText = data.emoji;
+            document.getElementById('cardRegion').innerText = data.region;
+            document.getElementById('cardTitle').innerText = data.title;
+            document.getElementById('cardDescription').innerText = data.description;
+            document.getElementById('cardIndicator').innerText = `${currentCardIndex + 1} dari ${cultureData.length} Provinsi`;
+            
+            const nextBtnText = document.getElementById('nextBtnText');
+            if (currentCardIndex === cultureData.length - 1) {
+                nextBtnText.innerText = "Lanjut ke Tantangan Wilayah";
+            } else {
+                nextBtnText.innerText = "Selanjutnya";
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                loadCardContent();
+            }
+        }
+
+        function nextCardOrMatch() {
+            if (currentCardIndex < cultureData.length - 1) {
+                currentCardIndex++;
+                loadCardContent();
+            } else {
+                // Berpindah ke Minigame Mencocokkan
+                document.getElementById('screen-learn').classList.add('hidden');
+                document.getElementById('screen-match').classList.remove('hidden');
+                loadMatchQuestion();
+                speakText("Kerja bagus! Sekarang kita masuki tantangan mencocokkan ciri khas daerah.");
+            }
+        }
+
+        function speakCurrentCard() {
+            const data = cultureData[currentCardIndex];
+            const textToRead = `Provinsi ${data.region}. ${data.title}. ${data.description}`;
+            speakText(textToRead);
+        }
+
+        // Pengendali Tantangan Mencocokkan
+        function loadMatchQuestion() {
+            const m = matchData[currentMatchIndex];
+            document.getElementById('matchProgress').innerText = `${currentMatchIndex + 1} / ${matchData.length}`;
+            document.getElementById('matchClueEmoji').innerText = m.emoji;
+            document.getElementById('matchClueText').innerText = m.clue;
+
+            const container = document.getElementById('matchOptionsContainer');
+            container.innerHTML = '';
+
+            m.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 font-medium text-sm md:text-base p-4 rounded-2xl transition flex items-center justify-between shadow-xs";
+                btn.innerHTML = `<span><strong class="mr-2 text-sky-700">${String.fromCharCode(65 + index)}.</strong> ${opt}</span> <i class="fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectMatchOption(index, btn);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('matchFeedback').classList.add('hidden');
+            document.getElementById('nextMatchBtn').classList.add('hidden');
+        }
+
+        function selectMatchOption(selectedIndex, selectedBtn) {
+            const m = matchData[currentMatchIndex];
+            const optionButtons = document.getElementById('matchOptionsContainer').children;
+
+            for (let btn of optionButtons) {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed', 'opacity-80');
+            }
+
+            const feedbackBox = document.getElementById('matchFeedback');
+            feedbackBox.classList.remove('hidden');
+
+            if (selectedIndex === m.answer) {
+                score += 10;
+                selectedBtn.className = "w-full text-left bg-emerald-100 border-2 border-emerald-500 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-emerald-900 shadow-sm";
+                selectedBtn.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600 text-lg";
+                
+                feedbackBox.className = "p-4 rounded-2xl mb-4 text-sm font-semibold flex items-center space-x-3 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-xl text-emerald-600 shrink-0"></i><div><strong>Jawaban Anda Benar!</strong> ${m.explanation}</div>`;
+                speakText("Benar sekali! " + m.explanation);
+            } else {
+                selectedBtn.className = "w-full text-left bg-rose-100 border-2 border-rose-500 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-rose-900 shadow-sm";
+                selectedBtn.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600 text-lg";
+                
+                optionButtons[m.answer].className = "w-full text-left bg-emerald-50 border-2 border-emerald-400 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-emerald-900 shadow-sm";
+                
+                feedbackBox.className = "p-4 rounded-2xl mb-4 text-sm font-semibold flex items-center space-x-3 bg-rose-50 text-rose-800 border border-rose-200";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xl text-rose-600 shrink-0"></i><div><strong>Kurang tepat.</strong> ${m.explanation}</div>`;
+                speakText("Kurang tepat. " + m.explanation);
+            }
+
+            document.getElementById('nextMatchBtn').classList.remove('hidden');
+        }
+
+        function nextMatchQuestion() {
+            currentMatchIndex++;
+            if (currentMatchIndex < matchData.length) {
+                loadMatchQuestion();
+            } else {
+                // Berpindah ke Uji Evaluasi Utama
+                document.getElementById('screen-match').classList.add('hidden');
+                document.getElementById('screen-quiz').classList.remove('hidden');
+                loadQuizQuestion();
+                speakText("Bagus sekali! Sekarang kita lanjutkan ke Uji Evaluasi akhir untuk menguji pemahaman materi.");
+            }
+        }
+
+        // Pengendali Uji Evaluasi
+        function loadQuizQuestion() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quizProgress').innerText = `Modul 3: Soal ${currentQuizIndex + 1} dari ${quizData.length}`;
+            document.getElementById('questionText').innerText = q.question;
+            document.getElementById('currentScore').innerText = score;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 font-medium text-sm md:text-base p-4 rounded-2xl transition flex items-center justify-between shadow-xs";
+                btn.innerHTML = `<span><strong class="mr-2 text-emerald-700">${String.fromCharCode(65 + index)}.</strong> ${opt}</span> <i class="fa-regular fa-circle text-slate-400"></i>`;
+                btn.onclick = () => selectOption(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('quizFeedback').classList.add('hidden');
+            document.getElementById('nextQuestionBtn').classList.add('hidden');
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            const q = quizData[currentQuizIndex];
+            const optionButtons = document.getElementById('optionsContainer').children;
+
+            for (let btn of optionButtons) {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed', 'opacity-80');
+            }
+
+            const feedbackBox = document.getElementById('quizFeedback');
+            feedbackBox.classList.remove('hidden');
+
+            if (selectedIndex === q.answer) {
+                score += 18; // Akumulasi poin kuis
+                document.getElementById('currentScore').innerText = score;
+                selectedBtn.className = "w-full text-left bg-emerald-100 border-2 border-emerald-500 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-emerald-900 shadow-sm";
+                selectedBtn.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600 text-lg";
+                
+                feedbackBox.className = "p-4 rounded-2xl mb-4 text-sm font-semibold flex items-center space-x-3 bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-xl text-emerald-600 shrink-0"></i><div><strong>Hebat, Jawaban Anda Benar!</strong> ${q.explanation}</div>`;
+                speakText("Benar sekali! " + q.explanation);
+            } else {
+                selectedBtn.className = "w-full text-left bg-rose-100 border-2 border-rose-500 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-rose-900 shadow-sm";
+                selectedBtn.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-600 text-lg";
+                
+                optionButtons[q.answer].className = "w-full text-left bg-emerald-50 border-2 border-emerald-400 font-bold text-sm md:text-base p-4 rounded-2xl flex items-center justify-between text-emerald-900 shadow-sm";
+                
+                feedbackBox.className = "p-4 rounded-2xl mb-4 text-sm font-semibold flex items-center space-x-3 bg-rose-50 text-rose-800 border border-rose-200";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-xl text-rose-600 shrink-0"></i><div><strong>Kurang tepat.</strong> ${q.explanation}</div>`;
+                speakText("Kurang tepat. " + q.explanation);
+            }
+
+            document.getElementById('nextQuestionBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex < quizData.length) {
+                loadQuizQuestion();
+            } else {
+                // Koreksi batas maksimal skor
+                if (score > 90) score = 100;
+                
+                document.getElementById('screen-quiz').classList.add('hidden');
+                document.getElementById('screen-result').classList.remove('hidden');
+                document.getElementById('finalScoreText').innerText = score;
+
+                const badgeTitle = document.getElementById('badgeTitle');
+                if (score >= 90) {
+                    badgeTitle.innerText = "🏅 Duta Budaya Cilik Teladan (Nilai Sempurna)";
+                    speakText("Luar biasa! Kamu mendapatkan nilai sempurna dan resmi dinobatkan sebagai Duta Budaya Cilik Teladan.");
+                } else if (score >= 60) {
+                    badgeTitle.innerText = "🥈 Penggerak Kebudayaan Nusantara";
+                    speakText("Pekerjaan yang sangat hebat! Kamu memiliki wawasan kebudayaan Indonesia yang baik.");
+                } else {
+                    badgeTitle.innerText = "🥉 Sahabat Budaya Indonesia";
+                    speakText("Tetap semangat belajar! Ayo ulangi kembali permainan agar pemahaman budayanya semakin matang.");
+                }
+            }
+        }
+
+        function restartGame() {
+            currentCardIndex = 0;
+            currentMatchIndex = 0;
+            currentQuizIndex = 0;
+            score = 0;
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-home').classList.remove('hidden');
+            speakText("Mari mulai kembali petualangan seru mengenal budaya Indonesia.");
+        }
+
+        // Fitur Pengaturan Suara / Narator Bahasa Indonesia
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                text.innerText = "Suara Aktif";
+                speakText("Fitur suara narator diaktifkan.");
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+                text.innerText = "Suara Senyap";
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speakText(text) {
+            if (!soundEnabled) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Fitur Unduh Berkas Permainan
+        function openDownloadModal() {
+            document.getElementById('downloadModal').classList.remove('hidden');
+        }
+
+        function closeDownloadModal() {
+            document.getElementById('downloadModal').classList.add('hidden');
+        }
+
+        function downloadGameFile() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Permainan_Edukasi_Bangga_Anak_Indonesia.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            closeDownloadModal();
+            speakText("Berkas permainan berhasil diunduh. Anda dapat langsung menggunakannya secara luring.");
+        }
+    </script>
+</body>
+</html>
